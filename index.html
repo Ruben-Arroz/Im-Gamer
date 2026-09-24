@@ -3,15 +3,14 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Rúben Arroz &middot; ESAN</title>
+<title>Rúben Arroz | ESAN</title>
 <style>
   :root {
     --bg: #0e0f12;
-    --panel: #16181c;
-    --border: #26282e;
-    --text: #e8e9eb;
-    --text-dim: #9a9ca3;
-    --accent: #4f8cff;
+    --border: #24262b;
+    --text: #f2f2f0;
+    --text-dim: #8f9198;
+    --hover: #ffffff;
   }
 
   * {
@@ -27,53 +26,75 @@
     min-height: 100vh;
     display: flex;
     flex-direction: column;
+    -webkit-font-smoothing: antialiased;
   }
 
   .wrap {
     width: 100%;
-    max-width: 640px;
+    max-width: 680px;
     margin: 0 auto;
     padding: 0 24px;
   }
 
   header {
-    padding-top: 56px;
-    padding-bottom: 40px;
+    padding-top: 72px;
+    padding-bottom: 56px;
   }
 
   .logos {
     display: flex;
-    align-items: center;
-    gap: 20px;
-    margin-bottom: 40px;
+    align-items: flex-end;
+    flex-wrap: wrap;
+    gap: 28px;
+    margin-bottom: 56px;
   }
 
   .logos img {
-    height: 34px;
     width: auto;
+    display: block;
+  }
+
+  .logos img:first-child {
+    height: 72px;
+  }
+
+  .logos img:last-child {
+    height: 72px;
   }
 
   .intro h1 {
-    font-size: 1.5rem;
-    font-weight: 600;
-    margin-bottom: 6px;
+    font-size: clamp(1.9rem, 5vw, 2.4rem);
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    margin-bottom: 10px;
   }
 
-  .intro .role {
+  .intro .tagline {
     color: var(--text-dim);
-    font-size: 0.95rem;
-    margin-bottom: 18px;
+    font-size: 1rem;
+    letter-spacing: 0.01em;
+    margin-bottom: 24px;
   }
 
   .intro p {
     color: var(--text-dim);
-    font-size: 0.92rem;
-    line-height: 1.65;
-    max-width: 520px;
+    font-size: 0.98rem;
+    line-height: 1.75;
+    max-width: 500px;
+  }
+
+  .intro p a {
+    color: var(--text);
+    text-decoration: none;
+    border-bottom: 1px solid var(--text-dim);
+  }
+
+  .intro p a:hover {
+    border-color: var(--text);
   }
 
   nav {
-    padding-bottom: 64px;
+    padding-bottom: 80px;
   }
 
   .link-row {
@@ -84,21 +105,24 @@
 
   .link-row a {
     display: flex;
-    align-items: baseline;
+    align-items: center;
     justify-content: space-between;
     gap: 16px;
-    padding: 22px 4px;
+    padding: 26px 2px;
     text-decoration: none;
     color: var(--text);
     border-bottom: 1px solid var(--border);
+    transition: color 0.15s ease;
   }
 
   .link-row a:hover .name {
-    color: var(--accent);
+    color: var(--hover);
+    text-decoration: underline;
+    text-underline-offset: 4px;
   }
 
   .link-row .name {
-    font-size: 1.05rem;
+    font-size: 1.1rem;
     font-weight: 500;
   }
 
@@ -110,8 +134,9 @@
 
   footer {
     margin-top: auto;
-    padding: 24px 0 32px;
+    padding: 28px 0 36px;
     border-top: 1px solid var(--border);
+    text-align: center;
   }
 
   footer p {
@@ -120,9 +145,28 @@
   }
 
   @media (max-width: 520px) {
+    header {
+      padding-top: 48px;
+      padding-bottom: 40px;
+    }
+
+    .logos {
+      gap: 20px;
+      margin-bottom: 36px;
+    }
+
+    .logos img:first-child {
+      height: 52px;
+    }
+
+    .logos img:last-child {
+      height: 52px;
+    }
+
     .link-row a {
       flex-direction: column;
-      gap: 4px;
+      align-items: flex-start;
+      gap: 6px;
     }
 
     .link-row .desc {
@@ -137,14 +181,14 @@
 
     <header>
       <div class="logos">
-        <img src="assets/logo-ua.png" alt="Universidade de Aveiro">
-        <img src="assets/logo-esan.png" alt="ESAN">
+        <img src="ESAN-Logos/Marca UA Vertical RGB_BRANCO.png" alt="Universidade de Aveiro">
+        <img src="ESAN-Logos/Marca UA Complementar BRANCO.png" alt="ESAN">
       </div>
 
       <div class="intro">
         <h1>Rúben Arroz</h1>
-        <p class="role">Curso Técnico Superior Profissional em Desenvolvimento de Software, ESAN</p>
-        <p>Programador com interesse em desenvolvimento web, jogos e inteligência artificial. Esta página é o ponto de partida para o trabalho desenvolvido ao longo do curso.</p>
+        <p class="tagline">Programador Web Fullstack &middot; Zoho &middot; Game Developer</p>
+        <p>A estudar na ESAN, Universidade de Aveiro. Atualmente em regime freelance no projeto RIDE e no projeto <a href="https://retroclub.pt" target="_blank" rel="noopener">Retroclub</a>.</p>
       </div>
     </header>
 
@@ -164,9 +208,7 @@
   </div>
 
   <footer>
-    <div class="wrap">
-      <p>ESAN, Universidade de Aveiro. Ano letivo 2026/2027.</p>
-    </div>
+    <p>ESAN, Universidade de Aveiro. Ano letivo 2026/2027.</p>
   </footer>
 
 </body>
