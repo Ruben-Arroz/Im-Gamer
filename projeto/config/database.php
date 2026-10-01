@@ -18,7 +18,7 @@ class Database
                 ]);
             } catch (PDOException $erro) {
                 error_log($erro->getMessage());
-                die('Erro de ligação à base de dados.');
+                die('Erro de ligação à base de dados: ' . $erro->getMessage());
             }
         }
 
