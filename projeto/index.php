@@ -1,27 +1,19 @@
 <?php
+$tituloPagina = 'Novidades';
+require_once __DIR__ . '/includes/header.php';
 
-require_once __DIR__ . '/credentials.php';
-
-class Database
-{
-    private static ?PDO $instancia = null;
-
-    public static function ligar(): PDO
-    {
-        if (self::$instancia === null) {
-            $dsn = 'mysql:host=' . DB_HOST . ';dbname=' . DB_NAME . ';charset=utf8mb4';
-
-            try {
-                self::$instancia = new PDO($dsn, DB_USER, DB_PASS, [
-                    PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
-                    PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
-                ]);
-            } catch (PDOException $erro) {
-                error_log($erro->getMessage());
-                die('Erro de ligação à base de dados.');
-            }
-        }
-
-        return self::$instancia;
-    }
+try {
+    $ligacao = Database::ligar();
+    $ligacao->query('SELECT 1');
+    $estadoBD = 'Ligação à base de dados estabelecida com sucesso.';
+} catch (Throwable $erro) {
+    $estadoBD = 'Falha na ligação à base de dados: ' . $erro->getMessage();
 }
+?>
+
+<section>
+    <h1>Bem-vindo ao I'm Gamer</h1>
+    <p><?= htmlspecialchars($estadoBD) ?></p>
+</section>
+
+<?php require_once __DIR__ . '/includes/footer.php'; ?>
