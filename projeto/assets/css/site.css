@@ -1,0 +1,48 @@
+.site-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 24px 40px;
+    border-bottom: 1px solid var(--border);
+}
+
+.site-header .logo {
+    font-family: 'Press Start 2P', monospace;
+    font-size: 1rem;
+    text-decoration: none;
+    color: var(--text);
+}
+
+.site-header nav {
+    display: flex;
+    gap: 28px;
+}
+
+.site-header nav a {
+    text-decoration: none;
+    color: var(--text-dim);
+    font-size: 0.9rem;
+    transition: color 0.15s ease;
+}
+
+.site-header nav a:hover {
+    color: var(--hover);
+}
+
+main {
+    padding: 48px 40px;
+    max-width: 960px;
+    margin: 0 auto;
+}
+
+.site-footer {
+    text-align: center;
+    padding: 28px 0 36px;
+    border-top: 1px solid var(--border);
+    margin-top: 48px;
+}
+
+.site-footer p {
+    color: var(--text-dim);
+    font-size: 0.78rem;
+}
