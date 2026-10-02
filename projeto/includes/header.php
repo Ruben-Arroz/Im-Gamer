@@ -17,8 +17,7 @@ $tituloPagina = isset($tituloPagina) ? "{$tituloPagina} | {$tituloBase}" : $titu
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Share+Tech+Mono&display=swap" rel="stylesheet">
-<link rel="icon" type="image/svg+xml" href="<?= BASE_URL ?>/projeto/assets/img/favicon.svg">
-<link rel="alternate icon" href="<?= BASE_URL ?>/projeto/assets/img/favicon.ico">
+<link rel="icon" type="image/png" href="<?= BASE_URL ?>/projeto/logos/versao3/logo_branco_fundo_preto.png">
 <link rel="stylesheet" href="<?= BASE_URL ?>/common/style.css">
 <link rel="stylesheet" href="<?= BASE_URL ?>/projeto/assets/css/site.css">
 </head>
