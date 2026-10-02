@@ -46,3 +46,83 @@ main {
     color: var(--text-dim);
     font-size: 0.78rem;
 }
+
+.auth-form {
+    max-width: 380px;
+    margin: 0 auto;
+}
+
+.auth-form h1 {
+    font-size: 1.1rem;
+    margin-bottom: 32px;
+}
+
+.auth-form form {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.auth-form label {
+    font-size: 0.85rem;
+    color: var(--text-dim);
+    margin-top: 14px;
+}
+
+.auth-form input {
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--text);
+    font-family: inherit;
+    font-size: 0.95rem;
+    padding: 10px 12px;
+    border-radius: 4px;
+}
+
+.auth-form input:focus {
+    outline: none;
+    border-color: var(--text-dim);
+}
+
+.auth-form button {
+    margin-top: 24px;
+    background: var(--text);
+    color: var(--bg);
+    border: none;
+    font-family: inherit;
+    font-size: 0.95rem;
+    padding: 12px;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.auth-form button:hover {
+    background: var(--hover);
+}
+
+.auth-switch {
+    margin-top: 20px;
+    font-size: 0.85rem;
+    color: var(--text-dim);
+}
+
+.auth-switch a {
+    color: var(--text);
+}
+
+.aviso {
+    font-size: 0.85rem;
+    padding: 10px 12px;
+    border-radius: 4px;
+    margin-bottom: 8px;
+}
+
+.aviso-erro {
+    border: 1px solid #5a2a2a;
+    color: #e5a3a3;
+}
+
+.aviso-sucesso {
+    border: 1px solid #2a5a3a;
+    color: #a3e5b8;
+}
