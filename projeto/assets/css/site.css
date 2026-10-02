@@ -8,7 +8,7 @@
 
 .site-header .logo {
     font-family: 'Press Start 2P', monospace;
-    font-size: 1rem;
+    font-size: 1.4rem;
     text-decoration: none;
     color: var(--text);
 }
@@ -30,6 +30,7 @@
 }
 
 main {
+    flex: 1;
     padding: 48px 40px;
     max-width: 960px;
     margin: 0 auto;
