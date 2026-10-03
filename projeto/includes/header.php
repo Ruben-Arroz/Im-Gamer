@@ -25,6 +25,7 @@ $tituloPagina = isset($tituloPagina) ? "{$tituloPagina} | {$tituloBase}" : $titu
         <a href="<?= BASE_URL ?>/projeto/index.php">Novidades</a>
         <a href="<?= BASE_URL ?>/projeto/lfg.php">LFG</a>
         <?php if (Auth::autenticado()): ?>
+            <a href="<?= BASE_URL ?>/projeto/perfil.php">Perfil</a>
             <a href="<?= BASE_URL ?>/projeto/logout.php">Sair</a>
         <?php else: ?>
             <a href="<?= BASE_URL ?>/projeto/login.php">Entrar</a>
