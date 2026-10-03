@@ -127,3 +127,24 @@ main {
     border: 1px solid #2a5a3a;
     color: #a3e5b8;
 }
+
+.perfil h1 {
+    font-size: 1.2rem;
+    margin-bottom: 12px;
+}
+
+.perfil-email {
+    color: var(--text-dim);
+    font-size: 0.85rem;
+    margin-bottom: 24px;
+}
+
+.perfil-bio {
+    line-height: 1.7;
+    margin-bottom: 24px;
+}
+
+.perfil-data {
+    color: var(--text-dim);
+    font-size: 0.8rem;
+}
