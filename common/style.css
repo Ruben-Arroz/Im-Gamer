@@ -12,14 +12,23 @@
     box-sizing: border-box;
 }
 
+html {
+    height: 100%;
+}
+
 body {
     background: var(--bg);
     color: var(--text);
     font-family: 'Share Tech Mono', monospace;
-    min-height: 100vh;
+    min-height: 100%;
     display: flex;
     flex-direction: column;
     -webkit-font-smoothing: antialiased;
+}
+
+::selection {
+    background: var(--text);
+    color: var(--bg);
 }
 
 h1, h2, h3 {
