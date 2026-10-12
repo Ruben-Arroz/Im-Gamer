@@ -5,7 +5,13 @@ if (session_status() === PHP_SESSION_NONE) {
 }
 
 if (!defined('BASE_URL')) {
-    define('BASE_URL', '/tesp-ds-g17');
+    $hostname = strtolower(explode(':', $_SERVER['HTTP_HOST'] ?? '')[0]);
+
+    if (in_array($hostname, ['localhost', '127.0.0.1'], true)) {
+        define('BASE_URL', '');
+    } else {
+        define('BASE_URL', '/tesp-ds-g17');
+    }
 }
 
 require_once __DIR__ . '/../config/database.php';
