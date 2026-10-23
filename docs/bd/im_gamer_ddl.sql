@@ -9,6 +9,7 @@ CREATE TABLE Utilizadores (
     steam_id VARCHAR(50) DEFAULT NULL UNIQUE,
     foto_perfil VARCHAR(255) DEFAULT NULL,
     bio TEXT DEFAULT NULL,
+    moeda CHAR(3) NOT NULL DEFAULT 'EUR',
     is_admin TINYINT(1) NOT NULL DEFAULT 0,
     data_criacao DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
@@ -16,6 +17,7 @@ CREATE TABLE Utilizadores (
 CREATE TABLE Jogos (
     id INT AUTO_INCREMENT PRIMARY KEY,
     rawg_id INT NOT NULL UNIQUE,
+    steam_app_id INT DEFAULT NULL UNIQUE,
     nome VARCHAR(255) NOT NULL,
     slug VARCHAR(255) NOT NULL,
     imagem_capa VARCHAR(255) DEFAULT NULL,
@@ -50,29 +52,64 @@ CREATE TABLE Jogos_Plataformas (
     CONSTRAINT fk_jogos_plataformas_plataforma FOREIGN KEY (plataforma_id) REFERENCES Plataformas (id) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
-CREATE TABLE Biblioteca_Jogos (
+CREATE TABLE Contas_Ligadas (
     id INT AUTO_INCREMENT PRIMARY KEY,
     utilizador_id INT NOT NULL,
-    jogo_id INT NOT NULL,
-    plataforma_id INT NOT NULL,
-    horas_jogadas INT NOT NULL DEFAULT 0,
+    servico VARCHAR(30) NOT NULL,
+    identificador VARCHAR(255) NOT NULL,
+    id_externo VARCHAR(100) DEFAULT NULL,
+    nome_publico VARCHAR(100) DEFAULT NULL,
+    avatar VARCHAR(255) DEFAULT NULL,
+    num_jogos INT NOT NULL DEFAULT 0,
+    minutos_jogados INT NOT NULL DEFAULT 0,
+    valor_jogos DECIMAL(10,2) NOT NULL DEFAULT 0,
+    valor_inventario DECIMAL(10,2) NOT NULL DEFAULT 0,
     ultima_sincronizacao DATETIME DEFAULT NULL,
-    UNIQUE (utilizador_id, jogo_id, plataforma_id),
-    CONSTRAINT fk_biblioteca_utilizador FOREIGN KEY (utilizador_id) REFERENCES Utilizadores (id) ON DELETE CASCADE,
-    CONSTRAINT fk_biblioteca_jogo FOREIGN KEY (jogo_id) REFERENCES Jogos (id) ON DELETE CASCADE,
-    CONSTRAINT fk_biblioteca_plataforma FOREIGN KEY (plataforma_id) REFERENCES Plataformas (id) ON DELETE CASCADE
+    data_criacao DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE (utilizador_id, servico),
+    CONSTRAINT fk_contas_utilizador FOREIGN KEY (utilizador_id) REFERENCES Utilizadores (id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+CREATE TABLE Biblioteca_Jogos (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    conta_id INT NOT NULL,
+    jogo_id INT DEFAULT NULL,
+    id_externo VARCHAR(50) DEFAULT NULL,
+    nome VARCHAR(255) NOT NULL,
+    imagem VARCHAR(255) DEFAULT NULL,
+    minutos_jogados INT NOT NULL DEFAULT 0,
+    valor DECIMAL(10,2) DEFAULT NULL,
+    ultima_sincronizacao DATETIME DEFAULT NULL,
+    UNIQUE (conta_id, id_externo),
+    CONSTRAINT fk_biblioteca_conta FOREIGN KEY (conta_id) REFERENCES Contas_Ligadas (id) ON DELETE CASCADE,
+    CONSTRAINT fk_biblioteca_jogo FOREIGN KEY (jogo_id) REFERENCES Jogos (id) ON DELETE SET NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+CREATE TABLE Inventario_Itens (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    conta_id INT NOT NULL,
+    jogo VARCHAR(100) NOT NULL,
+    nome VARCHAR(255) NOT NULL,
+    imagem VARCHAR(255) DEFAULT NULL,
+    quantidade INT NOT NULL DEFAULT 1,
+    preco DECIMAL(10,2) DEFAULT NULL,
+    ultima_sincronizacao DATETIME DEFAULT NULL,
+    CONSTRAINT fk_inventario_conta FOREIGN KEY (conta_id) REFERENCES Contas_Ligadas (id) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 CREATE TABLE LFG_Posts (
     id INT AUTO_INCREMENT PRIMARY KEY,
     utilizador_id INT NOT NULL,
     jogo_id INT NOT NULL,
+    plataforma_id INT DEFAULT NULL,
     descricao TEXT NOT NULL,
+    vagas TINYINT NOT NULL DEFAULT 1,
     data_hora_evento DATETIME NOT NULL,
     estado ENUM('aberto', 'fechado') NOT NULL DEFAULT 'aberto',
     data_criacao DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     CONSTRAINT fk_lfgposts_utilizador FOREIGN KEY (utilizador_id) REFERENCES Utilizadores (id) ON DELETE CASCADE,
-    CONSTRAINT fk_lfgposts_jogo FOREIGN KEY (jogo_id) REFERENCES Jogos (id) ON DELETE CASCADE
+    CONSTRAINT fk_lfgposts_jogo FOREIGN KEY (jogo_id) REFERENCES Jogos (id) ON DELETE CASCADE,
+    CONSTRAINT fk_lfgposts_plataforma FOREIGN KEY (plataforma_id) REFERENCES Plataformas (id) ON DELETE SET NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 CREATE TABLE LFG_Participantes (
@@ -129,4 +166,10 @@ CREATE TABLE Notificacoes (
     lida TINYINT(1) NOT NULL DEFAULT 0,
     data_criacao DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     CONSTRAINT fk_notificacoes_utilizador FOREIGN KEY (utilizador_id) REFERENCES Utilizadores (id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+CREATE TABLE Taxas_Cambio (
+    moeda CHAR(3) PRIMARY KEY,
+    taxa DECIMAL(12,6) NOT NULL,
+    data_atualizacao DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
