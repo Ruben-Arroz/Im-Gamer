@@ -278,7 +278,7 @@ main h2 {
     font-size: 0.9rem;
 }
 
-.lista-contas li > div {
+.lista-contas li>div {
     display: flex;
     flex-direction: column;
     gap: 2px;
