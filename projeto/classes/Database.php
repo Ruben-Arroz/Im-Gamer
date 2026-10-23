@@ -1,6 +1,6 @@
 <?php
 
-require_once __DIR__ . '/credentials.php';
+require_once __DIR__ . '/../config/credentials.php';
 
 class Database
 {
