@@ -10,12 +10,12 @@ $tituloPagina = isset($tituloPagina) ? "{$tituloPagina} | {$tituloBase}" : $titu
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title><?= htmlspecialchars($tituloPagina) ?></title>
-<link rel="icon" type="image/png" href="<?= BASE_URL ?>/projeto/logos/versao3/logo_branco_fundo_preto.png">
+<link rel="icon" type="image/png" href="<?= BASE_URL ?>/projeto/assets/img/logos/versao3/logo_branco_fundo_preto.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Share+Tech+Mono&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="<?= BASE_URL ?>/common/style.css?v=2">
-<link rel="stylesheet" href="<?= BASE_URL ?>/projeto/assets/css/site.css?v=2">
+<link rel="stylesheet" href="<?= BASE_URL ?>/projeto/assets/css/site.css?v=3">
 </head>
 <body>
 

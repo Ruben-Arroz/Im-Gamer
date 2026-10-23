@@ -119,13 +119,13 @@ main {
 }
 
 .aviso-erro {
-    border: 1px solid #5a2a2a;
-    color: #e5a3a3;
+    border: 1px solid var(--text);
+    color: var(--text);
 }
 
 .aviso-sucesso {
-    border: 1px solid #2a5a3a;
-    color: #a3e5b8;
+    border: 1px dashed var(--text-dim);
+    color: var(--text-dim);
 }
 
 .perfil h1 {
