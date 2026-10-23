@@ -14,5 +14,10 @@ if (!defined('BASE_URL')) {
     }
 }
 
+// pasta das fotos de perfil, fica na raiz do site e não dentro do projeto
+define('PASTA_UPLOADS', __DIR__ . '/../../uploads/');
+
 require_once __DIR__ . '/../classes/Database.php';
 require_once __DIR__ . '/../classes/Auth.php';
+require_once __DIR__ . '/../classes/Utilizador.php';
+require_once __DIR__ . '/../classes/ContasLigadas.php';

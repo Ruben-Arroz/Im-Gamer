@@ -31,6 +31,7 @@
 
 main {
     flex: 1;
+    width: 100%;
     padding: 48px 40px;
     max-width: 960px;
     margin: 0 auto;
@@ -48,29 +49,50 @@ main {
     font-size: 0.78rem;
 }
 
+main h2 {
+    font-size: 0.8rem;
+    margin: 40px 0 16px;
+}
+
+.texto-dim {
+    color: var(--text-dim);
+    font-size: 0.85rem;
+}
+
 .auth-form {
     max-width: 380px;
     margin: 0 auto;
 }
 
-.auth-form h1 {
+.formulario {
+    max-width: 480px;
+    margin: 0 auto;
+}
+
+.auth-form h1,
+.formulario h1 {
     font-size: 1.1rem;
     margin-bottom: 32px;
 }
 
-.auth-form form {
+.auth-form form,
+.formulario form {
     display: flex;
     flex-direction: column;
     gap: 6px;
 }
 
-.auth-form label {
+.auth-form label,
+.formulario label {
     font-size: 0.85rem;
     color: var(--text-dim);
     margin-top: 14px;
 }
 
-.auth-form input {
+.auth-form input,
+.formulario input,
+.formulario textarea,
+.formulario select {
     background: transparent;
     border: 1px solid var(--border);
     color: var(--text);
@@ -80,12 +102,40 @@ main {
     border-radius: 4px;
 }
 
-.auth-form input:focus {
+.formulario textarea {
+    resize: vertical;
+}
+
+.formulario select option {
+    background: var(--bg);
+}
+
+.auth-form input:focus,
+.formulario input:focus,
+.formulario textarea:focus,
+.formulario select:focus {
     outline: none;
     border-color: var(--text-dim);
 }
 
-.auth-form button {
+.formulario input[type="file"] {
+    padding: 8px;
+}
+
+.formulario .opcao {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--text);
+}
+
+.formulario .ajuda {
+    font-size: 0.75rem;
+    color: var(--text-dim);
+}
+
+.auth-form button,
+.formulario button {
     margin-top: 24px;
     background: var(--text);
     color: var(--bg);
@@ -97,8 +147,35 @@ main {
     cursor: pointer;
 }
 
-.auth-form button:hover {
+.auth-form button:hover,
+.formulario button:hover {
     background: var(--hover);
+}
+
+.formulario .botao-perigo {
+    background: transparent;
+    color: var(--text);
+    border: 1px solid var(--text);
+}
+
+.formulario .botao-perigo:hover {
+    background: var(--text);
+    color: var(--bg);
+}
+
+.formulario .botao-pequeno {
+    margin-top: 0;
+    padding: 6px 10px;
+    font-size: 0.8rem;
+    background: transparent;
+    color: var(--text-dim);
+    border: 1px solid var(--border);
+}
+
+.formulario .botao-pequeno:hover {
+    background: transparent;
+    color: var(--text);
+    border-color: var(--text-dim);
 }
 
 .auth-switch {
@@ -147,4 +224,195 @@ main {
 .perfil-data {
     color: var(--text-dim);
     font-size: 0.8rem;
+}
+
+.perfil-topo {
+    display: flex;
+    align-items: center;
+    gap: 24px;
+    margin-bottom: 24px;
+}
+
+.perfil-topo .perfil-email {
+    margin-bottom: 4px;
+}
+
+.perfil-foto {
+    width: 96px;
+    height: 96px;
+    object-fit: cover;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    flex-shrink: 0;
+}
+
+.perfil-sem-foto {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-style: dashed;
+    color: var(--text-dim);
+    font-size: 0.75rem;
+}
+
+.perfil-links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    font-size: 0.85rem;
+}
+
+.lista-contas {
+    list-style: none;
+    border-top: 1px solid var(--border);
+    margin-bottom: 8px;
+}
+
+.lista-contas li {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 12px 0;
+    border-bottom: 1px solid var(--border);
+    font-size: 0.9rem;
+}
+
+.lista-contas li > div {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.conta-servico {
+    color: var(--text-dim);
+    margin-right: 12px;
+}
+
+.filtros,
+.paginacao {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+.paginacao {
+    justify-content: center;
+    margin-top: 24px;
+}
+
+.filtros button,
+.paginacao button {
+    background: transparent;
+    color: var(--text-dim);
+    border: 1px solid var(--border);
+    font-family: inherit;
+    font-size: 0.85rem;
+    padding: 8px 14px;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.filtros button:hover,
+.paginacao button:hover:not(:disabled) {
+    color: var(--text);
+    border-color: var(--text-dim);
+}
+
+.filtros button.ativo {
+    background: var(--text);
+    color: var(--bg);
+    border-color: var(--text);
+}
+
+.paginacao button:disabled {
+    opacity: 0.4;
+    cursor: default;
+}
+
+.grelha-jogos {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 16px;
+}
+
+.cartao-jogo {
+    display: flex;
+    flex-direction: column;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    overflow: hidden;
+    text-decoration: none;
+    transition: border-color 0.15s ease;
+}
+
+.cartao-jogo:hover {
+    border-color: var(--text-dim);
+}
+
+.cartao-jogo img {
+    width: 100%;
+    aspect-ratio: 460 / 215;
+    object-fit: cover;
+    display: block;
+}
+
+.cartao-titulo {
+    padding: 10px 12px 2px;
+    font-size: 0.9rem;
+}
+
+.cartao-loja {
+    padding: 0 12px;
+    font-size: 0.75rem;
+    color: var(--text-dim);
+}
+
+.cartao-precos {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 12px 12px;
+    margin-top: auto;
+    font-size: 0.85rem;
+}
+
+.cartao-precos s {
+    color: var(--text-dim);
+}
+
+.desconto {
+    background: var(--text);
+    color: var(--bg);
+    padding: 2px 6px;
+    border-radius: 2px;
+    font-size: 0.75rem;
+}
+
+.fonte {
+    margin-top: 32px;
+    font-size: 0.75rem;
+    color: var(--text-dim);
+}
+
+@media (max-width: 640px) {
+    .site-header {
+        flex-direction: column;
+        gap: 16px;
+        padding: 20px;
+    }
+
+    .site-header nav {
+        gap: 18px;
+    }
+
+    main {
+        padding: 32px 20px;
+    }
+
+    .perfil-topo {
+        flex-direction: column;
+        align-items: flex-start;
+    }
 }

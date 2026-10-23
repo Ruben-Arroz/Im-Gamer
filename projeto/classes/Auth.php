@@ -52,4 +52,19 @@ class Auth
     {
         return isset($_SESSION['utilizador_id']);
     }
+
+    // token escondido nos formulários, para outro site não conseguir enviar pedidos em nome do utilizador
+    public static function token(): string
+    {
+        if (!isset($_SESSION['token'])) {
+            $_SESSION['token'] = bin2hex(random_bytes(32));
+        }
+
+        return $_SESSION['token'];
+    }
+
+    public static function tokenValido(string $token): bool
+    {
+        return isset($_SESSION['token']) && hash_equals($_SESSION['token'], $token);
+    }
 }
