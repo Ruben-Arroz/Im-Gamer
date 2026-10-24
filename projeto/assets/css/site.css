@@ -388,7 +388,8 @@ main h2 {
 }
 
 /* a biblioteca usa o ecrã todo, com os filtros encostados à esquerda */
-main:has(.biblioteca) {
+main:has(.biblioteca),
+main:has(.pagina-larga) {
     max-width: none;
 }
 
@@ -787,20 +788,24 @@ main:has(.biblioteca) {
     opacity: 0.85;
 }
 
-.biblioteca .grelha-jogos {
+.biblioteca .grelha-jogos,
+.catalogo .grelha-jogos {
     grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
     gap: 20px;
 }
 
-.biblioteca .cartao-titulo {
+.biblioteca .cartao-titulo,
+.catalogo .cartao-titulo {
     padding: 14px 14px 4px;
 }
 
-.biblioteca .cartao-loja {
+.biblioteca .cartao-loja,
+.catalogo .cartao-loja {
     padding: 0 14px;
 }
 
-.biblioteca .cartao-precos {
+.biblioteca .cartao-precos,
+.catalogo .cartao-precos {
     padding: 12px 14px 14px;
 }
 
@@ -969,4 +974,23 @@ main:has(.biblioteca) {
 
 .lista-contas form {
     flex-shrink: 0;
+}
+
+/* catálogo */
+.ajuda-filtro {
+    font-size: 0.75rem;
+    color: var(--text-dim);
+    line-height: 1.5;
+}
+
+.etiqueta-chave {
+    margin-left: 8px;
+    padding: 1px 6px;
+    border: 1px solid var(--border);
+    border-radius: 2px;
+    font-size: 0.7rem;
+}
+
+.catalogo .cartao-loja + .cartao-loja {
+    padding-top: 2px;
 }

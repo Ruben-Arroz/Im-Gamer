@@ -15,14 +15,14 @@ $tituloPagina = isset($tituloPagina) ? "{$tituloPagina} | {$tituloBase}" : $titu
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Share+Tech+Mono&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="<?= BASE_URL ?>/common/style.css?v=2">
-<link rel="stylesheet" href="<?= BASE_URL ?>/projeto/assets/css/site.css?v=11">
+<link rel="stylesheet" href="<?= BASE_URL ?>/projeto/assets/css/site.css?v=12">
 </head>
 <body>
 
 <header class="site-header">
     <a href="<?= BASE_URL ?>/projeto/index.php" class="logo">I'm Gamer</a>
     <nav>
-        <a href="<?= BASE_URL ?>/projeto/index.php">Novidades</a>
+        <a href="<?= BASE_URL ?>/projeto/catalogo.php">Catálogo</a>
         <a href="<?= BASE_URL ?>/projeto/lfg.php">LFG</a>
         <?php if (Auth::autenticado()): ?>
             <a href="<?= BASE_URL ?>/projeto/perfil.php">Perfil</a>
