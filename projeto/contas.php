@@ -47,6 +47,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 $contas = ContasLigadas::listar($utilizadorId);
 
+// se já houver conta epic o botão diz "Atualizar" em vez de "Ligar"
+$contaEpic = null;
+foreach ($contas as $conta) {
+    if ($conta['servico'] === 'epic') {
+        $contaEpic = $conta;
+    }
+}
+
 $tituloPagina = 'Contas ligadas';
 require_once __DIR__ . '/includes/header.php';
 ?>
@@ -113,8 +121,13 @@ require_once __DIR__ . '/includes/header.php';
         <button type="submit">Ligar conta</button>
     </form>
 
-    <h2>Ligar com a Epic Games</h2>
-    <p class="texto-dim">A Epic não mostra os jogos nos perfis públicos, por isso é preciso entrar na conta pela página da Epic. A tua password nunca passa pelo I'm Gamer.</p>
+    <h2>Epic Games</h2>
+    <p class="texto-dim">
+        A Epic não mostra os jogos nos perfis públicos, por isso é preciso entrar na conta pela página da Epic. A tua password nunca passa pelo I'm Gamer e o acesso à conta não fica guardado.
+        <?php if ($contaEpic && $contaEpic['ultima_sincronizacao']): ?>
+            Para atualizar os jogos, repete estes passos (última atualização a <?= (new DateTime($contaEpic['ultima_sincronizacao']))->format('d/m/Y H:i') ?>).
+        <?php endif; ?>
+    </p>
     <ol class="passos">
         <li><a href="<?= htmlspecialchars(Epic::linkLogin()) ?>" target="_blank" rel="noopener">Abre o login da Epic</a> e entra na tua conta.</li>
         <li>Vai aparecer uma página com um texto que tem "authorizationCode".</li>
@@ -127,7 +140,7 @@ require_once __DIR__ . '/includes/header.php';
         <label for="codigo">Código da Epic</label>
         <input type="text" id="codigo" name="codigo" autocomplete="off">
 
-        <button type="submit">Ligar Epic Games</button>
+        <button type="submit"><?= $contaEpic ? 'Atualizar Epic Games' : 'Ligar Epic Games' ?></button>
     </form>
 
     <p class="auth-switch"><a href="<?= BASE_URL ?>/projeto/perfil.php">Voltar ao perfil</a></p>

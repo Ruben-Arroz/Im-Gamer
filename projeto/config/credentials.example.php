@@ -8,7 +8,3 @@ define('DB_PASS', 'password');
 define('RAWG_API_KEY', 'a_tua_chave');
 define('STEAM_API_KEY', 'a_tua_chave');
 define('OPENXBL_API_KEY', 'a_tua_chave');
-
-// chave para cifrar os tokens das contas epic (64 letras e números ao calhas)
-// gera-se com: php -r "echo bin2hex(random_bytes(32));"
-define('CHAVE_TOKENS', 'uma_chave_grande');
