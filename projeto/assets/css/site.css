@@ -939,3 +939,34 @@ main:has(.biblioteca) {
 .paginacao a:hover {
     border-color: var(--text-dim);
 }
+
+/* página das contas ligadas */
+.formulario > .texto-dim {
+    margin-bottom: 24px;
+    line-height: 1.6;
+}
+
+.lista-contas .conta-logo {
+    flex-shrink: 0;
+}
+
+.lista-contas .conta-dados {
+    flex: 1;
+    min-width: 0;
+}
+
+.lista-contas .conta-dados strong {
+    font-weight: 400;
+    overflow-wrap: anywhere;
+}
+
+/* os links dos perfis são compridos, assim partem-se em vez de sair do ecrã */
+.conta-identificador {
+    font-size: 0.75rem;
+    color: var(--text-dim);
+    overflow-wrap: anywhere;
+}
+
+.lista-contas form {
+    flex-shrink: 0;
+}
