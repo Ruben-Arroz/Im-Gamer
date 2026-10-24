@@ -358,6 +358,160 @@ main h2 {
     margin: 24px 0 10px;
 }
 
+.subtitulo-linha {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+.subtitulo-linha a {
+    font-size: 0.8rem;
+    color: var(--text-dim);
+}
+
+.subtitulo-linha a:hover {
+    color: var(--text);
+}
+
+.biblioteca-topo {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 16px;
+    margin-bottom: 28px;
+}
+
+.biblioteca-topo h1 {
+    font-size: 1.1rem;
+    margin-bottom: 8px;
+}
+
+.biblioteca-corpo {
+    display: grid;
+    grid-template-columns: 230px 1fr;
+    gap: 32px;
+    align-items: start;
+}
+
+.filtros-biblioteca form {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.filtro-titulo {
+    color: var(--text-dim);
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-top: 18px;
+}
+
+.filtros-biblioteca .opcao {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.85rem;
+    cursor: pointer;
+}
+
+.filtro-solto {
+    margin-top: 8px;
+}
+
+.filtros-biblioteca input[type="text"],
+.filtros-biblioteca input[type="number"],
+.filtros-biblioteca select {
+    width: 100%;
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--text);
+    font-family: inherit;
+    font-size: 0.85rem;
+    padding: 8px 10px;
+    border-radius: 4px;
+}
+
+.filtros-biblioteca select {
+    appearance: none;
+    cursor: pointer;
+    padding-right: 30px;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%238f9198' stroke-width='1.5' fill='none'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 10px center;
+}
+
+.filtros-biblioteca select option {
+    background: var(--bg);
+}
+
+.filtros-biblioteca input:focus,
+.filtros-biblioteca select:focus {
+    outline: none;
+    border-color: var(--text-dim);
+}
+
+.filtro-intervalo {
+    display: flex;
+    gap: 8px;
+}
+
+.filtros-biblioteca button {
+    margin-top: 22px;
+    background: var(--text);
+    color: var(--bg);
+    border: none;
+    font-family: inherit;
+    font-size: 0.9rem;
+    padding: 10px;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.filtro-limpar {
+    text-align: center;
+    font-size: 0.8rem;
+    color: var(--text-dim);
+    margin-top: 6px;
+}
+
+.botao-filtros {
+    display: none;
+    background: transparent;
+    color: var(--text);
+    border: 1px solid var(--border);
+    font-family: inherit;
+    font-size: 0.85rem;
+    padding: 8px 16px;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.cartao-logo {
+    width: 12px;
+    height: 12px;
+    vertical-align: -1px;
+    margin-right: 2px;
+}
+
+.cartao-jogo:not([href]) {
+    cursor: default;
+}
+
+.paginacao a {
+    color: var(--text);
+    border: 1px solid var(--border);
+    padding: 8px 14px;
+    border-radius: 4px;
+    font-size: 0.85rem;
+    text-decoration: none;
+}
+
+.paginacao span {
+    align-self: center;
+}
+
 .escondido {
     display: none;
 }
@@ -587,7 +741,7 @@ main h2 {
     border-color: var(--text-dim);
 }
 
-.cartao-jogo img {
+.cartao-jogo > img {
     width: 100%;
     aspect-ratio: 460 / 215;
     object-fit: cover;
@@ -630,6 +784,32 @@ main h2 {
     margin-top: 32px;
     font-size: 0.75rem;
     color: var(--text-dim);
+}
+
+.cartao-precos {
+    flex-wrap: wrap;
+}
+
+@media (max-width: 760px) {
+    /* em ecrãs pequenos os filtros passam para cima dos jogos e ficam escondidos atrás do botão */
+    .biblioteca-corpo {
+        grid-template-columns: 1fr;
+    }
+
+    .botao-filtros {
+        display: block;
+    }
+
+    .filtros-biblioteca {
+        display: none;
+        padding: 16px;
+        border: 1px solid var(--border);
+        border-radius: 4px;
+    }
+
+    .filtros-biblioteca.aberto {
+        display: block;
+    }
 }
 
 @media (max-width: 640px) {

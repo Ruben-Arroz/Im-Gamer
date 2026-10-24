@@ -117,7 +117,10 @@ require_once __DIR__ . '/includes/header.php';
         </div>
 
         <?php if ($maisJogados): ?>
-            <p class="subtitulo">Mais jogados</p>
+            <div class="subtitulo-linha">
+                <p class="subtitulo">Mais jogados</p>
+                <a href="<?= BASE_URL ?>/projeto/biblioteca.php?u=<?= urlencode($utilizador['nome_utilizador']) ?>">Ver todos</a>
+            </div>
             <div class="fila-jogos">
                 <?php foreach ($maisJogados as $jogo): ?>
                     <div class="mini-jogo">
@@ -199,7 +202,10 @@ require_once __DIR__ . '/includes/header.php';
                     </div>
 
                     <?php if ($jogosConta): ?>
-                        <p class="subtitulo">Mais jogados</p>
+                        <div class="subtitulo-linha">
+                            <p class="subtitulo">Mais jogados</p>
+                            <a href="<?= BASE_URL ?>/projeto/biblioteca.php?u=<?= urlencode($utilizador['nome_utilizador']) ?>&amp;servico[]=<?= $conta['servico'] ?>">Ver todos</a>
+                        </div>
                         <div class="fila-jogos">
                             <?php foreach ($jogosConta as $jogo): ?>
                                 <div class="mini-jogo">
