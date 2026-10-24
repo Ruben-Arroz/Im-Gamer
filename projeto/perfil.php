@@ -143,9 +143,10 @@ require_once __DIR__ . '/includes/header.php';
 
         <?php foreach ($contas as $conta): ?>
             <?php
-            // a xbox não dá horas nem preços, por isso nessas contas esses números não aparecem
+            // o que a plataforma não dá não aparece (por exemplo a xbox não tem inventário)
             $temHoras = $conta['minutos_jogados'] > 0;
-            $temValores = $conta['valor_jogos'] > 0 || $conta['valor_inventario'] > 0;
+            $temValores = $conta['valor_jogos'] > 0;
+            $temInventario = $conta['servico'] === 'steam';
 
             $jogosConta = Biblioteca::maisJogados($conta['id'], 8);
             $jogosPorData = $temHoras ? [] : Biblioteca::porUltimaVez($conta['id'], 8);
@@ -196,11 +197,20 @@ require_once __DIR__ . '/includes/header.php';
                             <strong><?= $conta['num_conquistas'] ?></strong>
                             <span>conquistas</span>
                         </div>
+                        <?php if ($conta['pontuacao'] !== null): ?>
+                            <div class="numero">
+                                <strong><?= $conta['pontuacao'] ?></strong>
+                                <span>gamerscore</span>
+                            </div>
+                        <?php endif; ?>
                         <?php if ($mostrarValores && $temValores): ?>
                             <div class="numero">
                                 <strong><?= Moeda::formatar($conta['valor_jogos'], $moeda) ?></strong>
-                                <span>valor dos jogos</span>
+                                <!-- a xbox não diz se o jogo foi comprado ou se é do game pass -->
+                                <span><?= $conta['servico'] === 'xbox' ? 'valor dos jogos (pode incluir Game Pass)' : 'valor dos jogos' ?></span>
                             </div>
+                        <?php endif; ?>
+                        <?php if ($mostrarValores && $temInventario): ?>
                             <div class="numero">
                                 <strong><?= Moeda::formatar($conta['valor_inventario'], $moeda) ?></strong>
                                 <span>valor do inventário</span>
