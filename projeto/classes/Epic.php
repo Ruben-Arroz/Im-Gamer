@@ -90,17 +90,17 @@ class Epic
         $codigo = self::extrairCodigo($texto);
 
         if (!$codigo) {
-            return ['sucesso' => false, 'erro' => 'Não encontrei o código. Cola o texto que a Epic mostra depois do login.'];
+            return ['sucesso' => false, 'erro' => 'Não foi encontrado nenhum código. Cole o texto apresentado pela Epic depois do login.'];
         }
 
         $resposta = self::pedirToken(['grant_type' => 'authorization_code', 'code' => $codigo]);
 
         if ($resposta === null) {
-            return ['sucesso' => false, 'erro' => 'Não consegui falar com a Epic. Tenta outra vez daqui a pouco.'];
+            return ['sucesso' => false, 'erro' => 'Não foi possível comunicar com a Epic. Tente novamente mais tarde.'];
         }
 
         if (!isset($resposta['refresh_token'])) {
-            return ['sucesso' => false, 'erro' => 'O código não é válido ou já expirou. Faz o login outra vez e cola o código novo.'];
+            return ['sucesso' => false, 'erro' => 'O código não é válido ou já expirou. Faça o login novamente e cole o código novo.'];
         }
 
         $nome = $resposta['displayName'] ?? $resposta['account_id'];
