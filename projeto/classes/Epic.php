@@ -1,7 +1,7 @@
 <?php
 
 // a epic não tem perfis públicos, por isso usa-se o mesmo login que o launcher da epic usa (api não oficial)
-// o utilizador entra na página da epic, cola o código no site e fica guardado um token (cifrado) para as sincronizações
+// o utilizador entra na página da epic e cola o código no site, que vai logo buscar os jogos (o acesso não fica guardado)
 class Epic
 {
     // dados públicos do launcher, são os mesmos que as ferramentas não oficiais (como o legendary) usam
@@ -62,29 +62,8 @@ class Epic
         return json_decode($resposta, true);
     }
 
-    // o token dá acesso à conta, por isso fica cifrado na bd com a chave do credentials.php
-    private static function cifrar(string $texto): string
-    {
-        $iv = random_bytes(16);
-        return base64_encode($iv . openssl_encrypt($texto, 'aes-256-cbc', CHAVE_TOKENS, OPENSSL_RAW_DATA, $iv));
-    }
-
-    private static function decifrar(string $texto): ?string
-    {
-        $dados = base64_decode($texto);
-        $resultado = openssl_decrypt(substr($dados, 16), 'aes-256-cbc', CHAVE_TOKENS, OPENSSL_RAW_DATA, substr($dados, 0, 16));
-
-        return $resultado === false ? null : $resultado;
-    }
-
-    private static function guardarToken(int $contaId, string $token): void
-    {
-        $pdo = Database::ligar();
-        $stmt = $pdo->prepare('UPDATE Contas_Ligadas SET token = :token WHERE id = :id');
-        $stmt->execute(['token' => self::cifrar($token), 'id' => $contaId]);
-    }
-
-    // troca o código do login por um token e liga a conta ao utilizador
+    // troca o código do login por um acesso à conta, liga-a ao utilizador e vai logo buscar os jogos
+    // o acesso não fica guardado, para atualizar outra vez é preciso fazer o login de novo
     public static function ligar(int $utilizadorId, string $texto): array
     {
         $codigo = self::extrairCodigo($texto);
@@ -99,7 +78,7 @@ class Epic
             return ['sucesso' => false, 'erro' => 'Não foi possível comunicar com a Epic. Tente novamente mais tarde.'];
         }
 
-        if (!isset($resposta['refresh_token'])) {
+        if (!isset($resposta['access_token'])) {
             return ['sucesso' => false, 'erro' => 'O código não é válido ou já expirou. Faça o login novamente e cole o código novo.'];
         }
 
@@ -121,9 +100,7 @@ class Epic
             $contaId = $pdo->lastInsertId();
         }
 
-        self::guardarToken((int) $contaId, $resposta['refresh_token']);
-
-        return ['sucesso' => true];
+        return self::atualizar((int) $contaId, $resposta);
     }
 
     // a biblioteca vem às páginas, cada uma diz onde começa a seguinte
@@ -164,13 +141,19 @@ class Epic
     }
 
     // a loja da epic não tem api pública de preços, mas a cheapshark acompanha a loja da epic (loja 25)
+    // usa o preço normal (sem promoção), como na steam. 0 é grátis, null é porque a cheapshark não tem o jogo
     private static function preco(string $nome): ?float
     {
         $dados = Api::pedir('https://www.cheapshark.com/api/1.0/deals?storeID=25&exact=1&title=' . urlencode($nome));
-        $dolares = (float) ($dados[0]['salePrice'] ?? 0);
+
+        if (!isset($dados[0]['normalPrice'])) {
+            return null;
+        }
+
+        $dolares = (float) $dados[0]['normalPrice'];
 
         if ($dolares <= 0) {
-            return null;
+            return 0;
         }
 
         // a cheapshark dá o preço em dólares, os valores são guardados em euros
@@ -178,27 +161,15 @@ class Epic
         return $conversao['moeda'] === 'EUR' ? round($dolares * $conversao['fator'], 2) : null;
     }
 
-    public static function sincronizar(array $conta): array
+    private static function atualizar(int $contaId, array $resposta): array
     {
-        $token = $conta['token'] ? self::decifrar($conta['token']) : null;
-
-        if (!$token) {
-            return ['sucesso' => false, 'erro' => 'Esta conta ainda não foi ligada com o login da Epic. Liga-a em Contas ligadas.'];
-        }
-
-        $resposta = self::pedirToken(['grant_type' => 'refresh_token', 'refresh_token' => $token]);
-
-        if (!isset($resposta['access_token'])) {
-            return ['sucesso' => false, 'erro' => 'A ligação à Epic expirou. Liga a conta outra vez em Contas ligadas.'];
-        }
-
-        // a epic dá um token novo de cada vez, o antigo deixa de valer, por isso guarda-se logo
-        self::guardarToken($conta['id'], $resposta['refresh_token']);
+        // com muitos jogos pode demorar, cada jogo é um pedido ao catálogo e outro à cheapshark
+        set_time_limit(300);
         $acesso = $resposta['access_token'];
 
         $itens = self::biblioteca($acesso);
         if ($itens === null) {
-            return ['sucesso' => false, 'erro' => 'Não consegui ler a biblioteca da Epic.'];
+            return ['sucesso' => false, 'erro' => 'Não foi possível ler a biblioteca da Epic. Tente novamente mais tarde.'];
         }
 
         $minutos = self::minutosJogados($resposta['account_id'], $acesso);
@@ -251,26 +222,25 @@ class Epic
 
         try {
             $stmt = $pdo->prepare('DELETE FROM Biblioteca_Jogos WHERE conta_id = :conta');
-            $stmt->execute(['conta' => $conta['id']]);
+            $stmt->execute(['conta' => $contaId]);
 
             $stmt = $pdo->prepare('INSERT INTO Biblioteca_Jogos (conta_id, jogo_id, id_externo, nome, imagem, minutos_jogados, minutos_2_semanas,
                 conquistas, conquistas_total, valor, ultima_sincronizacao)
                 VALUES (:conta, :jogo, :id, :nome, :imagem, :minutos, 0, 0, 0, :valor, NOW())');
 
             foreach ($linhas as $linha) {
-                $linha['conta'] = $conta['id'];
+                $linha['conta'] = $contaId;
                 $stmt->execute($linha);
             }
 
-            $stmt = $pdo->prepare('UPDATE Contas_Ligadas SET nome_publico = :nome, nivel = NULL, num_jogos = :jogos, minutos_jogados = :minutos,
+            $stmt = $pdo->prepare('UPDATE Contas_Ligadas SET nivel = NULL, num_jogos = :jogos, minutos_jogados = :minutos,
                 num_conquistas = 0, valor_jogos = :valor_jogos, valor_inventario = 0, ultima_sincronizacao = NOW() WHERE id = :id');
 
             $stmt->execute([
-                'nome' => $resposta['displayName'] ?? $conta['nome_publico'],
                 'jogos' => count($linhas),
                 'minutos' => $minutosTotal,
                 'valor_jogos' => $valorJogos,
-                'id' => $conta['id'],
+                'id' => $contaId,
             ]);
 
             $pdo->commit();
@@ -278,7 +248,7 @@ class Epic
             // se alguma coisa falhar, desfaz tudo e a conta fica como estava
             $pdo->rollBack();
             error_log($erro->getMessage());
-            return ['sucesso' => false, 'erro' => 'Erro ao guardar na base de dados: ' . $erro->getMessage()];
+            return ['sucesso' => false, 'erro' => 'Não foi possível guardar os dados da Epic. Tente novamente mais tarde.'];
         }
 
         return ['sucesso' => true, 'jogos' => count($linhas)];

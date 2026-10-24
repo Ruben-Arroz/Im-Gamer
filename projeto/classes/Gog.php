@@ -70,14 +70,16 @@ class Gog
         return $jogos;
     }
 
-    // preço normal na loja portuguesa, em euros (a gog escreve "19.99 EUR")
+    // preço normal na loja portuguesa, em euros (a gog escreve "19.99 EUR", os grátis vêm com "0 EUR")
     private static function preco(string $id): ?float
     {
         $dados = Api::pedir('https://api.gog.com/products/' . $id . '/prices?countryCode=PT&currency=EUR');
-        $texto = $dados['_embedded']['prices'][0]['basePrice'] ?? '';
-        $preco = (float) $texto;
 
-        return $preco > 0 ? $preco : null;
+        if (!isset($dados['_embedded']['prices'][0]['basePrice'])) {
+            return null;
+        }
+
+        return (float) $dados['_embedded']['prices'][0]['basePrice'];
     }
 
     public static function sincronizar(array $conta): array

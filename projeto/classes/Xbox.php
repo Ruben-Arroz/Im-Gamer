@@ -94,20 +94,29 @@ class Xbox
         return $dados['Products'][0] ?? null;
     }
 
-    // preço atual na loja portuguesa, em euros (null se for grátis ou ainda não estiver à venda)
+    // preço atual na loja portuguesa, em euros (0 se for grátis, null se ainda não estiver à venda)
     public static function precoDaLoja(array $produto): ?float
     {
+        $gratis = false;
+
         foreach ($produto['DisplaySkuAvailabilities'] ?? [] as $sku) {
             foreach ($sku['Availabilities'] ?? [] as $disponivel) {
+                if (!in_array('Purchase', $disponivel['Actions'] ?? [])) {
+                    continue;
+                }
+
                 $preco = $disponivel['OrderManagementData']['Price']['ListPrice'] ?? 0;
 
-                if (in_array('Purchase', $disponivel['Actions'] ?? []) && $preco > 0) {
+                if ($preco > 0) {
                     return (float) $preco;
                 }
+
+                // dá para "comprar" a 0 €, mas pode haver outra edição paga, por isso continua a procurar
+                $gratis = true;
             }
         }
 
-        return null;
+        return $gratis ? 0 : null;
     }
 
     public static function sincronizar(array $conta): array

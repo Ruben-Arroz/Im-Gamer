@@ -206,7 +206,8 @@ class Steam
         }
     }
 
-    // preço normal de cada jogo na loja portuguesa da steam (em euros), os jogos grátis não têm preço
+    // preço normal de cada jogo na loja portuguesa da steam (em euros)
+    // os grátis vêm sem preço mas com success true (ficam a 0), os que saíram da loja vêm com success false
     private static function precos(array $appids): array
     {
         $precos = [];
@@ -218,6 +219,8 @@ class Steam
             foreach ($dados ?? [] as $appid => $info) {
                 if (isset($info['data']['price_overview'])) {
                     $precos[$appid] = $info['data']['price_overview']['initial'] / 100;
+                } elseif ($info['success'] ?? false) {
+                    $precos[$appid] = 0;
                 }
             }
         }

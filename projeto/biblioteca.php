@@ -225,7 +225,7 @@ require_once __DIR__ . '/includes/header.php';
                                     <span class="texto-dim"><?= $jogo['pontuacao'] ?>/<?= $jogo['pontuacao_total'] ?> G</span>
                                 <?php endif; ?>
                                 <?php if ($mostrarValores && $jogo['valor'] !== null): ?>
-                                    <strong><?= Moeda::formatar($jogo['valor'], $moeda) ?></strong>
+                                    <strong><?= $jogo['valor'] > 0 ? Moeda::formatar($jogo['valor'], $moeda) : 'Grátis' ?></strong>
                                 <?php endif; ?>
                             </p>
                         </a>
