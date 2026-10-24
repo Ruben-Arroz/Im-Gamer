@@ -13,7 +13,7 @@ if (isset($_GET['u'])) {
     $utilizador = Utilizador::buscarPorId($_SESSION['utilizador_id']);
 }
 
-const POR_PAGINA = 48;
+const POR_PAGINA = 24;
 
 if ($utilizador) {
     $proprio = (int) $utilizador['id'] === (int) $_SESSION['utilizador_id'];
@@ -231,7 +231,13 @@ require_once __DIR__ . '/includes/header.php';
                         <?php if ($pagina > 1): ?>
                             <a href="<?= htmlspecialchars(urlPagina($pagina - 1)) ?>">Anterior</a>
                         <?php endif; ?>
-                        <span class="texto-dim">Página <?= $pagina ?> de <?= $totalPaginas ?></span>
+                        <?php for ($numero = 1; $numero <= $totalPaginas; $numero++): ?>
+                            <?php if ($numero === $pagina): ?>
+                                <span class="pagina-atual"><?= $numero ?></span>
+                            <?php else: ?>
+                                <a href="<?= htmlspecialchars(urlPagina($numero)) ?>"><?= $numero ?></a>
+                            <?php endif; ?>
+                        <?php endfor; ?>
                         <?php if ($pagina < $totalPaginas): ?>
                             <a href="<?= htmlspecialchars(urlPagina($pagina + 1)) ?>">Seguinte</a>
                         <?php endif; ?>
