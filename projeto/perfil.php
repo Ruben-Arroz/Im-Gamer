@@ -15,7 +15,7 @@ if (isset($_GET['u'])) {
 
 if ($utilizador) {
     $proprio = (int) $utilizador['id'] === (int) $_SESSION['utilizador_id'];
-    $contas = ContasLigadas::listar($utilizador['id']);
+    $contas = ContasLigadas::ordenarPorFama(ContasLigadas::listar($utilizador['id']));
     $maisJogados = Biblioteca::maisJogadosDeTodas($utilizador['id'], 8);
 
     // os valores aparecem na moeda de quem está a ver, e só se o dono não os escondeu

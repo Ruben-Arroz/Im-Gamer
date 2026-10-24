@@ -12,6 +12,26 @@ class ContasLigadas
         'nintendo' => 'Nintendo',
     ];
 
+    // da plataforma mais famosa para a menos famosa, usado para ordenar as contas no perfil
+    const FAMA = ['steam', 'playstation', 'xbox', 'epic', 'nintendo', 'battlenet', 'gog'];
+
+    // as contas com jogos vêm primeiro, e entre essas ficam pela fama da plataforma
+    public static function ordenarPorFama(array $contas): array
+    {
+        usort($contas, function ($a, $b) {
+            $temA = $a['num_jogos'] > 0 ? 0 : 1;
+            $temB = $b['num_jogos'] > 0 ? 0 : 1;
+
+            if ($temA !== $temB) {
+                return $temA <=> $temB;
+            }
+
+            return array_search($a['servico'], self::FAMA) <=> array_search($b['servico'], self::FAMA);
+        });
+
+        return $contas;
+    }
+
     public static function listar(int $utilizadorId): array
     {
         $pdo = Database::ligar();
