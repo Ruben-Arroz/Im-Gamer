@@ -25,5 +25,6 @@ require_once __DIR__ . '/../classes/Utilizador.php';
 require_once __DIR__ . '/../classes/ContasLigadas.php';
 require_once __DIR__ . '/../classes/Biblioteca.php';
 require_once __DIR__ . '/../classes/Jogo.php';
+require_once __DIR__ . '/../classes/Catalogo.php';
 require_once __DIR__ . '/../classes/Moeda.php';
 require_once __DIR__ . '/../classes/Steam.php';

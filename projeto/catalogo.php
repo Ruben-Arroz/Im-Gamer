@@ -1,52 +1,13 @@
 <?php
 require_once __DIR__ . '/includes/bootstrap.php';
 
-// lojas ativas na cheapshark: id => [nome, se é a loja oficial da plataforma]
-// as que não são oficiais vendem chaves para ativar noutra plataforma (steam, epic, ...)
-const LOJAS = [
-    1 => ['Steam', true],
-    7 => ['GOG', true],
-    13 => ['Ubisoft Store', true],
-    25 => ['Epic Games Store', true],
-    2 => ['GamersGate', false],
-    3 => ['Green Man Gaming', false],
-    11 => ['Humble Store', false],
-    15 => ['Fanatical', false],
-    21 => ['WinGameStore', false],
-    23 => ['GameBillet', false],
-    27 => ['Gamesplanet', false],
-    28 => ['Gamesload', false],
-    30 => ['IndieGala', false],
-    35 => ['DreamGame', false],
-];
-
-const ORDENS = [
-    'Deal Rating' => 'Melhores promoções',
-    'Savings' => 'Maior desconto',
-    'Price' => 'Menor preço',
-    'Metacritic' => 'Nota Metacritic',
-    'Reviews' => 'Avaliações da Steam',
-    'Release' => 'Lançamento',
-    'Recent' => 'Promoções mais recentes',
-    'Title' => 'Nome',
-];
-
-// os preços da cheapshark vêm em dólares, aqui calcula-se quanto vale 1 dólar na moeda de quem está a ver
-$moeda = $_SESSION['moeda'] ?? 'EUR';
-$taxaDolar = Moeda::taxa('USD');
-$taxaMoeda = Moeda::taxa($moeda);
-
-if ($taxaDolar && $taxaMoeda) {
-    $dolarParaMoeda = $taxaMoeda / $taxaDolar;
-} else {
-    // sem taxas na bd mostra em dólares
-    $moeda = 'USD';
-    $dolarParaMoeda = 1;
-}
+// os preços da cheapshark vêm em dólares, por isso converte-se para a moeda de quem está a ver
+$conversao = Catalogo::conversaoDolar($_SESSION['moeda'] ?? 'EUR');
+$moeda = $conversao['moeda'];
 
 $lojasEscolhidas = array_map('intval', (array) ($_GET['loja'] ?? []));
 $tipoLoja = $_GET['tipo'] ?? 'todas';
-$ordem = isset(ORDENS[$_GET['ordem'] ?? '']) ? $_GET['ordem'] : 'Deal Rating';
+$ordem = isset(Catalogo::ORDENS[$_GET['ordem'] ?? '']) ? $_GET['ordem'] : 'Deal Rating';
 
 $tituloPagina = 'Catálogo';
 require_once __DIR__ . '/includes/header.php';
@@ -55,9 +16,9 @@ require_once __DIR__ . '/includes/header.php';
 <section class="catalogo pagina-larga" id="catalogo"
     data-moeda="<?= $moeda ?>"
     data-simbolo="<?= htmlspecialchars(Moeda::SIMBOLOS[$moeda]) ?>"
-    data-taxa="<?= $dolarParaMoeda ?>"
-    data-oficiais="<?= implode(',', array_keys(array_filter(LOJAS, fn($loja) => $loja[1]))) ?>"
-    data-todas="<?= implode(',', array_keys(LOJAS)) ?>">
+    data-taxa="<?= $conversao['fator'] ?>"
+    data-oficiais="<?= implode(',', Catalogo::lojasOficiais()) ?>"
+    data-todas="<?= implode(',', array_keys(Catalogo::LOJAS)) ?>">
 
     <div class="biblioteca-topo">
         <div>
@@ -78,7 +39,7 @@ require_once __DIR__ . '/includes/header.php';
                 <div class="filtro-grupo">
                     <label for="ordem" class="filtro-titulo">Ordenar por</label>
                     <select id="ordem" name="ordem">
-                        <?php foreach (ORDENS as $chave => $nome): ?>
+                        <?php foreach (Catalogo::ORDENS as $chave => $nome): ?>
                             <option value="<?= $chave ?>" <?= $ordem === $chave ? 'selected' : '' ?>><?= $nome ?></option>
                         <?php endforeach; ?>
                     </select>
@@ -94,7 +55,7 @@ require_once __DIR__ . '/includes/header.php';
 
                 <div class="filtro-grupo">
                     <p class="filtro-titulo">Lojas</p>
-                    <?php foreach (LOJAS as $id => $loja): ?>
+                    <?php foreach (Catalogo::LOJAS as $id => $loja): ?>
                         <label class="opcao">
                             <input type="checkbox" name="loja[]" value="<?= $id ?>" <?= in_array($id, $lojasEscolhidas) ? 'checked' : '' ?>>
                             <?= $loja[0] ?>
@@ -148,6 +109,7 @@ require_once __DIR__ . '/includes/header.php';
 </section>
 
 <script src="<?= BASE_URL ?>/projeto/assets/js/biblioteca.js?v=1"></script>
-<script src="<?= BASE_URL ?>/projeto/assets/js/catalogo.js?v=1"></script>
+<script src="<?= BASE_URL ?>/projeto/assets/js/cartoes.js?v=1"></script>
+<script src="<?= BASE_URL ?>/projeto/assets/js/catalogo.js?v=2"></script>
 
 <?php require_once __DIR__ . '/includes/footer.php'; ?>
