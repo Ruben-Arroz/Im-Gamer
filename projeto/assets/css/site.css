@@ -906,3 +906,14 @@ main:has(.biblioteca) {
         gap: 10px;
     }
 }
+.paginacao .pagina-atual {
+    background: var(--text);
+    color: var(--bg);
+    padding: 8px 14px;
+    border-radius: 4px;
+    font-size: 0.85rem;
+}
+
+.paginacao a:hover {
+    border-color: var(--text-dim);
+}
