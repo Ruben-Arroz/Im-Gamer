@@ -404,6 +404,28 @@ main:has(.biblioteca) {
     flex-direction: column;
 }
 
+/* no computador os filtros acompanham a página ao fazer scroll e têm scroll próprio se forem maiores que o ecrã */
+@media (min-width: 761px) {
+    .filtros-biblioteca {
+        position: sticky;
+        top: 24px;
+        max-height: calc(100vh - 48px);
+        overflow-y: auto;
+        padding-right: 12px;
+        scrollbar-width: thin;
+        scrollbar-color: var(--border) transparent;
+    }
+
+    .filtros-biblioteca::-webkit-scrollbar {
+        width: 6px;
+    }
+
+    .filtros-biblioteca::-webkit-scrollbar-thumb {
+        background: var(--border);
+        border-radius: 3px;
+    }
+}
+
 .filtro-grupo {
     display: flex;
     flex-direction: column;
