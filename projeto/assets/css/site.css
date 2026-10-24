@@ -358,12 +358,37 @@ main h2 {
     margin: 24px 0 10px;
 }
 
+.escondido {
+    display: none;
+}
+
 .fila-jogos {
     display: flex;
     gap: 12px;
     overflow-x: auto;
-    padding-bottom: 8px;
+    padding-bottom: 10px;
     scroll-snap-type: x mandatory;
+    scrollbar-width: thin;
+    scrollbar-color: var(--text-dim) transparent;
+}
+
+/* barra de scroll fina e escura no chrome e no edge (o firefox usa o scrollbar-color de cima) */
+.fila-jogos::-webkit-scrollbar {
+    height: 6px;
+}
+
+.fila-jogos::-webkit-scrollbar-track {
+    background: var(--border);
+    border-radius: 3px;
+}
+
+.fila-jogos::-webkit-scrollbar-thumb {
+    background: var(--text-dim);
+    border-radius: 3px;
+}
+
+.fila-jogos::-webkit-scrollbar-thumb:hover {
+    background: var(--text);
 }
 
 .mini-jogo {
