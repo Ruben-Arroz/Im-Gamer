@@ -266,14 +266,36 @@ $script:inicio = $null
 $script:tarefa = ''
 $script:houveErro = $false
 
+# com Enabled = $false o windows pinta o texto dos botões de preto e não se lê no fundo escuro,
+# por isso os botões ficam ativos mas ignoram os cliques e são pintados a cinzento à mão
+$script:ocupado = $false
+
+function Bloquear-Botoes($bloquear) {
+    $script:ocupado = $bloquear
+
+    foreach ($botao in @($botaoPublicar, $botaoSincronizar, $botaoLimpar)) {
+        if ($bloquear) {
+            $botao.BackColor = $corFundo
+            $botao.ForeColor = $corDim
+            $botao.Cursor = 'Default'
+        } elseif ($botao -eq $botaoPublicar) {
+            $botao.BackColor = $corTexto
+            $botao.ForeColor = $corFundo
+            $botao.Cursor = 'Hand'
+        } else {
+            $botao.BackColor = $corFundo
+            $botao.ForeColor = $corTexto
+            $botao.Cursor = 'Hand'
+        }
+    }
+}
+
 function Novo-Comando($tipo, $programa, $argumentos) {
     return @{ Tipo = $tipo; Programa = $programa; Argumentos = $argumentos }
 }
 
 function Comecar($nome, $comandos) {
-    $botaoPublicar.Enabled = $false
-    $botaoSincronizar.Enabled = $false
-    $botaoLimpar.Enabled = $false
+    Bloquear-Botoes $true
 
     $script:tarefa = $nome
     $script:inicio = Get-Date
@@ -392,9 +414,7 @@ function Terminar {
         $estado.Text = "$($script:tarefa) terminado às " + (Get-Date -Format 'HH:mm') + " ($segundos s)."
     }
 
-    $botaoPublicar.Enabled = $true
-    $botaoSincronizar.Enabled = $true
-    $botaoLimpar.Enabled = $true
+    Bloquear-Botoes $false
 }
 
 $temporizador = New-Object System.Windows.Forms.Timer
@@ -428,6 +448,11 @@ function Ha-Vpn {
 }
 
 $botaoPublicar.Add_Click({
+    # enquanto uma tarefa está a correr os botões não fazem nada
+    if ($script:ocupado) {
+        return
+    }
+
     if (-not (Ha-Vpn)) {
         return
     }
@@ -442,6 +467,11 @@ $botaoPublicar.Add_Click({
 })
 
 $botaoSincronizar.Add_Click({
+    # enquanto uma tarefa está a correr os botões não fazem nada
+    if ($script:ocupado) {
+        return
+    }
+
     if (-not (Ha-Vpn)) {
         return
     }
@@ -461,6 +491,11 @@ $botaoSite.Add_Click({
 })
 
 $botaoLimpar.Add_Click({
+    # enquanto uma tarefa está a correr os botões não fazem nada
+    if ($script:ocupado) {
+        return
+    }
+
     $registo.Clear()
     $estado.Text = 'Liga a VPN e escolhe o que queres fazer.'
 })
