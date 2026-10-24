@@ -1175,3 +1175,10 @@ main:has(.pagina-larga) {
         display: none;
     }
 }
+
+/* passos para ligar a epic */
+.passos {
+    padding-left: 20px;
+    margin: 0 0 16px;
+    line-height: 1.7;
+}

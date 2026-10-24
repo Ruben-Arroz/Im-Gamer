@@ -153,6 +153,10 @@ class Biblioteca
             return 'https://store.steampowered.com/app/' . $jogo['id_externo'];
         }
 
+        if ($jogo['servico'] === 'epic') {
+            return 'https://store.epicgames.com/pt/browse?q=' . urlencode($jogo['nome']);
+        }
+
         if ($jogo['servico'] === 'gog') {
             return 'https://www.gog.com/en/games?query=' . urlencode($jogo['nome']);
         }
