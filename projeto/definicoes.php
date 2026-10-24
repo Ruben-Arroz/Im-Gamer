@@ -25,6 +25,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $erro = 'Escolhe uma moeda da lista.';
         } else {
             Utilizador::atualizarMoeda($id, $moeda);
+            $_SESSION['moeda'] = $moeda;
             $mensagem = 'Moeda atualizada.';
         }
     } elseif ($acao === 'email') {
@@ -63,6 +64,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $erro = 'A password atual está errada.';
         } else {
             Utilizador::apagarFoto($utilizador['foto_perfil']);
+            Utilizador::apagarFoto($utilizador['foto_capa']);
             Utilizador::apagar($id);
             Auth::logout();
             header('Location: ' . BASE_URL . '/projeto/index.php');

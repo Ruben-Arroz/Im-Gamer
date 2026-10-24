@@ -9,10 +9,18 @@ class Utilizador
         'BRL' => 'Real brasileiro (R$)',
     ];
 
+    // campos usados nas duas pesquisas de utilizador, já com o nome do jogo favorito e da plataforma preferida
+    const SELECT = 'SELECT u.id, u.nome_utilizador, u.email, u.bio, u.foto_perfil, u.foto_capa, u.moeda, u.esconder_valores,
+        u.is_admin, u.data_criacao, u.jogo_favorito_id, j.rawg_id AS jogo_favorito_rawg_id, j.nome AS jogo_favorito,
+        u.plataforma_preferida_id, p.nome AS plataforma_preferida
+        FROM Utilizadores u
+        LEFT JOIN Jogos j ON j.id = u.jogo_favorito_id
+        LEFT JOIN Plataformas p ON p.id = u.plataforma_preferida_id';
+
     public static function buscarPorId(int $id): array|false
     {
         $pdo = Database::ligar();
-        $stmt = $pdo->prepare('SELECT id, nome_utilizador, email, bio, foto_perfil, moeda, is_admin, data_criacao FROM Utilizadores WHERE id = :id');
+        $stmt = $pdo->prepare(self::SELECT . ' WHERE u.id = :id');
         $stmt->execute(['id' => $id]);
 
         return $stmt->fetch();
@@ -21,10 +29,19 @@ class Utilizador
     public static function buscarPorNome(string $nome): array|false
     {
         $pdo = Database::ligar();
-        $stmt = $pdo->prepare('SELECT id, nome_utilizador, email, bio, foto_perfil, moeda, is_admin, data_criacao FROM Utilizadores WHERE nome_utilizador = :nome');
+        $stmt = $pdo->prepare(self::SELECT . ' WHERE u.nome_utilizador = :nome');
         $stmt->execute(['nome' => $nome]);
 
         return $stmt->fetch();
+    }
+
+    public static function nomeEmUso(string $nome, int $id): bool
+    {
+        $pdo = Database::ligar();
+        $stmt = $pdo->prepare('SELECT id FROM Utilizadores WHERE nome_utilizador = :nome AND id != :id');
+        $stmt->execute(['nome' => $nome, 'id' => $id]);
+
+        return (bool) $stmt->fetch();
     }
 
     public static function passwordCorreta(int $id, string $password): bool
@@ -37,11 +54,22 @@ class Utilizador
         return $hash && password_verify($password, $hash);
     }
 
-    public static function atualizarPerfil(int $id, string $bio, ?string $foto): void
+    public static function atualizarPerfil(int $id, array $dados): void
     {
         $pdo = Database::ligar();
-        $stmt = $pdo->prepare('UPDATE Utilizadores SET bio = :bio, foto_perfil = :foto WHERE id = :id');
-        $stmt->execute(['bio' => $bio !== '' ? $bio : null, 'foto' => $foto, 'id' => $id]);
+        $stmt = $pdo->prepare('UPDATE Utilizadores SET nome_utilizador = :nome, bio = :bio, foto_perfil = :foto, foto_capa = :capa,
+            jogo_favorito_id = :jogo, plataforma_preferida_id = :plataforma, esconder_valores = :esconder WHERE id = :id');
+
+        $stmt->execute([
+            'nome' => $dados['nome'],
+            'bio' => $dados['bio'] !== '' ? $dados['bio'] : null,
+            'foto' => $dados['foto'],
+            'capa' => $dados['capa'],
+            'jogo' => $dados['jogo'],
+            'plataforma' => $dados['plataforma'],
+            'esconder' => $dados['esconder'],
+            'id' => $id,
+        ]);
     }
 
     public static function atualizarMoeda(int $id, string $moeda): void
@@ -83,14 +111,35 @@ class Utilizador
         $stmt->execute(['id' => $id]);
     }
 
-    public static function guardarFoto(array $ficheiro, int $id): array
+    // trata da foto de perfil ou da capa: remover, manter a atual ou guardar uma nova
+    public static function trocarImagem(?array $ficheiro, bool $remover, ?string $atual, string $prefixo, int $id): array
     {
-        if ($ficheiro['error'] !== UPLOAD_ERR_OK) {
-            return ['sucesso' => false, 'erro' => 'Não foi possível enviar a foto.'];
+        if ($remover) {
+            self::apagarFoto($atual);
+            return ['sucesso' => true, 'nome' => null];
         }
 
-        if ($ficheiro['size'] > 2 * 1024 * 1024) {
-            return ['sucesso' => false, 'erro' => 'A foto não pode ter mais de 2 MB.'];
+        if (!$ficheiro || $ficheiro['error'] === UPLOAD_ERR_NO_FILE) {
+            return ['sucesso' => true, 'nome' => $atual];
+        }
+
+        $resultado = self::guardarImagem($ficheiro, $prefixo, $id);
+
+        if ($resultado['sucesso']) {
+            self::apagarFoto($atual);
+        }
+
+        return $resultado;
+    }
+
+    public static function guardarImagem(array $ficheiro, string $prefixo, int $id): array
+    {
+        if ($ficheiro['error'] !== UPLOAD_ERR_OK) {
+            return ['sucesso' => false, 'erro' => 'Não foi possível enviar a imagem.'];
+        }
+
+        if ($ficheiro['size'] > 4 * 1024 * 1024) {
+            return ['sucesso' => false, 'erro' => 'A imagem não pode ter mais de 4 MB.'];
         }
 
         // confirma que é mesmo uma imagem e não só um ficheiro com a extensão trocada
@@ -98,13 +147,13 @@ class Utilizador
         $tipos = ['image/jpeg' => 'jpg', 'image/png' => 'png', 'image/webp' => 'webp'];
 
         if ($info === false || !isset($tipos[$info['mime']])) {
-            return ['sucesso' => false, 'erro' => 'A foto tem de ser JPG, PNG ou WEBP.'];
+            return ['sucesso' => false, 'erro' => 'A imagem tem de ser JPG, PNG ou WEBP.'];
         }
 
-        $nome = 'perfil_' . $id . '_' . time() . '.' . $tipos[$info['mime']];
+        $nome = $prefixo . '_' . $id . '_' . time() . '.' . $tipos[$info['mime']];
 
         if (!move_uploaded_file($ficheiro['tmp_name'], PASTA_UPLOADS . $nome)) {
-            return ['sucesso' => false, 'erro' => 'Não foi possível guardar a foto.'];
+            return ['sucesso' => false, 'erro' => 'Não foi possível guardar a imagem.'];
         }
 
         return ['sucesso' => true, 'nome' => $nome];

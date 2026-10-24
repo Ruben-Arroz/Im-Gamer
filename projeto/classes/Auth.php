@@ -38,6 +38,7 @@ class Auth
         $_SESSION['utilizador_id'] = $utilizador['id'];
         $_SESSION['nome_utilizador'] = $utilizador['nome_utilizador'];
         $_SESSION['is_admin'] = (bool) $utilizador['is_admin'];
+        $_SESSION['moeda'] = $utilizador['moeda'];
 
         return ['sucesso' => true];
     }
