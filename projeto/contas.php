@@ -57,9 +57,15 @@ require_once __DIR__ . '/includes/header.php';
         <ul class="lista-contas">
             <?php foreach ($contas as $conta): ?>
                 <li>
-                    <div>
+                    <img class="conta-logo" src="<?= BASE_URL ?>/projeto/assets/img/plataformas/<?= $conta['servico'] ?>.svg" alt="">
+
+                    <div class="conta-dados">
                         <span class="conta-servico"><?= ContasLigadas::SERVICOS[$conta['servico']] ?></span>
-                        <span><?= htmlspecialchars($conta['identificador']) ?></span>
+                        <!-- depois de sincronizada mostra o nome da conta, o link fica por baixo em pequeno -->
+                        <strong><?= htmlspecialchars($conta['nome_publico'] ?? $conta['identificador']) ?></strong>
+                        <?php if ($conta['nome_publico']): ?>
+                            <span class="conta-identificador"><?= htmlspecialchars($conta['identificador']) ?></span>
+                        <?php endif; ?>
                         <span class="texto-dim">
                             <?php if ($conta['ultima_sincronizacao']): ?>
                                 Atualizada a <?= (new DateTime($conta['ultima_sincronizacao']))->format('d/m/Y H:i') ?>
