@@ -994,3 +994,39 @@ main:has(.pagina-larga) {
 .catalogo .cartao-loja + .cartao-loja {
     padding-top: 2px;
 }
+
+/* separadores dos lançamentos */
+.abas {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 28px;
+}
+
+.abas a {
+    color: var(--text-dim);
+    border: 1px solid var(--border);
+    padding: 8px 16px;
+    border-radius: 4px;
+    font-size: 0.85rem;
+    text-decoration: none;
+}
+
+.abas a:hover {
+    color: var(--text);
+}
+
+.abas a.ativo {
+    background: var(--text);
+    color: var(--bg);
+    border-color: var(--text);
+}
+
+.cartao-sem-imagem {
+    aspect-ratio: 460 / 215;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-dim);
+    font-size: 0.75rem;
+    background: var(--border);
+}
