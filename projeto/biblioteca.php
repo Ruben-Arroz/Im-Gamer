@@ -214,9 +214,15 @@ require_once __DIR__ . '/includes/header.php';
                                 <?php endif; ?>
                             </p>
                             <p class="cartao-precos">
-                                <span><?= formatarHoras($jogo['minutos_jogados']) ?></span>
+                                <!-- nos jogos da xbox nem sempre se sabe as horas, aí não aparece nada -->
+                                <?php if ($jogo['minutos_jogados'] !== null): ?>
+                                    <span><?= formatarHoras($jogo['minutos_jogados']) ?></span>
+                                <?php endif; ?>
                                 <?php if ($jogo['conquistas_total'] > 0): ?>
                                     <span class="texto-dim"><?= $jogo['conquistas'] ?>/<?= $jogo['conquistas_total'] ?> conquistas</span>
+                                <?php endif; ?>
+                                <?php if ($jogo['pontuacao_total'] > 0): ?>
+                                    <span class="texto-dim"><?= $jogo['pontuacao'] ?>/<?= $jogo['pontuacao_total'] ?> G</span>
                                 <?php endif; ?>
                                 <?php if ($mostrarValores && $jogo['valor'] !== null): ?>
                                     <strong><?= Moeda::formatar($jogo['valor'], $moeda) ?></strong>

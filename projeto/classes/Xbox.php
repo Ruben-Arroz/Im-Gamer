@@ -1,10 +1,11 @@
 <?php
 
 // a xbox não tem api pública, por isso usa-se o openxbl (xbl.io), que é um serviço não oficial
-// não dá horas jogadas nem preços, só os jogos, as conquistas e a última vez que se jogou
+// dá o perfil, os jogos, as conquistas, o gamerscore e as horas (nem sempre)
+// as imagens, os detalhes e os preços vêm do catálogo da loja da microsoft, que é público
 class Xbox
 {
-    private static function pedir(string $caminho): ?array
+    private static function pedir(string $caminho, ?array $corpo = null): ?array
     {
         $curl = curl_init('https://xbl.io/api/v2/' . $caminho);
         curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
@@ -13,7 +14,14 @@ class Xbox
             'X-Authorization: ' . OPENXBL_API_KEY,
             'Accept: application/json',
             'Accept-Language: pt-PT',
+            'Content-Type: application/json',
         ]);
+
+        // alguns pedidos são POST com um json no corpo
+        if ($corpo !== null) {
+            curl_setopt($curl, CURLOPT_POST, true);
+            curl_setopt($curl, CURLOPT_POSTFIELDS, json_encode($corpo));
+        }
 
         $resposta = curl_exec($curl);
         $codigo = curl_getinfo($curl, CURLINFO_HTTP_CODE);
@@ -57,6 +65,51 @@ class Xbox
         return $pessoas[0]['xuid'] ?? null;
     }
 
+    // minutos jogados de cada jogo, num só pedido. os jogos que não guardam esta estatística não vêm
+    private static function minutosJogados(string $xuid, array $jogos): array
+    {
+        $estatisticas = [];
+        foreach ($jogos as $jogo) {
+            $estatisticas[] = ['name' => 'MinutesPlayed', 'titleId' => $jogo['titleId']];
+        }
+
+        $dados = self::pedir('player/stats', ['xuids' => [$xuid], 'stats' => $estatisticas]);
+
+        $minutos = [];
+        foreach ($dados['content']['statlistscollection'][0]['stats'] ?? [] as $estatistica) {
+            if (isset($estatistica['value'])) {
+                $minutos[$estatistica['titleid']] = (int) $estatistica['value'];
+            }
+        }
+
+        return $minutos;
+    }
+
+    // vai à loja da microsoft pelo id do jogo na xbox, devolve o produto ou null se não estiver à venda
+    public static function produtoDaLoja(string $titleId): ?array
+    {
+        $dados = Api::pedir('https://displaycatalog.mp.microsoft.com/v7.0/products/lookup?alternateId=XboxTitleId&value='
+            . urlencode($titleId) . '&market=PT&languages=pt-pt&fieldsTemplate=details');
+
+        return $dados['Products'][0] ?? null;
+    }
+
+    // preço atual na loja portuguesa, em euros (null se for grátis ou ainda não estiver à venda)
+    public static function precoDaLoja(array $produto): ?float
+    {
+        foreach ($produto['DisplaySkuAvailabilities'] ?? [] as $sku) {
+            foreach ($sku['Availabilities'] ?? [] as $disponivel) {
+                $preco = $disponivel['OrderManagementData']['Price']['ListPrice'] ?? 0;
+
+                if (in_array('Purchase', $disponivel['Actions'] ?? []) && $preco > 0) {
+                    return (float) $preco;
+                }
+            }
+        }
+
+        return null;
+    }
+
     public static function sincronizar(array $conta): array
     {
         $xuid = self::descobrirXuid(trim($conta['identificador']));
@@ -79,10 +132,48 @@ class Xbox
         $jogos = $dados['content']['titles'] ?? [];
         self::progresso(count($jogos) . ' jogos');
 
+        $minutos = $jogos ? self::minutosJogados($xuid, $jogos) : [];
+        self::progresso(count($minutos) . ' jogos com horas');
+
         $conquistasTotal = 0;
-        foreach ($jogos as $jogo) {
-            $conquistasTotal += $jogo['achievement']['currentAchievements'];
-            self::progresso($jogo['name'] . ': ' . $jogo['achievement']['currentAchievements'] . ' conquistas');
+        $minutosTotal = 0;
+        $valorJogos = 0;
+        $linhas = [];
+
+        foreach ($jogos as $i => $jogo) {
+            $titulo = (string) $jogo['titleId'];
+            $produto = self::produtoDaLoja($titulo);
+            $jogoBd = $produto ? Jogo::daXbox($titulo, $produto) : null;
+            $preco = $produto ? self::precoDaLoja($produto) : null;
+
+            // se a loja não tiver o jogo fica a imagem quadrada que a xbox dá
+            $imagem = $jogoBd['imagem_capa'] ?? str_replace('http://', 'https://', $jogo['displayImage'] ?? '');
+            if ($imagem === '' || strlen($imagem) > 255) {
+                $imagem = null;
+            }
+
+            $feitas = $jogo['achievement']['currentAchievements'];
+            $conquistasTotal += $feitas;
+            $minutosTotal += $minutos[$titulo] ?? 0;
+            $valorJogos += $preco ?? 0;
+
+            $linhas[] = [
+                'jogo' => $jogoBd['id'] ?? null,
+                'titulo' => $titulo,
+                'nome' => $jogo['name'],
+                'imagem' => $imagem,
+                'minutos' => $minutos[$titulo] ?? null,
+                'ultima_vez' => self::converterData($jogo['titleHistory']['lastTimePlayed'] ?? ''),
+                'conquistas' => $feitas,
+                // há jogos em que a xbox não diz o total, por isso nunca fica menor que as já feitas
+                'conquistas_total' => max($feitas, $jogo['achievement']['totalAchievements']),
+                'pontuacao' => $jogo['achievement']['currentGamerscore'] ?? null,
+                'pontuacao_total' => $jogo['achievement']['totalGamerscore'] ?? null,
+                'valor' => $preco,
+            ];
+
+            self::progresso('[' . ($i + 1) . '/' . count($jogos) . '] ' . $jogo['name']
+                . ($preco ? ' = ' . number_format($preco, 2, ',', '') . ' €' : ''));
         }
 
         // o avatar tem de caber na coluna da bd
@@ -98,41 +189,29 @@ class Xbox
             $stmt = $pdo->prepare('DELETE FROM Biblioteca_Jogos WHERE conta_id = :conta');
             $stmt->execute(['conta' => $conta['id']]);
 
-            $stmt = $pdo->prepare('INSERT INTO Biblioteca_Jogos (conta_id, id_externo, nome, imagem, minutos_jogados, minutos_2_semanas,
-                ultima_vez_jogado, conquistas, conquistas_total, ultima_sincronizacao)
-                VALUES (:conta, :titulo, :nome, :imagem, 0, 0, :ultima_vez, :conquistas, :conquistas_total, NOW())');
+            $stmt = $pdo->prepare('INSERT INTO Biblioteca_Jogos (conta_id, jogo_id, id_externo, nome, imagem, minutos_jogados, minutos_2_semanas,
+                ultima_vez_jogado, conquistas, conquistas_total, pontuacao, pontuacao_total, valor, ultima_sincronizacao)
+                VALUES (:conta, :jogo, :titulo, :nome, :imagem, :minutos, 0, :ultima_vez, :conquistas, :conquistas_total,
+                :pontuacao, :pontuacao_total, :valor, NOW())');
 
-            foreach ($jogos as $jogo) {
-                // a imagem vem em http e o site é https
-                $imagem = str_replace('http://', 'https://', $jogo['displayImage'] ?? '');
-                if ($imagem === '' || strlen($imagem) > 255) {
-                    $imagem = null;
-                }
-
-                $feitas = $jogo['achievement']['currentAchievements'];
-
-                $stmt->execute([
-                    'conta' => $conta['id'],
-                    'titulo' => $jogo['titleId'],
-                    'nome' => $jogo['name'],
-                    'imagem' => $imagem,
-                    'ultima_vez' => self::converterData($jogo['titleHistory']['lastTimePlayed'] ?? ''),
-                    'conquistas' => $feitas,
-                    // há jogos em que a xbox não diz o total, por isso nunca fica menor que as já feitas
-                    'conquistas_total' => max($feitas, $jogo['achievement']['totalAchievements']),
-                ]);
+            foreach ($linhas as $linha) {
+                $linha['conta'] = $conta['id'];
+                $stmt->execute($linha);
             }
 
             $stmt = $pdo->prepare('UPDATE Contas_Ligadas SET id_externo = :xuid, nome_publico = :nome, avatar = :avatar, nivel = NULL,
-                num_jogos = :jogos, minutos_jogados = 0, num_conquistas = :conquistas, valor_jogos = 0, valor_inventario = 0,
-                ultima_sincronizacao = NOW() WHERE id = :id');
+                pontuacao = :pontuacao, num_jogos = :jogos, minutos_jogados = :minutos, num_conquistas = :conquistas,
+                valor_jogos = :valor_jogos, valor_inventario = 0, ultima_sincronizacao = NOW() WHERE id = :id');
 
             $stmt->execute([
                 'xuid' => $xuid,
                 'nome' => $perfil['gamertag'],
                 'avatar' => $avatar,
+                'pontuacao' => $perfil['gamerScore'],
                 'jogos' => count($jogos),
+                'minutos' => $minutosTotal,
                 'conquistas' => $conquistasTotal,
+                'valor_jogos' => $valorJogos,
                 'id' => $conta['id'],
             ]);
 

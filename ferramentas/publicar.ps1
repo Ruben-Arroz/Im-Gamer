@@ -15,8 +15,13 @@ public class Windows {
     public static extern int SetWindowTheme(IntPtr janela, string tema, string lista);
     [DllImport("dwmapi.dll")]
     public static extern int DwmSetWindowAttribute(IntPtr janela, int atributo, ref int valor, int tamanho);
+    [DllImport("uxtheme.dll", EntryPoint = "#135")]
+    public static extern int SetPreferredAppMode(int modo);
 }
 '@
+
+# sem isto o windows ignora o tema escuro no scroll (2 = forçar escuro)
+[void][Windows]::SetPreferredAppMode(2)
 
 $pastaProjeto = Split-Path $PSScriptRoot -Parent
 $servidor = '\\arca.ua.pt\Hosting\esan-tesp-ds-paw.web.ua.pt\tesp-ds-g17'
