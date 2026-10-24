@@ -21,7 +21,6 @@ $carrosseis = [
     ['Em breve', 'rawg', '1,90', 'lancamentos.php?aba=breve&periodo=90'],
 ];
 
-$tituloPagina = 'Início';
 require_once __DIR__ . '/includes/header.php';
 ?>
 

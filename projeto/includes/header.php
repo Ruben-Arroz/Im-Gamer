@@ -1,8 +1,10 @@
 <?php
 require_once __DIR__ . '/bootstrap.php';
 
-$tituloBase = "I'm Gamer";
-$tituloPagina = isset($tituloPagina) ? "{$tituloPagina} | {$tituloBase}" : $tituloBase;
+// cada página define o seu título, a página inicial não define e fica só "I'm Gamer"
+if (!isset($tituloPagina)) {
+    $tituloPagina = "I'm Gamer";
+}
 ?>
 <!DOCTYPE html>
 <html lang="pt-PT">
