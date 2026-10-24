@@ -8,6 +8,7 @@ CREATE TABLE `Jogos` (
   `rawg_id` int(11) DEFAULT NULL,
   `steam_app_id` int(11) DEFAULT NULL,
   `xbox_id` varchar(20) DEFAULT NULL,
+  `gog_id` varchar(20) DEFAULT NULL,
   `nome` varchar(255) NOT NULL,
   `slug` varchar(255) DEFAULT NULL,
   `imagem_capa` varchar(255) DEFAULT NULL,
@@ -23,7 +24,8 @@ CREATE TABLE `Jogos` (
   PRIMARY KEY (`id`),
   UNIQUE KEY `rawg_id` (`rawg_id`),
   UNIQUE KEY `steam_app_id` (`steam_app_id`),
-  UNIQUE KEY `xbox_id` (`xbox_id`)
+  UNIQUE KEY `xbox_id` (`xbox_id`),
+  UNIQUE KEY `gog_id` (`gog_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 CREATE TABLE `Generos` (

@@ -21,8 +21,8 @@ class Gog
         return $identificador;
     }
 
-    // a foto de perfil só aparece no html da página do perfil
-    private static function avatar(string $nome): ?string
+    // o número do utilizador só aparece no html da página do perfil
+    private static function descobrirId(string $nome): ?string
     {
         $curl = curl_init('https://www.gog.com/u/' . rawurlencode($nome));
         curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
@@ -31,11 +31,23 @@ class Gog
         curl_setopt($curl, CURLOPT_USERAGENT, 'ImGamer/1.0 (projeto escolar ESAN UA)');
         $html = curl_exec($curl);
 
-        if ($html && preg_match('/https:\/\/images\.gog\.com\/[a-f0-9]+_prof_avatar_140x140\.jpg/', $html, $partes)) {
-            return $partes[0];
+        if ($html && preg_match('/"userId":"(\d+)"/', $html, $partes)) {
+            return $partes[1];
         }
 
         return null;
+    }
+
+    // a foto da página do perfil fica em cache muito tempo, a desta api é sempre a atual
+    private static function avatar(?string $id): ?string
+    {
+        if (!$id) {
+            return null;
+        }
+
+        $dados = Api::pedir('https://users.gog.com/users/' . $id);
+
+        return $dados['avatar']['medium_2x'] ?? null;
     }
 
     // todos os jogos da conta, a gog dá 50 de cada vez
@@ -112,6 +124,9 @@ class Gog
                 . ($preco ? ' = ' . number_format($preco, 2, ',', '') . ' €' : ''));
         }
 
+        $id = self::descobrirId($nome);
+        $avatar = self::avatar($id);
+
         $pdo = Database::religar();
         $pdo->beginTransaction();
 
@@ -128,13 +143,14 @@ class Gog
                 $stmt->execute($linha);
             }
 
-            $stmt = $pdo->prepare('UPDATE Contas_Ligadas SET id_externo = :nome, nome_publico = :nome, avatar = :avatar, nivel = NULL,
+            $stmt = $pdo->prepare('UPDATE Contas_Ligadas SET id_externo = :id_gog, nome_publico = :nome, avatar = :avatar, nivel = NULL,
                 num_jogos = :jogos, minutos_jogados = :minutos, num_conquistas = 0, valor_jogos = :valor_jogos, valor_inventario = 0,
                 ultima_sincronizacao = NOW() WHERE id = :id');
 
             $stmt->execute([
+                'id_gog' => $id,
                 'nome' => $nome,
-                'avatar' => self::avatar($nome),
+                'avatar' => $avatar,
                 'jogos' => count($jogos),
                 'minutos' => $minutosTotal,
                 'valor_jogos' => $valorJogos,
