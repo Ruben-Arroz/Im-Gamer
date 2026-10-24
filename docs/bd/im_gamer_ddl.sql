@@ -1,19 +1,6 @@
 -- I'm Gamer
 -- Script de criação das tabelas (MariaDB 10.11 / MySQL)
 
-CREATE TABLE Utilizadores (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    nome_utilizador VARCHAR(50) NOT NULL UNIQUE,
-    email VARCHAR(255) NOT NULL UNIQUE,
-    password_hash VARCHAR(255) NOT NULL,
-    steam_id VARCHAR(50) DEFAULT NULL UNIQUE,
-    foto_perfil VARCHAR(255) DEFAULT NULL,
-    bio TEXT DEFAULT NULL,
-    moeda CHAR(3) NOT NULL DEFAULT 'EUR',
-    is_admin TINYINT(1) NOT NULL DEFAULT 0,
-    data_criacao DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
 CREATE TABLE Jogos (
     id INT AUTO_INCREMENT PRIMARY KEY,
     rawg_id INT NOT NULL UNIQUE,
@@ -34,6 +21,25 @@ CREATE TABLE Generos (
 CREATE TABLE Plataformas (
     id INT AUTO_INCREMENT PRIMARY KEY,
     nome VARCHAR(50) NOT NULL UNIQUE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+CREATE TABLE Utilizadores (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    nome_utilizador VARCHAR(50) NOT NULL UNIQUE,
+    email VARCHAR(255) NOT NULL UNIQUE,
+    password_hash VARCHAR(255) NOT NULL,
+    steam_id VARCHAR(50) DEFAULT NULL UNIQUE,
+    foto_perfil VARCHAR(255) DEFAULT NULL,
+    foto_capa VARCHAR(255) DEFAULT NULL,
+    bio TEXT DEFAULT NULL,
+    jogo_favorito_id INT DEFAULT NULL,
+    plataforma_preferida_id INT DEFAULT NULL,
+    moeda CHAR(3) NOT NULL DEFAULT 'EUR',
+    esconder_valores TINYINT(1) NOT NULL DEFAULT 0,
+    is_admin TINYINT(1) NOT NULL DEFAULT 0,
+    data_criacao DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT fk_utilizadores_jogo FOREIGN KEY (jogo_favorito_id) REFERENCES Jogos (id) ON DELETE SET NULL,
+    CONSTRAINT fk_utilizadores_plataforma FOREIGN KEY (plataforma_preferida_id) REFERENCES Plataformas (id) ON DELETE SET NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 CREATE TABLE Jogos_Generos (
@@ -60,8 +66,10 @@ CREATE TABLE Contas_Ligadas (
     id_externo VARCHAR(100) DEFAULT NULL,
     nome_publico VARCHAR(100) DEFAULT NULL,
     avatar VARCHAR(255) DEFAULT NULL,
+    nivel INT DEFAULT NULL,
     num_jogos INT NOT NULL DEFAULT 0,
     minutos_jogados INT NOT NULL DEFAULT 0,
+    num_conquistas INT NOT NULL DEFAULT 0,
     valor_jogos DECIMAL(10,2) NOT NULL DEFAULT 0,
     valor_inventario DECIMAL(10,2) NOT NULL DEFAULT 0,
     ultima_sincronizacao DATETIME DEFAULT NULL,
@@ -78,6 +86,7 @@ CREATE TABLE Biblioteca_Jogos (
     nome VARCHAR(255) NOT NULL,
     imagem VARCHAR(255) DEFAULT NULL,
     minutos_jogados INT NOT NULL DEFAULT 0,
+    minutos_2_semanas INT NOT NULL DEFAULT 0,
     valor DECIMAL(10,2) DEFAULT NULL,
     ultima_sincronizacao DATETIME DEFAULT NULL,
     UNIQUE (conta_id, id_externo),
