@@ -13,7 +13,7 @@ if (isset($_GET['u'])) {
     $utilizador = Utilizador::buscarPorId($_SESSION['utilizador_id']);
 }
 
-const POR_PAGINA = 24;
+const POR_PAGINA = 42;
 
 if ($utilizador) {
     $proprio = (int) $utilizador['id'] === (int) $_SESSION['utilizador_id'];
