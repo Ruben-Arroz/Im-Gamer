@@ -177,6 +177,45 @@ class Jogo
         return ['id' => (int) $pdo->lastInsertId(), 'imagem_capa' => $imagem];
     }
 
+    // igual aos outros mas com o produto do catálogo da epic
+    public static function daEpic(string $epicId, array $produto): ?array
+    {
+        $pdo = Database::ligar();
+        $stmt = $pdo->prepare('SELECT id, imagem_capa FROM Jogos WHERE epic_id = :epic');
+        $stmt->execute(['epic' => $epicId]);
+        $jogo = $stmt->fetch();
+
+        if ($jogo) {
+            return $jogo;
+        }
+
+        // as imagens largas primeiro, como nas outras plataformas
+        $imagem = null;
+        foreach (['DieselGameBox', 'OfferImageWide', 'Thumbnail', 'DieselGameBoxTall'] as $tipo) {
+            foreach ($produto['keyImages'] ?? [] as $foto) {
+                if (!$imagem && $foto['type'] === $tipo) {
+                    $imagem = $foto['url'];
+                }
+            }
+        }
+        if ($imagem && strlen($imagem) > 255) {
+            $imagem = null;
+        }
+
+        $stmt = $pdo->prepare('INSERT INTO Jogos (epic_id, nome, imagem_capa, descricao, produtora)
+            VALUES (:epic, :nome, :imagem, :descricao, :produtora)');
+
+        $stmt->execute([
+            'epic' => $epicId,
+            'nome' => $produto['title'],
+            'imagem' => $imagem,
+            'descricao' => ($produto['description'] ?? '') ?: null,
+            'produtora' => ($produto['developer'] ?? '') ?: null,
+        ]);
+
+        return ['id' => (int) $pdo->lastInsertId(), 'imagem_capa' => $imagem];
+    }
+
     private static function ligarGenero(int $jogoId, string $nome): void
     {
         $pdo = Database::ligar();

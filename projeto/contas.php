@@ -28,6 +28,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $erro = $resultado['erro'];
             }
         }
+    } elseif ($acao === 'epic') {
+        // a epic não tem perfis públicos, liga-se com o código que aparece depois do login
+        $resultado = Epic::ligar($utilizadorId, $_POST['codigo'] ?? '');
+        if (!$resultado['sucesso']) {
+            $erro = $resultado['erro'];
+        }
     } elseif ($acao === 'remover') {
         ContasLigadas::remover((int) ($_POST['conta_id'] ?? 0), $utilizadorId);
     }
@@ -47,7 +53,7 @@ require_once __DIR__ . '/includes/header.php';
 
 <section class="formulario">
     <h1>Contas ligadas</h1>
-    <p class="texto-dim">Liga as tuas contas das plataformas de jogos para juntar tudo no teu perfil. Por agora só as contas Steam e Xbox são atualizadas, e ainda não é automático.</p>
+    <p class="texto-dim">Liga as tuas contas das plataformas de jogos para juntar tudo no teu perfil. Por agora só as contas Steam, Xbox, GOG e Epic são atualizadas, e ainda não é automático.</p>
 
     <?php if ($erro): ?>
         <p class="aviso aviso-erro"><?= htmlspecialchars($erro) ?></p>
@@ -94,7 +100,10 @@ require_once __DIR__ . '/includes/header.php';
         <label for="servico">Plataforma</label>
         <select id="servico" name="servico">
             <?php foreach (ContasLigadas::SERVICOS as $codigo => $nome): ?>
-                <option value="<?= $codigo ?>"><?= $nome ?></option>
+                <!-- a epic tem a sua própria secção em baixo -->
+                <?php if ($codigo !== 'epic'): ?>
+                    <option value="<?= $codigo ?>"><?= $nome ?></option>
+                <?php endif; ?>
             <?php endforeach; ?>
         </select>
 
@@ -102,6 +111,23 @@ require_once __DIR__ . '/includes/header.php';
         <input type="text" id="identificador" name="identificador" value="<?= htmlspecialchars($_POST['identificador'] ?? '') ?>">
 
         <button type="submit">Ligar conta</button>
+    </form>
+
+    <h2>Ligar com a Epic Games</h2>
+    <p class="texto-dim">A Epic não mostra os jogos nos perfis públicos, por isso é preciso entrar na conta pela página da Epic. A tua password nunca passa pelo I'm Gamer.</p>
+    <ol class="passos">
+        <li><a href="<?= htmlspecialchars(Epic::linkLogin()) ?>" target="_blank" rel="noopener">Abre o login da Epic</a> e entra na tua conta.</li>
+        <li>Vai aparecer uma página com um texto que tem "authorizationCode".</li>
+        <li>Copia esse texto todo (ou só o código) e cola aqui em baixo. O código só vale uns minutos.</li>
+    </ol>
+    <form method="post" novalidate>
+        <input type="hidden" name="token" value="<?= Auth::token() ?>">
+        <input type="hidden" name="acao" value="epic">
+
+        <label for="codigo">Código da Epic</label>
+        <input type="text" id="codigo" name="codigo" autocomplete="off">
+
+        <button type="submit">Ligar Epic Games</button>
     </form>
 
     <p class="auth-switch"><a href="<?= BASE_URL ?>/projeto/perfil.php">Voltar ao perfil</a></p>
