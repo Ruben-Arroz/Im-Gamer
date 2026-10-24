@@ -6,10 +6,10 @@ $conversao = Catalogo::conversaoDolar($_SESSION['moeda'] ?? 'EUR');
 $moeda = $conversao['moeda'];
 $simbolo = Moeda::SIMBOLOS[$moeda];
 
-// "até 5" na moeda do utilizador, a cheapshark precisa do valor em dólares
+// "até 5" na moeda do user, a cheapshark precisa do valor em dólares
 $cincoEmDolares = ceil(5 / $conversao['fator']);
 
-// cada carrossel: [título, de onde vêm os jogos, o que se pede à api, link do "Ver todos"]
+// cada carrossel: título, de onde vêm os jogos, o que se pede à api, link do "Ver todos"
 // nos da rawg o pedido são os dias "de" e "até" a contar de hoje (negativo é para trás)
 $carrosseis = [
     ['Melhores promoções', 'cheapshark', 'sortBy=Deal%20Rating', 'catalogo.php'],
