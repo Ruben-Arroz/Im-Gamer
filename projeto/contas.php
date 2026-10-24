@@ -47,7 +47,7 @@ require_once __DIR__ . '/includes/header.php';
 
 <section class="formulario">
     <h1>Contas ligadas</h1>
-    <p class="texto-dim">Liga as tuas contas das plataformas de jogos para juntar tudo no teu perfil.</p>
+    <p class="texto-dim">Liga as tuas contas das plataformas de jogos para juntar tudo no teu perfil. Por agora só as contas Steam são atualizadas, e ainda não é automático.</p>
 
     <?php if ($erro): ?>
         <p class="aviso aviso-erro"><?= htmlspecialchars($erro) ?></p>

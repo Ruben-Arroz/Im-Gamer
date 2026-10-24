@@ -106,6 +106,16 @@ main h2 {
     resize: vertical;
 }
 
+/* a seta do select muda de navegador para navegador, por isso é desenhada à mão */
+.formulario select {
+    appearance: none;
+    cursor: pointer;
+    padding-right: 36px;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%238f9198' stroke-width='1.5' fill='none'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 14px center;
+}
+
 .formulario select option {
     background: var(--bg);
 }
@@ -120,6 +130,23 @@ main h2 {
 
 .formulario input[type="file"] {
     padding: 8px;
+    color: var(--text-dim);
+    font-size: 0.85rem;
+}
+
+.formulario input[type="file"]::file-selector-button {
+    margin-right: 12px;
+    padding: 6px 12px;
+    background: transparent;
+    color: var(--text);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    font-family: inherit;
+    cursor: pointer;
+}
+
+.formulario input[type="file"]::file-selector-button:hover {
+    border-color: var(--text-dim);
 }
 
 .formulario .opcao {
@@ -207,42 +234,54 @@ main h2 {
 
 .perfil h1 {
     font-size: 1.2rem;
-    margin-bottom: 12px;
+    margin-bottom: 8px;
+    word-break: break-word;
 }
 
-.perfil-email {
-    color: var(--text-dim);
-    font-size: 0.85rem;
+.perfil-capa {
+    height: 200px;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    background-size: cover;
+    background-position: center;
+}
+
+.perfil-sem-capa {
+    background: #16171b;
+}
+
+.perfil-cabecalho {
+    display: flex;
+    align-items: flex-end;
+    gap: 20px;
+    padding: 0 20px;
+    margin-top: -48px;
     margin-bottom: 24px;
 }
 
-.perfil-bio {
-    line-height: 1.7;
-    margin-bottom: 24px;
+.perfil-info {
+    flex: 1;
+    min-width: 0;
 }
 
 .perfil-data {
     color: var(--text-dim);
     font-size: 0.8rem;
+    line-height: 1.6;
 }
 
-.perfil-topo {
-    display: flex;
-    align-items: center;
-    gap: 24px;
-    margin-bottom: 24px;
-}
-
-.perfil-topo .perfil-email {
-    margin-bottom: 4px;
+.perfil-bio {
+    line-height: 1.7;
+    margin-bottom: 8px;
 }
 
 .perfil-foto {
-    width: 96px;
-    height: 96px;
+    width: 112px;
+    height: 112px;
     object-fit: cover;
     border: 1px solid var(--border);
     border-radius: 4px;
+    background: var(--bg);
     flex-shrink: 0;
 }
 
@@ -255,11 +294,183 @@ main h2 {
     font-size: 0.75rem;
 }
 
-.perfil-links {
+.perfil-acoes {
     display: flex;
+    gap: 8px;
+    align-self: flex-start;
+    margin-top: 60px;
+}
+
+.perfil-acoes a {
+    display: flex;
+    padding: 8px;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    transition: border-color 0.15s ease;
+}
+
+.perfil-acoes a:hover {
+    border-color: var(--text-dim);
+}
+
+.perfil-acoes img {
+    width: 18px;
+    height: 18px;
+}
+
+.capa-atual {
+    height: 90px;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    background-size: cover;
+    background-position: center;
+}
+
+.numeros {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 12px;
+    margin-bottom: 8px;
+}
+
+.numero {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    padding: 14px 16px;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+}
+
+.numero strong {
+    font-size: 1.15rem;
+    font-weight: 400;
+}
+
+.numero span {
+    color: var(--text-dim);
+    font-size: 0.75rem;
+}
+
+.subtitulo {
+    color: var(--text-dim);
+    font-size: 0.8rem;
+    margin: 24px 0 10px;
+}
+
+.fila-jogos {
+    display: flex;
+    gap: 12px;
+    overflow-x: auto;
+    padding-bottom: 8px;
+    scroll-snap-type: x mandatory;
+}
+
+.mini-jogo {
+    flex: 0 0 180px;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    overflow: hidden;
+    scroll-snap-align: start;
+}
+
+.mini-jogo img {
+    width: 100%;
+    aspect-ratio: 460 / 215;
+    object-fit: cover;
+    display: block;
+}
+
+.mini-jogo p {
+    padding: 8px 10px 0;
+    font-size: 0.8rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.mini-jogo span {
+    display: block;
+    padding: 2px 10px 10px;
+    color: var(--text-dim);
+    font-size: 0.75rem;
+}
+
+.mini-item img {
+    aspect-ratio: 1;
+    object-fit: contain;
+    padding: 12px;
+}
+
+.conta {
+    margin-top: 40px;
+    padding-top: 24px;
+    border-top: 1px solid var(--border);
+}
+
+.conta-topo {
+    display: flex;
+    align-items: center;
     flex-wrap: wrap;
-    gap: 20px;
-    font-size: 0.85rem;
+    gap: 14px;
+    margin-bottom: 16px;
+}
+
+.conta-topo > div {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    flex: 1;
+    min-width: 0;
+}
+
+.conta-logo {
+    width: 28px;
+    height: 28px;
+}
+
+.conta-avatar {
+    width: 44px;
+    height: 44px;
+    border-radius: 4px;
+    border: 1px solid var(--border);
+}
+
+.conta-link {
+    font-size: 0.8rem;
+    color: var(--text-dim);
+}
+
+.pesquisa-jogo {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+}
+
+.sugestoes {
+    list-style: none;
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    z-index: 10;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-top: none;
+}
+
+.sugestoes:empty {
+    display: none;
+}
+
+.sugestoes li {
+    padding: 10px 12px;
+    font-size: 0.9rem;
+    cursor: pointer;
+}
+
+.sugestoes li:hover {
+    background: var(--border);
 }
 
 .lista-contas {
@@ -411,8 +622,41 @@ main h2 {
         padding: 32px 20px;
     }
 
-    .perfil-topo {
-        flex-direction: column;
-        align-items: flex-start;
+    .perfil-capa {
+        height: 120px;
+    }
+
+    .perfil-cabecalho {
+        flex-wrap: wrap;
+        padding: 0 12px;
+        margin-top: -40px;
+    }
+
+    .perfil-foto {
+        width: 84px;
+        height: 84px;
+    }
+
+    .perfil-info {
+        flex-basis: 100%;
+    }
+
+    /* no telemóvel os ícones ficam por baixo do nome */
+    .perfil-acoes {
+        order: 3;
+        margin-top: 0;
+    }
+
+    .numeros {
+        grid-template-columns: 1fr 1fr;
+    }
+
+    .mini-jogo {
+        flex-basis: 150px;
+    }
+
+    .grelha-jogos {
+        grid-template-columns: 1fr 1fr;
+        gap: 10px;
     }
 }
