@@ -143,7 +143,12 @@ require_once __DIR__ . '/includes/header.php';
 
         <?php foreach ($contas as $conta): ?>
             <?php
+            // a xbox não dá horas nem preços, por isso nessas contas esses números não aparecem
+            $temHoras = $conta['minutos_jogados'] > 0;
+            $temValores = $conta['valor_jogos'] > 0 || $conta['valor_inventario'] > 0;
+
             $jogosConta = Biblioteca::maisJogados($conta['id'], 8);
+            $jogosPorData = $temHoras ? [] : Biblioteca::porUltimaVez($conta['id'], 8);
             $recentes = Biblioteca::jogadosRecentemente($conta['id'], 8);
             $itens = $mostrarValores ? Biblioteca::inventario($conta['id'], 8) : [];
             ?>
@@ -181,15 +186,17 @@ require_once __DIR__ . '/includes/header.php';
                             <strong><?= $conta['num_jogos'] ?></strong>
                             <span>jogos</span>
                         </div>
-                        <div class="numero">
-                            <strong><?= formatarHoras($conta['minutos_jogados']) ?></strong>
-                            <span>jogadas</span>
-                        </div>
+                        <?php if ($temHoras): ?>
+                            <div class="numero">
+                                <strong><?= formatarHoras($conta['minutos_jogados']) ?></strong>
+                                <span>jogadas</span>
+                            </div>
+                        <?php endif; ?>
                         <div class="numero">
                             <strong><?= $conta['num_conquistas'] ?></strong>
                             <span>conquistas</span>
                         </div>
-                        <?php if ($mostrarValores): ?>
+                        <?php if ($mostrarValores && $temValores): ?>
                             <div class="numero">
                                 <strong><?= Moeda::formatar($conta['valor_jogos'], $moeda) ?></strong>
                                 <span>valor dos jogos</span>
@@ -212,6 +219,26 @@ require_once __DIR__ . '/includes/header.php';
                                     <img src="<?= htmlspecialchars($jogo['imagem']) ?>" alt="" loading="lazy">
                                     <p><?= htmlspecialchars($jogo['nome']) ?></p>
                                     <span><?= formatarHoras($jogo['minutos_jogados']) ?></span>
+                                </div>
+                            <?php endforeach; ?>
+                        </div>
+                    <?php endif; ?>
+
+                    <?php if ($jogosPorData): ?>
+                        <div class="subtitulo-linha">
+                            <p class="subtitulo">Jogos</p>
+                            <a href="<?= BASE_URL ?>/projeto/biblioteca.php?u=<?= urlencode($utilizador['nome_utilizador']) ?>&amp;servico[]=<?= $conta['servico'] ?>">Ver todos</a>
+                        </div>
+                        <div class="fila-jogos">
+                            <?php foreach ($jogosPorData as $jogo): ?>
+                                <div class="mini-jogo">
+                                    <?php if ($jogo['imagem']): ?>
+                                        <img src="<?= htmlspecialchars($jogo['imagem']) ?>" alt="" loading="lazy">
+                                    <?php endif; ?>
+                                    <p><?= htmlspecialchars($jogo['nome']) ?></p>
+                                    <span>
+                                        <?= $jogo['ultima_vez_jogado'] ? (new DateTime($jogo['ultima_vez_jogado']))->format('d/m/Y') : 'nunca jogado' ?>
+                                    </span>
                                 </div>
                             <?php endforeach; ?>
                         </div>

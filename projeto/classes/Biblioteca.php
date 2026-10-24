@@ -153,6 +153,11 @@ class Biblioteca
             return 'https://store.steampowered.com/app/' . $jogo['id_externo'];
         }
 
+        // a xbox não tem endereço direto sem o código do produto, por isso abre a pesquisa da loja
+        if ($jogo['servico'] === 'xbox') {
+            return 'https://www.xbox.com/pt-PT/search?q=' . urlencode($jogo['nome']);
+        }
+
         return null;
     }
 
@@ -162,6 +167,18 @@ class Biblioteca
         $stmt = $pdo->prepare('SELECT * FROM Biblioteca_Jogos WHERE conta_id = :conta AND minutos_jogados > 0 ORDER BY minutos_jogados DESC LIMIT :limite');
         $stmt->bindValue('conta', $contaId, PDO::PARAM_INT);
         // o LIMIT tem de ir como número, se for como texto o mysql dá erro
+        $stmt->bindValue('limite', $limite, PDO::PARAM_INT);
+        $stmt->execute();
+
+        return $stmt->fetchAll();
+    }
+
+    // para as contas que não dão horas (xbox), mostra os jogos pela última vez que foram jogados
+    public static function porUltimaVez(int $contaId, int $limite): array
+    {
+        $pdo = Database::ligar();
+        $stmt = $pdo->prepare('SELECT * FROM Biblioteca_Jogos WHERE conta_id = :conta ORDER BY ultima_vez_jogado DESC LIMIT :limite');
+        $stmt->bindValue('conta', $contaId, PDO::PARAM_INT);
         $stmt->bindValue('limite', $limite, PDO::PARAM_INT);
         $stmt->execute();
 
