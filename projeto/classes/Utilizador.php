@@ -112,7 +112,8 @@ class Utilizador
     }
 
     // trata da foto de perfil ou da capa: remover, manter a atual ou guardar uma nova
-    public static function trocarImagem(?array $ficheiro, bool $remover, ?string $atual, string $prefixo, int $id): array
+    // $pasta é "perfis" ou "capas", as subpastas de uploads
+    public static function trocarImagem(?array $ficheiro, bool $remover, ?string $atual, string $pasta, int $id): array
     {
         if ($remover) {
             self::apagarFoto($atual);
@@ -123,7 +124,7 @@ class Utilizador
             return ['sucesso' => true, 'nome' => $atual];
         }
 
-        $resultado = self::guardarImagem($ficheiro, $prefixo, $id);
+        $resultado = self::guardarImagem($ficheiro, $pasta, $id);
 
         if ($resultado['sucesso']) {
             self::apagarFoto($atual);
@@ -132,7 +133,7 @@ class Utilizador
         return $resultado;
     }
 
-    public static function guardarImagem(array $ficheiro, string $prefixo, int $id): array
+    public static function guardarImagem(array $ficheiro, string $pasta, int $id): array
     {
         if ($ficheiro['error'] !== UPLOAD_ERR_OK) {
             return ['sucesso' => false, 'erro' => 'Não foi possível enviar a imagem.'];
@@ -150,7 +151,13 @@ class Utilizador
             return ['sucesso' => false, 'erro' => 'A imagem tem de ser JPG, PNG ou WEBP.'];
         }
 
-        $nome = $prefixo . '_' . $id . '_' . time() . '.' . $tipos[$info['mime']];
+        // na bd fica guardado o caminho dentro de uploads, por exemplo "capas/3_1792816377.jpg"
+        $nome = $pasta . '/' . $id . '_' . time() . '.' . $tipos[$info['mime']];
+
+        // a subpasta é criada na primeira vez que é precisa
+        if (!is_dir(PASTA_UPLOADS . $pasta)) {
+            mkdir(PASTA_UPLOADS . $pasta, 0755, true);
+        }
 
         if (!move_uploaded_file($ficheiro['tmp_name'], PASTA_UPLOADS . $nome)) {
             return ['sucesso' => false, 'erro' => 'Não foi possível guardar a imagem.'];
@@ -161,9 +168,9 @@ class Utilizador
 
     public static function apagarFoto(?string $nome): void
     {
-        // o basename garante que só se apagam ficheiros dentro da pasta uploads
-        if ($nome && file_exists(PASTA_UPLOADS . basename($nome))) {
-            unlink(PASTA_UPLOADS . basename($nome));
+        // só apaga ficheiros das pastas perfis e capas, nunca nada fora delas
+        if ($nome && preg_match('/^(perfis|capas)\/[A-Za-z0-9_.]+$/', $nome) && file_exists(PASTA_UPLOADS . $nome)) {
+            unlink(PASTA_UPLOADS . $nome);
         }
     }
 }

@@ -5,6 +5,15 @@ Add-Type -AssemblyName System.Drawing
 $pasta = $PSScriptRoot
 $servidor = '\\arca.ua.pt\Hosting\esan-tesp-ds-paw.web.ua.pt\tesp-ds-g17'
 
+# o php escreve em utf-8, sem isto os acentos aparecem trocados
+[Console]::OutputEncoding = [System.Text.Encoding]::UTF8
+
+# usa o comando php se existir, senão vai à pasta onde o winget o instalou
+$php = (Get-Command php -ErrorAction SilentlyContinue).Source
+if (-not $php) {
+    $php = "$env:LOCALAPPDATA\Microsoft\WinGet\Packages\PHP.PHP.8.3_Microsoft.Winget.Source_8wekyb3d8bbwe\php.exe"
+}
+
 # cores iguais às do site
 $fundo = [System.Drawing.Color]::FromArgb(14, 15, 18)
 $borda = [System.Drawing.Color]::FromArgb(36, 38, 43)
@@ -12,7 +21,7 @@ $texto = [System.Drawing.Color]::FromArgb(242, 242, 240)
 $textoDim = [System.Drawing.Color]::FromArgb(143, 145, 152)
 
 $janela = New-Object System.Windows.Forms.Form
-$janela.Text = "Publicar I'm Gamer"
+$janela.Text = "I'm Gamer"
 $janela.WindowState = 'Maximized'
 $janela.BackColor = $fundo
 $janela.ForeColor = $texto
@@ -33,9 +42,19 @@ $botao.ForeColor = $fundo
 $botao.FlatAppearance.BorderSize = 0
 $botao.Cursor = 'Hand'
 
+$botaoSincronizar = New-Object System.Windows.Forms.Button
+$botaoSincronizar.Text = 'Sincronizar contas'
+$botaoSincronizar.Location = New-Object System.Drawing.Point(176, 16)
+$botaoSincronizar.Size = New-Object System.Drawing.Size(200, 38)
+$botaoSincronizar.FlatStyle = 'Flat'
+$botaoSincronizar.BackColor = $fundo
+$botaoSincronizar.ForeColor = $texto
+$botaoSincronizar.FlatAppearance.BorderColor = $textoDim
+$botaoSincronizar.Cursor = 'Hand'
+
 $estado = New-Object System.Windows.Forms.Label
-$estado.Text = 'Liga a VPN e carrega em Publicar.'
-$estado.Location = New-Object System.Drawing.Point(180, 25)
+$estado.Text = 'Liga a VPN e escolhe o que queres fazer.'
+$estado.Location = New-Object System.Drawing.Point(396, 25)
 $estado.AutoSize = $true
 $estado.ForeColor = $textoDim
 
@@ -105,7 +124,24 @@ $botao.Add_Click({
     $botao.Enabled = $true
 })
 
+# vai buscar os dados das contas steam e as taxas de câmbio e guarda na bd (corre o projeto/sincronizar.php)
+$botaoSincronizar.Add_Click({
+    $botao.Enabled = $false
+    $botaoSincronizar.Enabled = $false
+    $registo.Clear()
+    $estado.Text = 'A sincronizar, pode demorar um minuto...'
+    $janela.Refresh()
+
+    $saida = & $php "$pasta\projeto\sincronizar.php" 2>&1
+    $registo.Text = ($saida | ForEach-Object { "$_" }) -join "`r`n"
+    $estado.Text = 'Sincronização terminada às ' + (Get-Date -Format 'HH:mm') + '.'
+
+    $botao.Enabled = $true
+    $botaoSincronizar.Enabled = $true
+})
+
 $topo.Controls.Add($botao)
+$topo.Controls.Add($botaoSincronizar)
 $topo.Controls.Add($estado)
 $janela.Controls.Add($area)
 $janela.Controls.Add($topo)
