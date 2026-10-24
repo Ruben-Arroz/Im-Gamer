@@ -24,4 +24,12 @@ class Database
 
         return self::$instancia;
     }
+
+    // fecha a ligação e abre uma nova, para quando a ligação pode ter caído
+    // (por exemplo na sincronização, que fica muito tempo à espera da internet)
+    public static function religar(): PDO
+    {
+        self::$instancia = null;
+        return self::ligar();
+    }
 }

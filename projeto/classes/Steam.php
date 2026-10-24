@@ -15,6 +15,16 @@ class Steam
     // o mercado da steam bloqueia quem faz muitos pedidos, por isso há um limite de itens com preço
     const MAX_ITENS_COM_PRECO = 30;
 
+    // o sincronizar.php liga isto para ir mostrando o que está a fazer
+    public static bool $mostrarProgresso = false;
+
+    private static function progresso(string $texto): void
+    {
+        if (self::$mostrarProgresso) {
+            echo '  ' . $texto . "\n";
+        }
+    }
+
     // aceita o link do perfil, o link personalizado (/id/nome), o steamid64 ou só o nome personalizado
     public static function descobrirId(string $identificador): ?string
     {
@@ -54,12 +64,16 @@ class Steam
 
         $dados = Api::pedir('https://api.steampowered.com/IPlayerService/GetSteamLevel/v1/?key=' . STEAM_API_KEY . '&steamid=' . $steamId);
         $nivel = $dados['response']['player_level'] ?? null;
+        self::progresso('Perfil: ' . $perfil['personaname'] . ' (nível ' . ($nivel ?? '?') . ')');
 
         // se os detalhes dos jogos forem privados a lista vem vazia
         $dados = Api::pedir('https://api.steampowered.com/IPlayerService/GetOwnedGames/v1/?key=' . STEAM_API_KEY . '&steamid=' . $steamId . '&include_appinfo=1&include_played_free_games=1');
         $jogos = $dados['response']['games'] ?? [];
+        self::progresso(count($jogos) . ' jogos na biblioteca');
 
         $precos = self::precos(array_column($jogos, 'appid'));
+        self::progresso(count($precos) . ' jogos com preço na loja');
+
         $itens = self::inventario($steamId, array_column($jogos, 'appid'));
 
         $minutosTotal = 0;
@@ -68,8 +82,9 @@ class Steam
         $detalhes = [];
 
         // tudo o que vem da internet é tratado antes de começar a guardar, para a bd não ficar à espera
-        foreach ($jogos as $jogo) {
+        foreach ($jogos as $numero => $jogo) {
             $appid = $jogo['appid'];
+            self::progresso('[' . ($numero + 1) . '/' . count($jogos) . '] ' . $jogo['name']);
             $minutosTotal += $jogo['playtime_forever'];
             $valorJogos += $precos[$appid] ?? 0;
 
@@ -102,7 +117,10 @@ class Steam
             $valorInventario += ($item['preco'] ?? 0) * $item['quantidade'];
         }
 
-        $pdo = Database::ligar();
+        self::progresso('A guardar na base de dados...');
+
+        // a parte de ir à internet demora, por isso abre-se uma ligação nova antes de guardar
+        $pdo = Database::religar();
         $pdo->beginTransaction();
 
         try {
@@ -267,6 +285,7 @@ class Steam
                 if ($comPreco < self::MAX_ITENS_COM_PRECO) {
                     $preco = self::precoMercado($appid, $descricao['market_hash_name']);
                     $comPreco++;
+                    self::progresso('Inventário ' . $nomeJogo . ': ' . $descricao['name'] . ' = ' . ($preco !== null ? number_format($preco, 2, ',', ' ') . ' €' : 'sem preço'));
                     sleep(3);
                 }
 

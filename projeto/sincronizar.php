@@ -8,20 +8,28 @@ if (php_sapi_name() !== 'cli') {
 
 require_once __DIR__ . '/includes/bootstrap.php';
 
+Steam::$mostrarProgresso = true;
+
 echo 'Taxas de câmbio: ' . (Moeda::atualizarTaxas() ? 'atualizadas' : 'falhou') . "\n";
 
 $pdo = Database::ligar();
 $contas = $pdo->query("SELECT * FROM Contas_Ligadas WHERE servico = 'steam'")->fetchAll();
 
 foreach ($contas as $conta) {
-    echo 'Steam ' . $conta['identificador'] . ' ... ';
-    $resultado = Steam::sincronizar($conta);
+    echo "\nSteam: " . $conta['identificador'] . "\n";
+
+    // se a ligação à bd ou à internet falhar, mostra o erro e passa à conta seguinte
+    try {
+        $resultado = Steam::sincronizar($conta);
+    } catch (Exception $erro) {
+        $resultado = ['sucesso' => false, 'erro' => 'Falhou (' . $erro->getMessage() . '). Vê se a VPN está ligada e tenta outra vez.'];
+    }
 
     if ($resultado['sucesso']) {
-        echo $resultado['jogos'] . ' jogos, ' . $resultado['itens'] . " itens no inventário\n";
+        echo '  Conta atualizada: ' . $resultado['jogos'] . ' jogos, ' . $resultado['itens'] . " itens no inventário\n";
     } else {
-        echo $resultado['erro'] . "\n";
+        echo '  ERRO: ' . $resultado['erro'] . "\n";
     }
 }
 
-echo "Feito.\n";
+echo "\nFeito.\n";
