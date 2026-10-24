@@ -387,17 +387,33 @@ main h2 {
     margin-bottom: 8px;
 }
 
+/* a biblioteca usa o ecrã todo, com os filtros encostados à esquerda */
+main:has(.biblioteca) {
+    max-width: none;
+}
+
 .biblioteca-corpo {
     display: grid;
-    grid-template-columns: 230px 1fr;
-    gap: 32px;
+    grid-template-columns: 260px 1fr;
+    gap: 48px;
     align-items: start;
 }
 
 .filtros-biblioteca form {
     display: flex;
     flex-direction: column;
-    gap: 6px;
+}
+
+.filtro-grupo {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding: 20px 0;
+    border-bottom: 1px solid var(--border);
+}
+
+.filtro-grupo:first-child {
+    padding-top: 0;
 }
 
 .filtro-titulo {
@@ -405,7 +421,7 @@ main h2 {
     font-size: 0.75rem;
     text-transform: uppercase;
     letter-spacing: 0.05em;
-    margin-top: 18px;
+    margin-bottom: 2px;
 }
 
 .filtros-biblioteca .opcao {
@@ -730,15 +746,40 @@ main h2 {
 .cartao-jogo {
     display: flex;
     flex-direction: column;
-    border: 1px solid var(--border);
+    background: #121317;
     border-radius: 4px;
     overflow: hidden;
     text-decoration: none;
-    transition: border-color 0.15s ease;
+    transition: background 0.15s ease;
 }
 
 .cartao-jogo:hover {
-    border-color: var(--text-dim);
+    background: #1a1b20;
+}
+
+.cartao-jogo > img {
+    transition: opacity 0.15s ease;
+}
+
+.cartao-jogo:hover > img {
+    opacity: 0.85;
+}
+
+.biblioteca .grelha-jogos {
+    grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+    gap: 20px;
+}
+
+.biblioteca .cartao-titulo {
+    padding: 14px 14px 4px;
+}
+
+.biblioteca .cartao-loja {
+    padding: 0 14px;
+}
+
+.biblioteca .cartao-precos {
+    padding: 12px 14px 14px;
 }
 
 .cartao-jogo > img {
