@@ -142,6 +142,7 @@ function Novo-Botao($texto, $principal) {
 
 $botaoPublicar = Novo-Botao 'Publicar site' $true
 $botaoSincronizar = Novo-Botao 'Sincronizar contas' $false
+$botaoCredenciais = Novo-Botao 'Enviar credenciais' $false
 $botaoSite = Novo-Botao 'Abrir site' $false
 $botaoLimpar = Novo-Botao 'Limpar' $false
 
@@ -273,7 +274,7 @@ $script:ocupado = $false
 function Bloquear-Botoes($bloquear) {
     $script:ocupado = $bloquear
 
-    foreach ($botao in @($botaoPublicar, $botaoSincronizar, $botaoLimpar)) {
+    foreach ($botao in @($botaoPublicar, $botaoSincronizar, $botaoCredenciais, $botaoLimpar)) {
         if ($bloquear) {
             $botao.BackColor = $corFundo
             $botao.ForeColor = $corDim
@@ -484,6 +485,35 @@ $botaoSincronizar.Add_Click({
     Comecar 'Sincronizar contas' @(
         (Novo-Comando 'php' $php "`"$pastaProjeto\projeto\sincronizar.php`"")
     )
+})
+
+# o "Publicar site" nunca toca no credentials.php, para não se substituírem as passwords do servidor sem querer
+# este botão é só para quando se muda uma chave e pede confirmação antes
+$botaoCredenciais.Add_Click({
+    if ($script:ocupado) {
+        return
+    }
+
+    if (-not (Ha-Vpn)) {
+        return
+    }
+
+    $resposta = [System.Windows.Forms.MessageBox]::Show(
+        'Isto substitui o credentials.php do servidor pelo deste computador. Continuar?',
+        'Enviar credenciais', 'YesNo', 'Warning')
+
+    if ($resposta -ne 'Yes') {
+        return
+    }
+
+    try {
+        Copy-Item "$pastaProjeto\projeto\config\credentials.php" "$servidor\projeto\config\credentials.php" -ErrorAction Stop
+        Escrever '' $corTexto $false
+        Escrever 'credentials.php enviado para o servidor.' $corTexto $true
+        $estado.Text = 'Credenciais enviadas às ' + (Get-Date -Format 'HH:mm') + '.'
+    } catch {
+        Escrever 'Não foi possível enviar o credentials.php.' $corTexto $true
+    }
 })
 
 $botaoSite.Add_Click({
