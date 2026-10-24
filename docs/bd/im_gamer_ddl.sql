@@ -99,7 +99,7 @@ CREATE TABLE Inventario_Itens (
     conta_id INT NOT NULL,
     jogo VARCHAR(100) NOT NULL,
     nome VARCHAR(255) NOT NULL,
-    imagem VARCHAR(255) DEFAULT NULL,
+    imagem VARCHAR(1000) DEFAULT NULL,
     quantidade INT NOT NULL DEFAULT 1,
     preco DECIMAL(10,2) DEFAULT NULL,
     ultima_sincronizacao DATETIME DEFAULT NULL,

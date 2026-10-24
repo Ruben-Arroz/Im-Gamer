@@ -2,8 +2,15 @@
 
 class Steam
 {
-    // jogos com itens que dá para vender no mercado da steam
-    const JOGOS_COM_INVENTARIO = [730 => 'Counter-Strike 2', 440 => 'Team Fortress 2', 570 => 'Dota 2', 252490 => 'Rust'];
+    // inventários com itens que dá para vender no mercado: appid => [nome, contexto]
+    // o 753 é a própria steam (cartas, fundos de perfil, emoticons) e usa o contexto 6
+    const INVENTARIOS = [
+        730 => ['Counter-Strike 2', 2],
+        440 => ['Team Fortress 2', 2],
+        570 => ['Dota 2', 2],
+        252490 => ['Rust', 2],
+        753 => ['Steam', 6],
+    ];
 
     // o mercado da steam bloqueia quem faz muitos pedidos, por isso há um limite de itens com preço
     const MAX_ITENS_COM_PRECO = 30;
@@ -74,22 +81,61 @@ class Steam
             $valorInventario += ($item['preco'] ?? 0) * $item['quantidade'];
         }
 
+        // as imagens vêm antes de começar a guardar, para a bd não ficar à espera da internet
+        $imagens = [];
+        foreach ($jogos as $jogo) {
+            $imagens[$jogo['appid']] = self::imagemJogo($jogo);
+        }
+
         $pdo = Database::ligar();
         $pdo->beginTransaction();
 
-        // apaga o que havia e volta a guardar tudo, assim jogos e itens que já não existem desaparecem
+        try {
+            self::guardar($pdo, $conta['id'], $jogos, $imagens, $precos, $itens);
+
+            $stmt = $pdo->prepare('UPDATE Contas_Ligadas SET id_externo = :steamid, nome_publico = :nome, avatar = :avatar, nivel = :nivel,
+                num_jogos = :jogos, minutos_jogados = :minutos, num_conquistas = :conquistas, valor_jogos = :valor_jogos,
+                valor_inventario = :valor_inventario, ultima_sincronizacao = NOW() WHERE id = :id');
+
+            $stmt->execute([
+                'steamid' => $steamId,
+                'nome' => $perfil['personaname'],
+                'avatar' => $perfil['avatarfull'],
+                'nivel' => $nivel,
+                'jogos' => count($jogos),
+                'minutos' => $minutosTotal,
+                'conquistas' => $conquistasTotal,
+                'valor_jogos' => $valorJogos,
+                'valor_inventario' => $valorInventario,
+                'id' => $conta['id'],
+            ]);
+
+            $pdo->commit();
+        } catch (PDOException $erro) {
+            // se alguma coisa falhar, desfaz tudo e a conta fica como estava
+            $pdo->rollBack();
+            error_log($erro->getMessage());
+            return ['sucesso' => false, 'erro' => 'Erro ao guardar na base de dados: ' . $erro->getMessage()];
+        }
+
+        return ['sucesso' => true, 'jogos' => count($jogos), 'itens' => count($itens)];
+    }
+
+    // apaga o que havia e volta a guardar tudo, assim jogos e itens que já não existem desaparecem
+    private static function guardar(PDO $pdo, int $contaId, array $jogos, array $imagens, array $precos, array $itens): void
+    {
         $stmt = $pdo->prepare('DELETE FROM Biblioteca_Jogos WHERE conta_id = :conta');
-        $stmt->execute(['conta' => $conta['id']]);
+        $stmt->execute(['conta' => $contaId]);
 
         $stmt = $pdo->prepare('INSERT INTO Biblioteca_Jogos (conta_id, id_externo, nome, imagem, minutos_jogados, minutos_2_semanas, valor, ultima_sincronizacao)
             VALUES (:conta, :appid, :nome, :imagem, :minutos, :minutos2, :valor, NOW())');
 
         foreach ($jogos as $jogo) {
             $stmt->execute([
-                'conta' => $conta['id'],
+                'conta' => $contaId,
                 'appid' => $jogo['appid'],
                 'nome' => $jogo['name'],
-                'imagem' => self::imagemJogo($jogo),
+                'imagem' => $imagens[$jogo['appid']],
                 'minutos' => $jogo['playtime_forever'],
                 'minutos2' => $jogo['playtime_2weeks'] ?? 0,
                 'valor' => $precos[$jogo['appid']] ?? null,
@@ -97,14 +143,14 @@ class Steam
         }
 
         $stmt = $pdo->prepare('DELETE FROM Inventario_Itens WHERE conta_id = :conta');
-        $stmt->execute(['conta' => $conta['id']]);
+        $stmt->execute(['conta' => $contaId]);
 
         $stmt = $pdo->prepare('INSERT INTO Inventario_Itens (conta_id, jogo, nome, imagem, quantidade, preco, ultima_sincronizacao)
             VALUES (:conta, :jogo, :nome, :imagem, :quantidade, :preco, NOW())');
 
         foreach ($itens as $item) {
             $stmt->execute([
-                'conta' => $conta['id'],
+                'conta' => $contaId,
                 'jogo' => $item['jogo'],
                 'nome' => $item['nome'],
                 'imagem' => $item['imagem'],
@@ -112,27 +158,6 @@ class Steam
                 'preco' => $item['preco'],
             ]);
         }
-
-        $stmt = $pdo->prepare('UPDATE Contas_Ligadas SET id_externo = :steamid, nome_publico = :nome, avatar = :avatar, nivel = :nivel,
-            num_jogos = :jogos, minutos_jogados = :minutos, num_conquistas = :conquistas, valor_jogos = :valor_jogos,
-            valor_inventario = :valor_inventario, ultima_sincronizacao = NOW() WHERE id = :id');
-
-        $stmt->execute([
-            'steamid' => $steamId,
-            'nome' => $perfil['personaname'],
-            'avatar' => $perfil['avatarfull'],
-            'nivel' => $nivel,
-            'jogos' => count($jogos),
-            'minutos' => $minutosTotal,
-            'conquistas' => $conquistasTotal,
-            'valor_jogos' => $valorJogos,
-            'valor_inventario' => $valorInventario,
-            'id' => $conta['id'],
-        ]);
-
-        $pdo->commit();
-
-        return ['sucesso' => true, 'jogos' => count($jogos), 'itens' => count($itens)];
     }
 
     // preço normal de cada jogo na loja portuguesa da steam (em euros), os jogos grátis não têm preço
@@ -192,12 +217,16 @@ class Steam
         $itens = [];
         $comPreco = 0;
 
-        foreach (self::JOGOS_COM_INVENTARIO as $appid => $nomeJogo) {
-            if (!in_array($appid, $appidsDaConta)) {
+        // os itens que estão à venda no mercado não aparecem no inventário público
+        foreach (self::INVENTARIOS as $appid => $inventario) {
+            [$nomeJogo, $contexto] = $inventario;
+
+            // só vale a pena pedir o inventário dos jogos que a conta tem (a steam toda a gente tem)
+            if ($appid !== 753 && !in_array($appid, $appidsDaConta)) {
                 continue;
             }
 
-            $dados = Api::pedir('https://steamcommunity.com/inventory/' . $steamId . '/' . $appid . '/2?l=english&count=2000');
+            $dados = Api::pedir('https://steamcommunity.com/inventory/' . $steamId . '/' . $appid . '/' . $contexto . '?l=english&count=2000');
 
             if (!$dados || empty($dados['assets'])) {
                 continue;
@@ -232,7 +261,7 @@ class Steam
 
                 $itens[] = [
                     'jogo' => $nomeJogo,
-                    'nome' => $descricao['market_hash_name'],
+                    'nome' => $descricao['name'],
                     'imagem' => 'https://community.cloudflare.steamstatic.com/economy/image/' . $descricao['icon_url'],
                     'quantidade' => $quantidade,
                     'preco' => $preco,

@@ -30,7 +30,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     } elseif ($pesquisaJogo !== '' && $rawgId === 0) {
         $erro = 'Escolhe o jogo favorito da lista de sugestões.';
     } elseif ($plataformaId !== 0 && !in_array($plataformaId, array_column($plataformas, 'id'))) {
-        $erro = 'Escolhe uma plataforma da lista.';
+        $erro = 'Escolhe um dispositivo da lista.';
     }
 
     // o jogo vem da pesquisa da rawg feita no browser, se for novo fica guardado na tabela Jogos
@@ -98,15 +98,17 @@ require_once __DIR__ . '/includes/header.php';
         <input type="text" id="nome_utilizador" name="nome_utilizador" maxlength="50" value="<?= htmlspecialchars($_POST['nome_utilizador'] ?? $utilizador['nome_utilizador']) ?>">
 
         <label for="foto">Foto de perfil</label>
+        <img id="previsao_foto" class="perfil-foto <?= $utilizador['foto_perfil'] ? '' : 'escondido' ?>" alt="Foto de perfil"
+            src="<?= $utilizador['foto_perfil'] ? BASE_URL . '/uploads/' . htmlspecialchars($utilizador['foto_perfil']) : '' ?>">
         <?php if ($utilizador['foto_perfil']): ?>
-            <img class="perfil-foto" src="<?= BASE_URL ?>/uploads/<?= htmlspecialchars($utilizador['foto_perfil']) ?>" alt="Foto atual">
             <label class="opcao"><input type="checkbox" name="remover_foto"> Remover foto</label>
         <?php endif; ?>
         <input type="file" id="foto" name="foto" accept="image/jpeg,image/png,image/webp">
 
         <label for="capa">Imagem de capa</label>
+        <div id="previsao_capa" class="capa-atual <?= $utilizador['foto_capa'] ? '' : 'escondido' ?>"
+            <?php if ($utilizador['foto_capa']): ?>style="background-image: url('<?= BASE_URL ?>/uploads/<?= htmlspecialchars($utilizador['foto_capa']) ?>')"<?php endif; ?>></div>
         <?php if ($utilizador['foto_capa']): ?>
-            <div class="capa-atual" style="background-image: url('<?= BASE_URL ?>/uploads/<?= htmlspecialchars($utilizador['foto_capa']) ?>')"></div>
             <label class="opcao"><input type="checkbox" name="remover_capa"> Remover capa</label>
         <?php endif; ?>
         <input type="file" id="capa" name="capa" accept="image/jpeg,image/png,image/webp">
@@ -130,7 +132,7 @@ require_once __DIR__ . '/includes/header.php';
         <input type="hidden" id="jogo_lancamento" name="jogo_lancamento" value="<?= htmlspecialchars($_POST['jogo_lancamento'] ?? '') ?>">
         <p class="ajuda">Pesquisa feita na <a href="https://rawg.io" target="_blank" rel="noopener">RAWG</a>.</p>
 
-        <label for="plataforma_id">Plataforma preferida</label>
+        <label for="plataforma_id">Dispositivo preferido</label>
         <select id="plataforma_id" name="plataforma_id">
             <option value="0">Nenhuma</option>
             <?php foreach ($plataformas as $plataforma): ?>
@@ -150,5 +152,6 @@ require_once __DIR__ . '/includes/header.php';
 </section>
 
 <script src="<?= BASE_URL ?>/projeto/assets/js/pesquisa_jogo.js?v=1"></script>
+<script src="<?= BASE_URL ?>/projeto/assets/js/previsao_imagem.js?v=1"></script>
 
 <?php require_once __DIR__ . '/includes/footer.php'; ?>
