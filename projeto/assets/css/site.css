@@ -1030,3 +1030,148 @@ main:has(.pagina-larga) {
     font-size: 0.75rem;
     background: var(--border);
 }
+
+/* página inicial */
+.destaque {
+    position: relative;
+    min-height: 380px;
+    display: flex;
+    align-items: flex-end;
+    padding: 28px;
+    border-radius: 4px;
+    background-color: #16171b;
+    background-size: cover;
+    background-position: center top;
+    margin-bottom: 16px;
+}
+
+/* caixa escura por cima da imagem, para o texto se ler bem sem usar gradientes */
+.destaque-caixa {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    max-width: 440px;
+    padding: 20px 22px;
+    background: rgba(14, 15, 18, 0.88);
+    border-radius: 4px;
+    text-decoration: none;
+}
+
+.destaque-caixa .cartao-loja,
+.destaque-caixa .cartao-precos {
+    padding: 0;
+}
+
+.destaque-etiqueta {
+    color: var(--text-dim);
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+}
+
+.destaque-titulo {
+    font-size: 1.3rem;
+}
+
+.carrossel {
+    margin-top: 44px;
+}
+
+.carrossel-topo {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+    margin-bottom: 16px;
+}
+
+.carrossel-topo h2 {
+    margin: 0;
+}
+
+.carrossel-topo a {
+    font-size: 0.8rem;
+    color: var(--text-dim);
+    white-space: nowrap;
+}
+
+.carrossel-topo a:hover {
+    color: var(--text);
+}
+
+.carrossel-setas {
+    display: flex;
+    gap: 8px;
+    margin-left: auto;
+}
+
+.carrossel-setas button {
+    width: 34px;
+    height: 34px;
+    background: transparent;
+    color: var(--text);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    font-size: 1.2rem;
+    line-height: 1;
+    cursor: pointer;
+}
+
+.carrossel-setas button:hover {
+    background: var(--border);
+}
+
+.carrossel-faixa {
+    display: flex;
+    gap: 16px;
+    overflow-x: auto;
+    padding-bottom: 12px;
+    scroll-snap-type: x mandatory;
+    scrollbar-width: thin;
+    scrollbar-color: var(--border) transparent;
+}
+
+.carrossel-faixa::-webkit-scrollbar {
+    height: 6px;
+}
+
+.carrossel-faixa::-webkit-scrollbar-thumb {
+    background: var(--border);
+    border-radius: 3px;
+}
+
+.carrossel-faixa .cartao-jogo {
+    flex: 0 0 260px;
+    scroll-snap-align: start;
+}
+
+.inicio .cartao-titulo {
+    padding: 14px 14px 4px;
+}
+
+.inicio .cartao-loja {
+    padding: 0 14px;
+}
+
+.inicio .cartao-precos {
+    padding: 12px 14px 14px;
+}
+
+@media (max-width: 640px) {
+    .destaque {
+        min-height: 260px;
+        padding: 14px;
+    }
+
+    .destaque-titulo {
+        font-size: 1.05rem;
+    }
+
+    .carrossel-faixa .cartao-jogo {
+        flex-basis: 220px;
+    }
+
+    /* no telemóvel faz-se scroll com o dedo, as setas não fazem falta */
+    .carrossel-setas {
+        display: none;
+    }
+}
