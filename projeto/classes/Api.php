@@ -21,16 +21,4 @@ class Api
 
         return json_decode($resposta, true);
     }
-
-    // vê se um endereço existe sem descarregar o ficheiro todo
-    public static function existe(string $url): bool
-    {
-        $curl = curl_init($url);
-        curl_setopt($curl, CURLOPT_NOBODY, true);
-        curl_setopt($curl, CURLOPT_TIMEOUT, 10);
-        curl_exec($curl);
-        $codigo = curl_getinfo($curl, CURLINFO_HTTP_CODE);
-
-        return $codigo === 200;
-    }
 }

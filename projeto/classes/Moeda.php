@@ -27,7 +27,7 @@ class Moeda
         return true;
     }
 
-    private static function taxa(string $moeda): ?float
+    public static function taxa(string $moeda): ?float
     {
         if ($moeda === 'EUR') {
             return 1;

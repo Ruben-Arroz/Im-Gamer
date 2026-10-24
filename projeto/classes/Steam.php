@@ -65,15 +65,36 @@ class Steam
         $minutosTotal = 0;
         $conquistasTotal = 0;
         $valorJogos = 0;
+        $detalhes = [];
 
+        // tudo o que vem da internet é tratado antes de começar a guardar, para a bd não ficar à espera
         foreach ($jogos as $jogo) {
+            $appid = $jogo['appid'];
             $minutosTotal += $jogo['playtime_forever'];
-            $valorJogos += $precos[$jogo['appid']] ?? 0;
+            $valorJogos += $precos[$appid] ?? 0;
 
+            // o jogo fica na tabela Jogos (com géneros e modos de jogo) e só é pedido à loja da primeira vez
+            $jogoBd = Jogo::daSteam($appid);
+
+            $conquistas = [0, 0];
             // só vale a pena ver as conquistas dos jogos que já foram jogados
             if ($jogo['playtime_forever'] > 0) {
-                $conquistasTotal += self::conquistas($steamId, $jogo['appid']);
+                $conquistas = self::conquistas($steamId, $appid);
+                $conquistasTotal += $conquistas[0];
             }
+
+            // se a loja não tiver imagem fica o ícone pequeno do jogo
+            $imagem = $jogoBd['imagem_capa'] ?? null;
+            if (!$imagem) {
+                $imagem = 'https://media.steampowered.com/steamcommunity/public/images/apps/' . $appid . '/' . $jogo['img_icon_url'] . '.jpg';
+            }
+
+            $detalhes[$appid] = [
+                'jogo_id' => $jogoBd['id'] ?? null,
+                'imagem' => $imagem,
+                'conquistas' => $conquistas[0],
+                'conquistas_total' => $conquistas[1],
+            ];
         }
 
         $valorInventario = 0;
@@ -81,17 +102,11 @@ class Steam
             $valorInventario += ($item['preco'] ?? 0) * $item['quantidade'];
         }
 
-        // as imagens vêm antes de começar a guardar, para a bd não ficar à espera da internet
-        $imagens = [];
-        foreach ($jogos as $jogo) {
-            $imagens[$jogo['appid']] = self::imagemJogo($jogo);
-        }
-
         $pdo = Database::ligar();
         $pdo->beginTransaction();
 
         try {
-            self::guardar($pdo, $conta['id'], $jogos, $imagens, $precos, $itens);
+            self::guardar($pdo, $conta['id'], $jogos, $detalhes, $precos, $itens);
 
             $stmt = $pdo->prepare('UPDATE Contas_Ligadas SET id_externo = :steamid, nome_publico = :nome, avatar = :avatar, nivel = :nivel,
                 num_jogos = :jogos, minutos_jogados = :minutos, num_conquistas = :conquistas, valor_jogos = :valor_jogos,
@@ -122,22 +137,35 @@ class Steam
     }
 
     // apaga o que havia e volta a guardar tudo, assim jogos e itens que já não existem desaparecem
-    private static function guardar(PDO $pdo, int $contaId, array $jogos, array $imagens, array $precos, array $itens): void
+    private static function guardar(PDO $pdo, int $contaId, array $jogos, array $detalhes, array $precos, array $itens): void
     {
         $stmt = $pdo->prepare('DELETE FROM Biblioteca_Jogos WHERE conta_id = :conta');
         $stmt->execute(['conta' => $contaId]);
 
-        $stmt = $pdo->prepare('INSERT INTO Biblioteca_Jogos (conta_id, id_externo, nome, imagem, minutos_jogados, minutos_2_semanas, valor, ultima_sincronizacao)
-            VALUES (:conta, :appid, :nome, :imagem, :minutos, :minutos2, :valor, NOW())');
+        $stmt = $pdo->prepare('INSERT INTO Biblioteca_Jogos (conta_id, jogo_id, id_externo, nome, imagem, minutos_jogados, minutos_2_semanas,
+            ultima_vez_jogado, conquistas, conquistas_total, valor, ultima_sincronizacao)
+            VALUES (:conta, :jogo, :appid, :nome, :imagem, :minutos, :minutos2, :ultima_vez, :conquistas, :conquistas_total, :valor, NOW())');
 
         foreach ($jogos as $jogo) {
+            $detalhe = $detalhes[$jogo['appid']];
+
+            // a steam dá a última vez jogado em segundos desde 1970, e 0 quando nunca foi jogado
+            $ultimaVez = null;
+            if (!empty($jogo['rtime_last_played'])) {
+                $ultimaVez = date('Y-m-d H:i:s', $jogo['rtime_last_played']);
+            }
+
             $stmt->execute([
                 'conta' => $contaId,
+                'jogo' => $detalhe['jogo_id'],
                 'appid' => $jogo['appid'],
                 'nome' => $jogo['name'],
-                'imagem' => $imagens[$jogo['appid']],
+                'imagem' => $detalhe['imagem'],
                 'minutos' => $jogo['playtime_forever'],
                 'minutos2' => $jogo['playtime_2weeks'] ?? 0,
+                'ultima_vez' => $ultimaVez,
+                'conquistas' => $detalhe['conquistas'],
+                'conquistas_total' => $detalhe['conquistas_total'],
                 'valor' => $precos[$jogo['appid']] ?? null,
             ]);
         }
@@ -179,37 +207,20 @@ class Steam
         return $precos;
     }
 
-    private static function imagemJogo(array $jogo): string
-    {
-        $imagem = 'https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/' . $jogo['appid'] . '/header.jpg';
-
-        if (Api::existe($imagem)) {
-            return $imagem;
-        }
-
-        // nos jogos mais recentes o endereço da imagem tem um código, por isso é preciso pedir à loja
-        $dados = Api::pedir('https://store.steampowered.com/api/appdetails?appids=' . $jogo['appid'] . '&filters=basic');
-
-        if (isset($dados[$jogo['appid']]['data']['header_image'])) {
-            return $dados[$jogo['appid']]['data']['header_image'];
-        }
-
-        // se nada der, fica o ícone pequeno do jogo
-        return 'https://media.steampowered.com/steamcommunity/public/images/apps/' . $jogo['appid'] . '/' . $jogo['img_icon_url'] . '.jpg';
-    }
-
-    private static function conquistas(string $steamId, int $appid): int
+    // devolve [conquistas desbloqueadas, total de conquistas do jogo]
+    private static function conquistas(string $steamId, int $appid): array
     {
         $dados = Api::pedir('https://api.steampowered.com/ISteamUserStats/GetPlayerAchievements/v1/?key=' . STEAM_API_KEY . '&steamid=' . $steamId . '&appid=' . $appid);
-        $total = 0;
+        $lista = $dados['playerstats']['achievements'] ?? [];
+        $feitas = 0;
 
-        foreach ($dados['playerstats']['achievements'] ?? [] as $conquista) {
+        foreach ($lista as $conquista) {
             if ($conquista['achieved'] == 1) {
-                $total++;
+                $feitas++;
             }
         }
 
-        return $total;
+        return [$feitas, count($lista)];
     }
 
     private static function inventario(string $steamId, array $appidsDaConta): array
