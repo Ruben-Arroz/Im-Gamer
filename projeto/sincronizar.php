@@ -1,5 +1,5 @@
 <?php
-// vai buscar os dados das contas steam e xbox e as taxas de câmbio e guarda tudo na bd
+// vai buscar os dados das contas steam, xbox e gog e as taxas de câmbio e guarda tudo na bd
 // por agora corre no pc (o servidor da UA não tem acesso à internet) php projeto/sincronizar.php
 
 if (php_sapi_name() !== 'cli') {
@@ -13,7 +13,7 @@ Steam::$mostrarProgresso = true;
 echo 'Taxas de câmbio: ' . (Moeda::atualizarTaxas() ? 'atualizadas' : 'falhou') . "\n";
 
 $pdo = Database::ligar();
-$contas = $pdo->query("SELECT * FROM Contas_Ligadas WHERE servico IN ('steam', 'xbox') ORDER BY servico, id")->fetchAll();
+$contas = $pdo->query("SELECT * FROM Contas_Ligadas WHERE servico IN ('steam', 'xbox', 'gog') ORDER BY servico, id")->fetchAll();
 
 foreach ($contas as $conta) {
     echo "\n" . ContasLigadas::SERVICOS[$conta['servico']] . ': ' . $conta['identificador'] . "\n";
@@ -22,6 +22,8 @@ foreach ($contas as $conta) {
     try {
         if ($conta['servico'] === 'steam') {
             $resultado = Steam::sincronizar($conta);
+        } elseif ($conta['servico'] === 'gog') {
+            $resultado = Gog::sincronizar($conta);
         } else {
             $resultado = Xbox::sincronizar($conta);
         }

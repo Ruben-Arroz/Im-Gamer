@@ -153,6 +153,10 @@ class Biblioteca
             return 'https://store.steampowered.com/app/' . $jogo['id_externo'];
         }
 
+        if ($jogo['servico'] === 'gog') {
+            return 'https://www.gog.com/en/games?query=' . urlencode($jogo['nome']);
+        }
+
         // a xbox não tem endereço direto sem o código do produto, por isso abre a pesquisa da loja
         if ($jogo['servico'] === 'xbox') {
             return 'https://www.xbox.com/pt-PT/search?q=' . urlencode($jogo['nome']);

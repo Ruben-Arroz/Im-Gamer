@@ -29,3 +29,4 @@ require_once __DIR__ . '/../classes/Catalogo.php';
 require_once __DIR__ . '/../classes/Moeda.php';
 require_once __DIR__ . '/../classes/Steam.php';
 require_once __DIR__ . '/../classes/Xbox.php';
+require_once __DIR__ . '/../classes/Gog.php';

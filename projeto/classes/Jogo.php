@@ -145,6 +145,38 @@ class Jogo
         return ['id' => $id, 'imagem_capa' => $imagem];
     }
 
+    // igual ao daXbox mas com o produto da api da gog
+    public static function daGog(string $gogId, array $produto): ?array
+    {
+        $pdo = Database::ligar();
+        $stmt = $pdo->prepare('SELECT id, imagem_capa FROM Jogos WHERE gog_id = :gog');
+        $stmt->execute(['gog' => $gogId]);
+        $jogo = $stmt->fetch();
+
+        if ($jogo) {
+            return $jogo;
+        }
+
+        // o endereço da imagem vem sem o https
+        $imagem = isset($produto['images']['logo2x']) ? 'https:' . $produto['images']['logo2x'] : null;
+
+        $lancamento = substr($produto['release_date'] ?? '', 0, 10);
+
+        $stmt = $pdo->prepare('INSERT INTO Jogos (gog_id, nome, imagem_capa, data_lancamento, descricao)
+            VALUES (:gog, :nome, :imagem, :lancamento, :descricao)');
+
+        $stmt->execute([
+            'gog' => $gogId,
+            'nome' => $produto['title'],
+            'imagem' => $imagem,
+            'lancamento' => $lancamento ?: null,
+            // a descrição vem com html, por isso só se guarda o texto
+            'descricao' => strip_tags($produto['description']['lead'] ?? '') ?: null,
+        ]);
+
+        return ['id' => (int) $pdo->lastInsertId(), 'imagem_capa' => $imagem];
+    }
+
     private static function ligarGenero(int $jogoId, string $nome): void
     {
         $pdo = Database::ligar();
