@@ -1,3 +1,4 @@
 projeto/config/credentials.php
 uploads/*
 !uploads/.gitkeep
+ferramentas/epic_token.json
