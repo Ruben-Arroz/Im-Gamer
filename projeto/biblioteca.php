@@ -89,86 +89,105 @@ require_once __DIR__ . '/includes/header.php';
                 <form method="get">
                     <input type="hidden" name="u" value="<?= htmlspecialchars($utilizador['nome_utilizador']) ?>">
 
-                    <label for="q" class="filtro-titulo">Pesquisar</label>
-                    <input type="text" id="q" name="q" value="<?= htmlspecialchars($filtros['nome']) ?>" placeholder="Nome do jogo">
+                    <div class="filtro-grupo">
+                        <label for="q" class="filtro-titulo">Pesquisar</label>
+                        <input type="text" id="q" name="q" value="<?= htmlspecialchars($filtros['nome']) ?>" placeholder="Nome do jogo">
+                    </div>
 
-                    <p class="filtro-titulo">Ordenar por</p>
-                    <select name="ordem">
-                        <?php foreach (Biblioteca::ORDENS as $chave => $ordem): ?>
-                            <?php if ($chave === 'preco' && !$mostrarValores) continue; ?>
-                            <option value="<?= $chave ?>" <?= $filtros['ordem'] === $chave ? 'selected' : '' ?>><?= $ordem[0] ?></option>
-                        <?php endforeach; ?>
-                    </select>
+                    <div class="filtro-grupo">
+                        <label for="ordem" class="filtro-titulo">Ordenar por</label>
+                        <select id="ordem" name="ordem">
+                            <?php foreach (Biblioteca::ORDENS as $chave => $ordem): ?>
+                                <?php if ($chave === 'preco' && !$mostrarValores) continue; ?>
+                                <option value="<?= $chave ?>" <?= $filtros['ordem'] === $chave ? 'selected' : '' ?>><?= $ordem[0] ?></option>
+                            <?php endforeach; ?>
+                        </select>
+                    </div>
 
                     <?php if (count($contas) > 1): ?>
-                        <p class="filtro-titulo">Plataforma</p>
-                        <?php foreach ($contas as $conta): ?>
-                            <label class="opcao">
-                                <input type="checkbox" name="servico[]" value="<?= $conta['servico'] ?>" <?= in_array($conta['servico'], $filtros['servicos']) ? 'checked' : '' ?>>
-                                <?= ContasLigadas::SERVICOS[$conta['servico']] ?>
-                            </label>
-                        <?php endforeach; ?>
+                        <div class="filtro-grupo">
+                            <p class="filtro-titulo">Plataforma</p>
+                            <?php foreach ($contas as $conta): ?>
+                                <label class="opcao">
+                                    <input type="checkbox" name="servico[]" value="<?= $conta['servico'] ?>" <?= in_array($conta['servico'], $filtros['servicos']) ? 'checked' : '' ?>>
+                                    <?= ContasLigadas::SERVICOS[$conta['servico']] ?>
+                                </label>
+                            <?php endforeach; ?>
+                        </div>
                     <?php elseif ($filtros['servicos']): ?>
                         <!-- só há uma conta, mas o filtro que veio do perfil fica guardado -->
                         <input type="hidden" name="servico[]" value="<?= $filtros['servicos'][0] ?>">
                     <?php endif; ?>
 
                     <?php if ($generos): ?>
-                        <p class="filtro-titulo">Géneros</p>
-                        <?php foreach ($generos as $genero): ?>
-                            <label class="opcao">
-                                <input type="checkbox" name="genero[]" value="<?= $genero['id'] ?>" <?= in_array($genero['id'], $filtros['generos']) ? 'checked' : '' ?>>
-                                <?= htmlspecialchars($genero['nome']) ?> <span class="texto-dim">(<?= $genero['quantidade'] ?>)</span>
-                            </label>
-                        <?php endforeach; ?>
-                    <?php endif; ?>
-
-                    <p class="filtro-titulo">Modo de jogo</p>
-                    <?php foreach (Biblioteca::MODOS as $chave => $nome): ?>
-                        <label class="opcao">
-                            <input type="checkbox" name="modo[]" value="<?= $chave ?>" <?= in_array($chave, $filtros['modos']) ? 'checked' : '' ?>>
-                            <?= $nome ?>
-                        </label>
-                    <?php endforeach; ?>
-
-                    <p class="filtro-titulo">Horas jogadas</p>
-                    <label class="opcao"><input type="radio" name="horas" value="" <?= $filtros['horas'] === '' ? 'checked' : '' ?>> Todas</label>
-                    <?php foreach (Biblioteca::HORAS as $chave => $horas): ?>
-                        <label class="opcao">
-                            <input type="radio" name="horas" value="<?= $chave ?>" <?= $filtros['horas'] === $chave ? 'checked' : '' ?>>
-                            <?= $horas[0] ?>
-                        </label>
-                    <?php endforeach; ?>
-
-                    <label class="opcao filtro-solto">
-                        <input type="checkbox" name="recentes" <?= $filtros['recentes'] ? 'checked' : '' ?>>
-                        Jogados nas últimas 2 semanas
-                    </label>
-
-                    <p class="filtro-titulo">Conquistas</p>
-                    <label class="opcao"><input type="radio" name="conquistas" value="" <?= $filtros['conquistas'] === '' ? 'checked' : '' ?>> Todas</label>
-                    <?php foreach (Biblioteca::CONQUISTAS as $chave => $conquistas): ?>
-                        <label class="opcao">
-                            <input type="radio" name="conquistas" value="<?= $chave ?>" <?= $filtros['conquistas'] === $chave ? 'checked' : '' ?>>
-                            <?= $conquistas[0] ?>
-                        </label>
-                    <?php endforeach; ?>
-
-                    <?php if ($mostrarValores): ?>
-                        <p class="filtro-titulo">Preço (<?= Moeda::SIMBOLOS[$moeda] ?>)</p>
-                        <div class="filtro-intervalo">
-                            <input type="number" name="preco_min" min="0" step="1" placeholder="mín." value="<?= htmlspecialchars($_GET['preco_min'] ?? '') ?>">
-                            <input type="number" name="preco_max" min="0" step="1" placeholder="máx." value="<?= htmlspecialchars($_GET['preco_max'] ?? '') ?>">
+                        <div class="filtro-grupo">
+                            <p class="filtro-titulo">Géneros</p>
+                            <?php foreach ($generos as $genero): ?>
+                                <label class="opcao">
+                                    <input type="checkbox" name="genero[]" value="<?= $genero['id'] ?>" <?= in_array($genero['id'], $filtros['generos']) ? 'checked' : '' ?>>
+                                    <?= htmlspecialchars($genero['nome']) ?> <span class="texto-dim">(<?= $genero['quantidade'] ?>)</span>
+                                </label>
+                            <?php endforeach; ?>
                         </div>
                     <?php endif; ?>
 
-                    <p class="filtro-titulo">Nota Metacritic mínima</p>
-                    <input type="number" name="metacritic" min="0" max="100" placeholder="ex.: 75" value="<?= $filtros['metacritic'] ?? '' ?>">
+                    <div class="filtro-grupo">
+                        <p class="filtro-titulo">Modo de jogo</p>
+                        <?php foreach (Biblioteca::MODOS as $chave => $nome): ?>
+                            <label class="opcao">
+                                <input type="checkbox" name="modo[]" value="<?= $chave ?>" <?= in_array($chave, $filtros['modos']) ? 'checked' : '' ?>>
+                                <?= $nome ?>
+                            </label>
+                        <?php endforeach; ?>
+                    </div>
 
-                    <p class="filtro-titulo">Ano de lançamento</p>
-                    <div class="filtro-intervalo">
-                        <input type="number" name="ano_min" min="1970" max="2100" placeholder="de" value="<?= $filtros['ano_min'] ?? '' ?>">
-                        <input type="number" name="ano_max" min="1970" max="2100" placeholder="até" value="<?= $filtros['ano_max'] ?? '' ?>">
+                    <div class="filtro-grupo">
+                        <p class="filtro-titulo">Horas jogadas</p>
+                        <label class="opcao"><input type="radio" name="horas" value="" <?= $filtros['horas'] === '' ? 'checked' : '' ?>> Todas</label>
+                        <?php foreach (Biblioteca::HORAS as $chave => $horas): ?>
+                            <label class="opcao">
+                                <input type="radio" name="horas" value="<?= $chave ?>" <?= $filtros['horas'] === $chave ? 'checked' : '' ?>>
+                                <?= $horas[0] ?>
+                            </label>
+                        <?php endforeach; ?>
+                        <label class="opcao filtro-solto">
+                            <input type="checkbox" name="recentes" <?= $filtros['recentes'] ? 'checked' : '' ?>>
+                            Jogados nas últimas 2 semanas
+                        </label>
+                    </div>
+
+                    <div class="filtro-grupo">
+                        <p class="filtro-titulo">Conquistas</p>
+                        <label class="opcao"><input type="radio" name="conquistas" value="" <?= $filtros['conquistas'] === '' ? 'checked' : '' ?>> Todas</label>
+                        <?php foreach (Biblioteca::CONQUISTAS as $chave => $conquistas): ?>
+                            <label class="opcao">
+                                <input type="radio" name="conquistas" value="<?= $chave ?>" <?= $filtros['conquistas'] === $chave ? 'checked' : '' ?>>
+                                <?= $conquistas[0] ?>
+                            </label>
+                        <?php endforeach; ?>
+                    </div>
+
+                    <?php if ($mostrarValores): ?>
+                        <div class="filtro-grupo">
+                            <p class="filtro-titulo">Preço (<?= Moeda::SIMBOLOS[$moeda] ?>)</p>
+                            <div class="filtro-intervalo">
+                                <input type="number" name="preco_min" min="0" step="1" placeholder="mín." value="<?= htmlspecialchars($_GET['preco_min'] ?? '') ?>">
+                                <input type="number" name="preco_max" min="0" step="1" placeholder="máx." value="<?= htmlspecialchars($_GET['preco_max'] ?? '') ?>">
+                            </div>
+                        </div>
+                    <?php endif; ?>
+
+                    <div class="filtro-grupo">
+                        <p class="filtro-titulo">Nota Metacritic mínima</p>
+                        <input type="number" name="metacritic" min="0" max="100" placeholder="ex.: 75" value="<?= $filtros['metacritic'] ?? '' ?>">
+                    </div>
+
+                    <div class="filtro-grupo">
+                        <p class="filtro-titulo">Ano de lançamento</p>
+                        <div class="filtro-intervalo">
+                            <input type="number" name="ano_min" min="1970" max="2100" placeholder="de" value="<?= $filtros['ano_min'] ?? '' ?>">
+                            <input type="number" name="ano_max" min="1970" max="2100" placeholder="até" value="<?= $filtros['ano_max'] ?? '' ?>">
+                        </div>
                     </div>
 
                     <button type="submit">Aplicar filtros</button>
