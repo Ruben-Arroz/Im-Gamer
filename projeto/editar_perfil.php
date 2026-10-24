@@ -48,14 +48,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 
     if (!$erro) {
-        $foto = Utilizador::trocarImagem($_FILES['foto'] ?? null, isset($_POST['remover_foto']), $utilizador['foto_perfil'], 'perfil', $utilizador['id']);
+        $foto = Utilizador::trocarImagem($_FILES['foto'] ?? null, isset($_POST['remover_foto']), $utilizador['foto_perfil'], 'perfis', $utilizador['id']);
         if (!$foto['sucesso']) {
             $erro = $foto['erro'];
         }
     }
 
     if (!$erro) {
-        $capa = Utilizador::trocarImagem($_FILES['capa'] ?? null, isset($_POST['remover_capa']), $utilizador['foto_capa'], 'capa', $utilizador['id']);
+        $capa = Utilizador::trocarImagem($_FILES['capa'] ?? null, isset($_POST['remover_capa']), $utilizador['foto_capa'], 'capas', $utilizador['id']);
         if (!$capa['sucesso']) {
             $erro = $capa['erro'];
         }
