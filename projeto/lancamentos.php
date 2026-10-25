@@ -13,6 +13,7 @@ require_once __DIR__ . '/includes/header.php';
 
 <!-- a chave da rawg tem de ir para o browser porque é ele que faz os pedidos -->
 <section class="catalogo pagina-larga" id="lancamentos"
+    data-base="<?= BASE_URL ?>"
     data-chave="<?= htmlspecialchars(RAWG_API_KEY) ?>"
     data-generos='<?= htmlspecialchars(json_encode(Catalogo::GENEROS_INGLES), ENT_QUOTES) ?>'>
 
@@ -92,7 +93,7 @@ require_once __DIR__ . '/includes/header.php';
 </section>
 
 <script src="<?= BASE_URL ?>/projeto/assets/js/biblioteca.js?v=1"></script>
-<script src="<?= BASE_URL ?>/projeto/assets/js/cartoes.js?v=1"></script>
-<script src="<?= BASE_URL ?>/projeto/assets/js/lancamentos.js?v=2"></script>
+<script src="<?= BASE_URL ?>/projeto/assets/js/cartoes.js?v=2"></script>
+<script src="<?= BASE_URL ?>/projeto/assets/js/lancamentos.js?v=3"></script>
 
 <?php require_once __DIR__ . '/includes/footer.php'; ?>

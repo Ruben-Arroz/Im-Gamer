@@ -35,9 +35,7 @@ async function carregarDestaque() {
 
         const caixa = document.createElement('a');
         caixa.className = 'destaque-caixa';
-        caixa.href = 'https://www.cheapshark.com/redirect?dealID=' + promo.dealID;
-        caixa.target = '_blank';
-        caixa.rel = 'noopener';
+        caixa.href = linkJogoPromocao(promo);
 
         const etiqueta = criarTexto('destaque-etiqueta', 'Em destaque');
         const titulo = criarTexto('destaque-titulo', promo.title);
@@ -118,6 +116,76 @@ async function carregarCarrossel(carrossel) {
     }
 }
 
+// jogos da lista de desejos com o preço mais barato que houver agora (com ou sem promoção)
+async function carregarDesejos(carrossel) {
+    const faixa = carrossel.querySelector('.carrossel-faixa');
+    const desejos = JSON.parse(carrossel.dataset.desejos).slice(0, POR_CARROSSEL);
+    const lojas = todasLojas.split(',');
+
+    try {
+        // primeiro descobre o id de cada jogo na cheapshark, pela steam ou pelo nome
+        const pedidos = desejos.map(async function (jogo) {
+            const url = CHEAPSHARK + '/games?' + (jogo.steam ? 'steamAppID=' + jogo.steam : 'exact=1&title=' + encodeURIComponent(jogo.nome));
+            const lista = await (await fetch(url)).json();
+            return lista.length ? { id: jogo.id, gameID: lista[0].gameID } : null;
+        });
+
+        const encontrados = (await Promise.all(pedidos)).filter(function (jogo) {
+            return jogo;
+        });
+
+        faixa.innerHTML = '';
+
+        if (encontrados.length) {
+            // depois pede os preços de todos de uma vez
+            const ids = encontrados.map(function (jogo) {
+                return jogo.gameID;
+            });
+            const precos = await (await fetch(CHEAPSHARK + '/games?ids=' + ids.join(','))).json();
+
+            for (const jogo of encontrados) {
+                const info = precos[jogo.gameID];
+                if (!info) {
+                    continue;
+                }
+
+                const promocoes = info.deals.filter(function (promo) {
+                    return lojas.includes(promo.storeID);
+                }).sort(function (a, b) {
+                    return parseFloat(a.price) - parseFloat(b.price);
+                });
+
+                if (!promocoes.length) {
+                    continue;
+                }
+
+                // o cartão é o mesmo das promoções, só muda o link para a página do jogo
+                const melhor = promocoes[0];
+                const cartao = criarCartaoPromocao({
+                    title: info.info.title,
+                    steamAppID: info.info.steamAppID,
+                    thumb: info.info.thumb,
+                    storeID: melhor.storeID,
+                    salePrice: melhor.price,
+                    normalPrice: melhor.retailPrice,
+                    savings: melhor.savings,
+                    metacriticScore: '0',
+                    steamRatingText: null,
+                });
+                cartao.href = base + '/projeto/jogo.php?id=' + jogo.id;
+                faixa.appendChild(cartao);
+            }
+        }
+
+        if (!faixa.children.length) {
+            faixa.appendChild(criarTexto('texto-dim', 'Nenhum jogo da lista de desejos está à venda nas lojas de PC.'));
+        }
+    } catch (erro) {
+        faixa.innerHTML = '';
+        faixa.appendChild(criarTexto('texto-dim', 'Não foi possível carregar. Tenta mais tarde.'));
+    }
+}
+
 // as setas andam quase uma "página" do carrossel para o lado
 for (const botao of document.querySelectorAll('.carrossel-setas button')) {
     botao.addEventListener('click', function () {
@@ -131,7 +199,11 @@ async function iniciar() {
     carregarDestaque();
 
     for (const carrossel of document.querySelectorAll('.carrossel')) {
-        carregarCarrossel(carrossel);
+        if (carrossel.dataset.fonte === 'desejos') {
+            carregarDesejos(carrossel);
+        } else {
+            carregarCarrossel(carrossel);
+        }
     }
 }
 

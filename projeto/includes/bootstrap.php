@@ -32,3 +32,5 @@ require_once __DIR__ . '/../classes/Xbox.php';
 require_once __DIR__ . '/../classes/Gog.php';
 require_once __DIR__ . '/../classes/Epic.php';
 require_once __DIR__ . '/../classes/Estatisticas.php';
+require_once __DIR__ . '/../classes/ListaDesejos.php';
+require_once __DIR__ . '/../classes/Avaliacoes.php';

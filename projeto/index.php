@@ -21,11 +21,20 @@ $carrosseis = [
     ['Em breve', 'rawg', '1,90', 'lancamentos.php?aba=breve&periodo=90'],
 ];
 
+// jogos da lista de desejos para o primeiro carrossel (o browser vai buscar os preços à cheapshark)
+$desejos = [];
+if (Auth::autenticado()) {
+    foreach (ListaDesejos::listar($_SESSION['utilizador_id']) as $jogo) {
+        $desejos[] = ['id' => $jogo['id'], 'nome' => $jogo['nome'], 'steam' => $jogo['steam_app_id']];
+    }
+}
+
 require_once __DIR__ . '/includes/header.php';
 ?>
 
 <!-- a chave da rawg tem de ir para o browser porque é ele que faz os pedidos -->
 <section class="inicio pagina-larga" id="inicio"
+    data-base="<?= BASE_URL ?>"
     data-simbolo="<?= htmlspecialchars($simbolo) ?>"
     data-taxa="<?= $conversao['fator'] ?>"
     data-oficiais="<?= implode(',', Catalogo::lojasOficiais()) ?>"
@@ -34,6 +43,21 @@ require_once __DIR__ . '/includes/header.php';
     data-generos='<?= htmlspecialchars(json_encode(Catalogo::GENEROS_INGLES), ENT_QUOTES) ?>'>
 
     <div id="destaque" class="destaque"></div>
+
+    <?php if ($desejos): ?>
+        <section class="carrossel" data-fonte="desejos" data-desejos='<?= htmlspecialchars(json_encode($desejos), ENT_QUOTES) ?>'>
+            <div class="carrossel-topo">
+                <h2>Da tua lista de desejos</h2>
+                <div class="carrossel-setas">
+                    <button type="button" data-direcao="-1" aria-label="Anteriores">&lsaquo;</button>
+                    <button type="button" data-direcao="1" aria-label="Seguintes">&rsaquo;</button>
+                </div>
+            </div>
+            <div class="carrossel-faixa">
+                <p class="texto-dim">A carregar...</p>
+            </div>
+        </section>
+    <?php endif; ?>
 
     <?php foreach ($carrosseis as $carrossel): ?>
         <section class="carrossel" data-fonte="<?= $carrossel[1] ?>" data-pedido="<?= htmlspecialchars($carrossel[2]) ?>">
@@ -57,7 +81,7 @@ require_once __DIR__ . '/includes/header.php';
     </p>
 </section>
 
-<script src="<?= BASE_URL ?>/projeto/assets/js/cartoes.js?v=1"></script>
-<script src="<?= BASE_URL ?>/projeto/assets/js/inicio.js?v=2"></script>
+<script src="<?= BASE_URL ?>/projeto/assets/js/cartoes.js?v=2"></script>
+<script src="<?= BASE_URL ?>/projeto/assets/js/inicio.js?v=3"></script>
 
 <?php require_once __DIR__ . '/includes/footer.php'; ?>

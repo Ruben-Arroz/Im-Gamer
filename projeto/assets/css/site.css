@@ -1267,3 +1267,223 @@ main:has(.pagina-larga) {
 .estatisticas > .perfil-data {
     margin-bottom: 20px;
 }
+
+/* os mini cartões do perfil são links para a página do jogo */
+a.mini-jogo {
+    color: var(--text);
+    text-decoration: none;
+    transition: border-color 0.15s ease;
+}
+
+a.mini-jogo[href]:hover {
+    border-color: var(--text-dim);
+}
+
+a.barra-nome {
+    color: var(--text);
+    text-decoration: none;
+}
+
+a.barra-nome:hover {
+    text-decoration: underline;
+}
+
+/* página do jogo */
+.jogo h1 {
+    font-size: 1.2rem;
+    margin-bottom: 8px;
+    line-height: 1.5;
+}
+
+.jogo-topo {
+    display: grid;
+    grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr);
+    gap: 28px;
+    align-items: start;
+}
+
+.jogo-capa {
+    width: 100%;
+    aspect-ratio: 460 / 215;
+    object-fit: cover;
+    border-radius: 4px;
+    border: 1px solid var(--border);
+}
+
+.jogo-info {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.etiquetas {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+
+.etiquetas span {
+    padding: 3px 8px;
+    border: 1px solid var(--border);
+    border-radius: 2px;
+    font-size: 0.75rem;
+    color: var(--text-dim);
+}
+
+.jogo-notas {
+    display: flex;
+    gap: 12px;
+}
+
+.jogo-notas .numero {
+    flex: 1;
+}
+
+.jogo-acoes {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    align-items: center;
+}
+
+.jogo-acoes button,
+.botao-contorno {
+    background: var(--text);
+    color: var(--bg);
+    border: 1px solid var(--text);
+    font-family: inherit;
+    font-size: 0.85rem;
+    padding: 9px 14px;
+    border-radius: 4px;
+    cursor: pointer;
+    text-decoration: none;
+}
+
+.jogo-acoes button:hover {
+    background: var(--hover);
+}
+
+.jogo-acoes .botao-contorno,
+.botao-contorno {
+    background: transparent;
+    color: var(--text);
+    border-color: var(--border);
+}
+
+.jogo-acoes .botao-contorno:hover,
+.botao-contorno:hover {
+    background: transparent;
+    border-color: var(--text-dim);
+}
+
+.jogo-descricao {
+    margin-top: 28px;
+    line-height: 1.7;
+    font-size: 0.9rem;
+    max-width: 80ch;
+}
+
+.jogo .numeros + .numeros {
+    margin-top: 12px;
+}
+
+.precos {
+    display: flex;
+    flex-direction: column;
+    max-width: 640px;
+}
+
+.preco-linha {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--border);
+    color: var(--text);
+    text-decoration: none;
+    font-size: 0.9rem;
+}
+
+.preco-linha:hover {
+    color: var(--hover);
+}
+
+.preco-linha .cartao-precos {
+    padding: 0;
+    margin: 0;
+}
+
+.preco-minimo {
+    margin-top: 12px;
+}
+
+.formulario-avaliacao {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    max-width: 640px;
+    margin-bottom: 24px;
+}
+
+.formulario-avaliacao label {
+    font-size: 0.85rem;
+    color: var(--text-dim);
+    margin-top: 8px;
+}
+
+.formulario-avaliacao select,
+.formulario-avaliacao textarea {
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--text);
+    font-family: inherit;
+    font-size: 0.95rem;
+    padding: 10px 12px;
+    border-radius: 4px;
+    resize: vertical;
+}
+
+.formulario-avaliacao select option {
+    background: var(--bg);
+}
+
+.formulario-avaliacao .jogo-acoes {
+    margin-top: 10px;
+}
+
+.lista-avaliacoes {
+    list-style: none;
+    max-width: 640px;
+}
+
+.lista-avaliacoes li {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 6px 12px;
+    padding: 14px 0;
+    border-bottom: 1px solid var(--border);
+    font-size: 0.9rem;
+}
+
+.lista-avaliacoes p {
+    flex-basis: 100%;
+    line-height: 1.6;
+    color: var(--text);
+}
+
+.estrelas {
+    letter-spacing: 2px;
+}
+
+.lista-quem-tem a {
+    color: var(--text);
+}
+
+@media (max-width: 760px) {
+    .jogo-topo {
+        grid-template-columns: 1fr;
+        gap: 18px;
+    }
+}
