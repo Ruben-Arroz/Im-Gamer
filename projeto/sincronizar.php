@@ -1,5 +1,5 @@
 <?php
-// a epic não entra aqui, atualiza-se no site com o login da epic (contas.php)
+// a epic  atualiza se no site com o login da epic (contas.php)
 // vai buscar os dados das contas steam, xbox e gog e as taxas de câmbio e guarda tudo na bd
 // por agora corre no pc (o servidor da UA não tem acesso à internet) php projeto/sincronizar.php
 
@@ -19,7 +19,7 @@ $contas = $pdo->query("SELECT * FROM Contas_Ligadas WHERE servico IN ('steam', '
 foreach ($contas as $conta) {
     echo "\n" . ContasLigadas::SERVICOS[$conta['servico']] . ': ' . $conta['identificador'] . "\n";
 
-    // se a ligação à bd ou à internet falhar, mostra o erro e passa à conta seguinte
+    // se a ligação à bd ou à internet falhar mostra o erro e passa à conta seguinte
     try {
         if ($conta['servico'] === 'steam') {
             $resultado = Steam::sincronizar($conta);
