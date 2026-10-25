@@ -202,8 +202,13 @@ require_once __DIR__ . '/includes/header.php';
 
                 <div class="grelha-jogos">
                     <?php foreach ($resultado['jogos'] as $jogo): ?>
-                        <?php $link = Biblioteca::linkLoja($jogo); ?>
-                        <a class="cartao-jogo" <?= $link ? 'href="' . htmlspecialchars($link) . '" target="_blank" rel="noopener"' : '' ?>>
+                        <!-- abre a página do jogo, se o jogo não estiver na tabela Jogos abre a loja -->
+                        <?php if ($jogo['jogo_id']): ?>
+                            <a class="cartao-jogo" href="<?= BASE_URL ?>/projeto/jogo.php?id=<?= $jogo['jogo_id'] ?>">
+                        <?php else: ?>
+                            <?php $link = Biblioteca::linkLoja($jogo); ?>
+                            <a class="cartao-jogo" <?= $link ? 'href="' . htmlspecialchars($link) . '" target="_blank" rel="noopener"' : '' ?>>
+                        <?php endif; ?>
                             <img src="<?= htmlspecialchars($jogo['imagem']) ?>" alt="" loading="lazy">
                             <p class="cartao-titulo"><?= htmlspecialchars($jogo['nome']) ?></p>
                             <p class="cartao-loja">

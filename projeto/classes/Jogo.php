@@ -243,6 +243,139 @@ class Jogo
         return $data ? $data->format('Y-m-d') : null;
     }
 
+    public static function buscarPorId(int $id): ?array
+    {
+        $pdo = Database::ligar();
+        $stmt = $pdo->prepare('SELECT * FROM Jogos WHERE id = :id');
+        $stmt->execute(['id' => $id]);
+
+        return $stmt->fetch() ?: null;
+    }
+
+    public static function generosDoJogo(int $id): array
+    {
+        $pdo = Database::ligar();
+        $stmt = $pdo->prepare('SELECT g.nome FROM Jogos_Generos jg JOIN Generos g ON g.id = jg.genero_id WHERE jg.jogo_id = :id ORDER BY g.nome');
+        $stmt->execute(['id' => $id]);
+
+        return $stmt->fetchAll(PDO::FETCH_COLUMN);
+    }
+
+    public static function plataformasDoJogo(int $id): array
+    {
+        $pdo = Database::ligar();
+        $stmt = $pdo->prepare('SELECT p.nome FROM Jogos_Plataformas jp JOIN Plataformas p ON p.id = jp.plataforma_id WHERE jp.jogo_id = :id ORDER BY p.nome');
+        $stmt->execute(['id' => $id]);
+
+        return $stmt->fetchAll(PDO::FETCH_COLUMN);
+    }
+
+    // procura um jogo que já esteja na bd (pela rawg, pela steam ou pelo nome), para não haver repetidos
+    public static function procurar(int $rawgId, string $slug, int $steamAppId, string $nome): ?int
+    {
+        $pdo = Database::ligar();
+        $procuras = [
+            ['rawg_id', $rawgId],
+            ['slug', $slug],
+            ['steam_app_id', $steamAppId],
+            ['nome', $nome],
+        ];
+
+        // os nomes das colunas vêm desta lista fixa, por isso podem ir diretos para o sql
+        foreach ($procuras as $procura) {
+            if ($procura[1]) {
+                $stmt = $pdo->prepare('SELECT id FROM Jogos WHERE ' . $procura[0] . ' = :valor ORDER BY id LIMIT 1');
+                $stmt->execute(['valor' => $procura[1]]);
+                $id = $stmt->fetchColumn();
+
+                if ($id) {
+                    return (int) $id;
+                }
+            }
+        }
+
+        return null;
+    }
+
+    // completa um jogo com os detalhes da rawg, sem apagar o que já lá estava (por exemplo os dados da steam)
+    public static function guardarDetalhesRawg(int $id, array $dados): void
+    {
+        $pdo = Database::ligar();
+        $stmt = $pdo->prepare('UPDATE Jogos SET
+            rawg_id = COALESCE(rawg_id, :rawg),
+            slug = COALESCE(slug, :slug),
+            steam_app_id = COALESCE(steam_app_id, :steam),
+            imagem_capa = COALESCE(imagem_capa, :imagem),
+            data_lancamento = COALESCE(data_lancamento, :lancamento),
+            descricao = COALESCE(descricao, :descricao),
+            nota_metacritic = COALESCE(nota_metacritic, :metacritic),
+            produtora = COALESCE(produtora, :produtora),
+            editora = COALESCE(editora, :editora),
+            modo_um_jogador = GREATEST(modo_um_jogador, :um_jogador),
+            modo_multijogador = GREATEST(modo_multijogador, :multijogador),
+            modo_cooperativo = GREATEST(modo_cooperativo, :cooperativo)
+            WHERE id = :id');
+
+        $stmt->execute([
+            'rawg' => $dados['rawg_id'],
+            'slug' => $dados['slug'],
+            'steam' => $dados['steam'],
+            'imagem' => $dados['imagem'],
+            'lancamento' => $dados['lancamento'],
+            'descricao' => $dados['descricao'],
+            'metacritic' => $dados['metacritic'],
+            'produtora' => $dados['produtora'],
+            'editora' => $dados['editora'],
+            'um_jogador' => $dados['um_jogador'],
+            'multijogador' => $dados['multijogador'],
+            'cooperativo' => $dados['cooperativo'],
+            'id' => $id,
+        ]);
+
+        foreach ($dados['generos'] as $genero) {
+            self::ligarGenero($id, $genero);
+        }
+
+        foreach ($dados['plataformas'] as $plataforma) {
+            self::ligarPlataforma($id, $plataforma);
+        }
+    }
+
+    // só liga às plataformas que já existem na tabela (PC, PlayStation 5, ...), as outras ficam de fora
+    private static function ligarPlataforma(int $jogoId, string $nome): void
+    {
+        $pdo = Database::ligar();
+        $stmt = $pdo->prepare('SELECT id FROM Plataformas WHERE nome = :nome');
+        $stmt->execute(['nome' => $nome]);
+        $plataformaId = $stmt->fetchColumn();
+
+        if ($plataformaId) {
+            $stmt = $pdo->prepare('INSERT IGNORE INTO Jogos_Plataformas (jogo_id, plataforma_id) VALUES (:jogo, :plataforma)');
+            $stmt->execute(['jogo' => $jogoId, 'plataforma' => $plataformaId]);
+        }
+    }
+
+    // links para as lojas onde o jogo está, conforme os ids que temos dele
+    public static function lojas(array $jogo): array
+    {
+        $lojas = [];
+
+        if ($jogo['steam_app_id']) {
+            $lojas['Steam'] = 'https://store.steampowered.com/app/' . $jogo['steam_app_id'];
+        }
+        if ($jogo['xbox_id']) {
+            $lojas['Xbox'] = 'https://www.xbox.com/pt-PT/search?q=' . urlencode($jogo['nome']);
+        }
+        if ($jogo['gog_id']) {
+            $lojas['GOG'] = 'https://www.gog.com/en/games?query=' . urlencode($jogo['nome']);
+        }
+        if ($jogo['epic_id']) {
+            $lojas['Epic Games'] = 'https://store.epicgames.com/pt/browse?q=' . urlencode($jogo['nome']);
+        }
+
+        return $lojas;
+    }
+
     public static function plataformas(): array
     {
         $pdo = Database::ligar();

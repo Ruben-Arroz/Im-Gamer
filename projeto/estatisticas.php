@@ -117,7 +117,11 @@ require_once __DIR__ . '/includes/header.php';
                 <div class="barras">
                     <?php foreach ($maisJogados as $jogo): ?>
                         <div class="barra-linha">
-                            <span class="barra-nome"><?= htmlspecialchars($jogo['nome']) ?></span>
+                            <?php if ($jogo['jogo_id']): ?>
+                                <a class="barra-nome" href="<?= BASE_URL ?>/projeto/jogo.php?id=<?= $jogo['jogo_id'] ?>"><?= htmlspecialchars($jogo['nome']) ?></a>
+                            <?php else: ?>
+                                <span class="barra-nome"><?= htmlspecialchars($jogo['nome']) ?></span>
+                            <?php endif; ?>
                             <div class="barra"><div style="width: <?= percentagem($jogo['minutos_jogados'], $maxJogado) ?>%"></div></div>
                             <span class="barra-valor"><?= formatarHoras($jogo['minutos_jogados']) ?></span>
                         </div>

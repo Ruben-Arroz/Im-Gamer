@@ -14,6 +14,7 @@ require_once __DIR__ . '/includes/header.php';
 ?>
 
 <section class="catalogo pagina-larga" id="catalogo"
+    data-base="<?= BASE_URL ?>"
     data-moeda="<?= $moeda ?>"
     data-simbolo="<?= htmlspecialchars(Moeda::SIMBOLOS[$moeda]) ?>"
     data-taxa="<?= $conversao['fator'] ?>"
@@ -109,7 +110,7 @@ require_once __DIR__ . '/includes/header.php';
 </section>
 
 <script src="<?= BASE_URL ?>/projeto/assets/js/biblioteca.js?v=1"></script>
-<script src="<?= BASE_URL ?>/projeto/assets/js/cartoes.js?v=1"></script>
-<script src="<?= BASE_URL ?>/projeto/assets/js/catalogo.js?v=2"></script>
+<script src="<?= BASE_URL ?>/projeto/assets/js/cartoes.js?v=2"></script>
+<script src="<?= BASE_URL ?>/projeto/assets/js/catalogo.js?v=3"></script>
 
 <?php require_once __DIR__ . '/includes/footer.php'; ?>

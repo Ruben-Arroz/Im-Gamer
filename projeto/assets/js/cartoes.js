@@ -10,6 +10,7 @@ let lojasOficiais = [];
 let nomesLojas = {};
 let generosPt = {};
 let chaveRawg = '';
+let base = '';
 
 // as avaliações da steam vêm em inglês, ficam com os nomes que a steam usa em português
 const AVALIACOES = {
@@ -40,6 +41,15 @@ function configurarCartoes(elemento) {
     if (dados.chave) {
         chaveRawg = dados.chave;
     }
+    // o endereço base do site (vazio em localhost, /tesp-ds-g17 no servidor)
+    if (dados.base !== undefined) {
+        base = dados.base;
+    }
+}
+
+// os cartões abrem a página do jogo, que vai buscar o resto dos dados
+function linkJogoPromocao(promo) {
+    return base + '/projeto/jogo.php?nome=' + encodeURIComponent(promo.title) + (promo.steamAppID ? '&steam=' + promo.steamAppID : '');
 }
 
 // nomes das lojas da cheapshark, se falhar os cartões aparecem na mesma sem o nome
@@ -83,9 +93,7 @@ function criarTexto(classe, texto) {
 function criarCartaoPromocao(promo) {
     const cartao = document.createElement('a');
     cartao.className = 'cartao-jogo';
-    cartao.href = 'https://www.cheapshark.com/redirect?dealID=' + promo.dealID;
-    cartao.target = '_blank';
-    cartao.rel = 'noopener';
+    cartao.href = linkJogoPromocao(promo);
 
     // a imagem da steam é maior que a miniatura da cheapshark, se falhar usa a miniatura
     const imagem = document.createElement('img');
@@ -115,19 +123,24 @@ function criarCartaoPromocao(promo) {
         extra.push(AVALIACOES[promo.steamRatingText] || promo.steamRatingText);
     }
 
-    const desconto = document.createElement('span');
-    desconto.className = 'desconto';
-    desconto.textContent = '-' + Math.round(promo.savings) + '%';
+    const precos = document.createElement('p');
+    precos.className = 'cartao-precos';
 
-    const precoNormal = document.createElement('s');
-    precoNormal.textContent = formatarPreco(promo.normalPrice);
+    // na lista de desejos há jogos sem promoção, aí só aparece o preço
+    if (parseFloat(promo.savings) >= 1) {
+        const desconto = document.createElement('span');
+        desconto.className = 'desconto';
+        desconto.textContent = '-' + Math.round(promo.savings) + '%';
+
+        const precoNormal = document.createElement('s');
+        precoNormal.textContent = formatarPreco(promo.normalPrice);
+
+        precos.append(desconto, precoNormal);
+    }
 
     const precoPromo = document.createElement('strong');
     precoPromo.textContent = formatarPreco(promo.salePrice);
-
-    const precos = document.createElement('p');
-    precos.className = 'cartao-precos';
-    precos.append(desconto, precoNormal, precoPromo);
+    precos.appendChild(precoPromo);
 
     cartao.append(imagem, criarTexto('cartao-titulo', promo.title), loja, criarTexto('cartao-loja', extra.join(' · ')), precos);
     return cartao;
@@ -136,9 +149,7 @@ function criarCartaoPromocao(promo) {
 function criarCartaoLancamento(jogo) {
     const cartao = document.createElement('a');
     cartao.className = 'cartao-jogo';
-    cartao.href = 'https://rawg.io/games/' + jogo.slug;
-    cartao.target = '_blank';
-    cartao.rel = 'noopener';
+    cartao.href = base + '/projeto/jogo.php?rawg=' + encodeURIComponent(jogo.slug);
 
     if (jogo.background_image) {
         const imagem = document.createElement('img');

@@ -169,6 +169,36 @@ class Biblioteca
         return null;
     }
 
+    // quem tem o jogo nas contas ligadas. o mesmo jogo em plataformas diferentes pode ser outra linha de Jogos, por isso também conta o nome igual
+    public static function quemTem(int $jogoId, string $nome, int $limite): array
+    {
+        $pdo = Database::ligar();
+        $stmt = $pdo->prepare('SELECT u.nome_utilizador, u.foto_perfil, c.servico, b.minutos_jogados FROM Biblioteca_Jogos b
+            JOIN Contas_Ligadas c ON c.id = b.conta_id
+            JOIN Utilizadores u ON u.id = c.utilizador_id
+            WHERE b.jogo_id = :jogo OR b.nome = :nome
+            ORDER BY b.minutos_jogados IS NULL, b.minutos_jogados DESC
+            LIMIT :limite');
+        $stmt->bindValue('jogo', $jogoId, PDO::PARAM_INT);
+        $stmt->bindValue('nome', $nome);
+        $stmt->bindValue('limite', $limite, PDO::PARAM_INT);
+        $stmt->execute();
+
+        return $stmt->fetchAll();
+    }
+
+    // o progresso do utilizador num jogo, uma linha por cada conta onde o tem
+    public static function progressoNoJogo(int $utilizadorId, int $jogoId, string $nome): array
+    {
+        $pdo = Database::ligar();
+        $stmt = $pdo->prepare('SELECT b.*, c.servico FROM Biblioteca_Jogos b
+            JOIN Contas_Ligadas c ON c.id = b.conta_id
+            WHERE c.utilizador_id = :utilizador AND (b.jogo_id = :jogo OR b.nome = :nome)');
+        $stmt->execute(['utilizador' => $utilizadorId, 'jogo' => $jogoId, 'nome' => $nome]);
+
+        return $stmt->fetchAll();
+    }
+
     public static function maisJogados(int $contaId, int $limite): array
     {
         $pdo = Database::ligar();

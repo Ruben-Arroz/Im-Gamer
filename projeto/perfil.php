@@ -126,11 +126,11 @@ require_once __DIR__ . '/includes/header.php';
             </div>
             <div class="fila-jogos">
                 <?php foreach ($maisJogados as $jogo): ?>
-                    <div class="mini-jogo">
+                    <a class="mini-jogo" <?= $jogo['jogo_id'] ? 'href="' . BASE_URL . '/projeto/jogo.php?id=' . $jogo['jogo_id'] . '"' : '' ?>>
                         <img src="<?= htmlspecialchars($jogo['imagem']) ?>" alt="" loading="lazy">
                         <p><?= htmlspecialchars($jogo['nome']) ?></p>
                         <span><?= formatarHoras($jogo['minutos_jogados']) ?></span>
-                    </div>
+                    </a>
                 <?php endforeach; ?>
             </div>
         <?php endif; ?>
@@ -228,11 +228,11 @@ require_once __DIR__ . '/includes/header.php';
                         </div>
                         <div class="fila-jogos">
                             <?php foreach ($jogosConta as $jogo): ?>
-                                <div class="mini-jogo">
+                                <a class="mini-jogo" <?= $jogo['jogo_id'] ? 'href="' . BASE_URL . '/projeto/jogo.php?id=' . $jogo['jogo_id'] . '"' : '' ?>>
                                     <img src="<?= htmlspecialchars($jogo['imagem']) ?>" alt="" loading="lazy">
                                     <p><?= htmlspecialchars($jogo['nome']) ?></p>
                                     <span><?= formatarHoras($jogo['minutos_jogados']) ?></span>
-                                </div>
+                                </a>
                             <?php endforeach; ?>
                         </div>
                     <?php endif; ?>
@@ -244,7 +244,7 @@ require_once __DIR__ . '/includes/header.php';
                         </div>
                         <div class="fila-jogos">
                             <?php foreach ($jogosPorData as $jogo): ?>
-                                <div class="mini-jogo">
+                                <a class="mini-jogo" <?= $jogo['jogo_id'] ? 'href="' . BASE_URL . '/projeto/jogo.php?id=' . $jogo['jogo_id'] . '"' : '' ?>>
                                     <?php if ($jogo['imagem']): ?>
                                         <img src="<?= htmlspecialchars($jogo['imagem']) ?>" alt="" loading="lazy">
                                     <?php endif; ?>
@@ -252,7 +252,7 @@ require_once __DIR__ . '/includes/header.php';
                                     <span>
                                         <?= $jogo['ultima_vez_jogado'] ? (new DateTime($jogo['ultima_vez_jogado']))->format('d/m/Y') : 'nunca jogado' ?>
                                     </span>
-                                </div>
+                                </a>
                             <?php endforeach; ?>
                         </div>
                     <?php endif; ?>
@@ -261,11 +261,11 @@ require_once __DIR__ . '/includes/header.php';
                         <p class="subtitulo">Jogados nas últimas 2 semanas</p>
                         <div class="fila-jogos">
                             <?php foreach ($recentes as $jogo): ?>
-                                <div class="mini-jogo">
+                                <a class="mini-jogo" <?= $jogo['jogo_id'] ? 'href="' . BASE_URL . '/projeto/jogo.php?id=' . $jogo['jogo_id'] . '"' : '' ?>>
                                     <img src="<?= htmlspecialchars($jogo['imagem']) ?>" alt="" loading="lazy">
                                     <p><?= htmlspecialchars($jogo['nome']) ?></p>
                                     <span><?= formatarHoras($jogo['minutos_2_semanas']) ?></span>
-                                </div>
+                                </a>
                             <?php endforeach; ?>
                         </div>
                     <?php endif; ?>
