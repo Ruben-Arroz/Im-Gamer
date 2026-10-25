@@ -9,6 +9,7 @@ CREATE TABLE `Jogos` (
   `steam_app_id` int(11) DEFAULT NULL,
   `xbox_id` varchar(20) DEFAULT NULL,
   `gog_id` varchar(20) DEFAULT NULL,
+  `epic_id` varchar(50) DEFAULT NULL,
   `nome` varchar(255) NOT NULL,
   `slug` varchar(255) DEFAULT NULL,
   `imagem_capa` varchar(255) DEFAULT NULL,
@@ -25,7 +26,8 @@ CREATE TABLE `Jogos` (
   UNIQUE KEY `rawg_id` (`rawg_id`),
   UNIQUE KEY `steam_app_id` (`steam_app_id`),
   UNIQUE KEY `xbox_id` (`xbox_id`),
-  UNIQUE KEY `gog_id` (`gog_id`)
+  UNIQUE KEY `gog_id` (`gog_id`),
+  UNIQUE KEY `epic_id` (`epic_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 CREATE TABLE `Generos` (
@@ -55,6 +57,7 @@ CREATE TABLE `Utilizadores` (
   `plataforma_preferida_id` int(11) DEFAULT NULL,
   `moeda` char(3) NOT NULL DEFAULT 'EUR',
   `esconder_valores` tinyint(1) NOT NULL DEFAULT 0,
+  `esconder_reputacao` tinyint(1) NOT NULL DEFAULT 0,
   `is_admin` tinyint(1) NOT NULL DEFAULT 0,
   `data_criacao` datetime NOT NULL DEFAULT current_timestamp(),
   PRIMARY KEY (`id`),
@@ -111,10 +114,12 @@ CREATE TABLE `Contas_Ligadas` (
   `servico` varchar(30) NOT NULL,
   `identificador` varchar(255) NOT NULL,
   `id_externo` varchar(100) DEFAULT NULL,
+  `token` text DEFAULT NULL,
   `nome_publico` varchar(100) DEFAULT NULL,
   `avatar` varchar(255) DEFAULT NULL,
   `nivel` int(11) DEFAULT NULL,
   `pontuacao` int(11) DEFAULT NULL,
+  `reputacao` varchar(255) DEFAULT NULL,
   `num_jogos` int(11) NOT NULL DEFAULT 0,
   `minutos_jogados` int(11) NOT NULL DEFAULT 0,
   `num_conquistas` int(11) NOT NULL DEFAULT 0,
