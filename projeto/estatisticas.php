@@ -17,6 +17,7 @@ if ($utilizador) {
     $id = (int) $utilizador['id'];
     $proprio = $id === (int) $_SESSION['utilizador_id'];
     $mostrarValores = $proprio || !$utilizador['esconder_valores'];
+    $mostrarReputacao = $proprio || !$utilizador['esconder_reputacao'];
     $moeda = $_SESSION['moeda'] ?? 'EUR';
 
     $resumo = Estatisticas::resumo($id);
@@ -34,6 +35,14 @@ if ($utilizador) {
     foreach (ContasLigadas::ordenarPorFama(ContasLigadas::listar($id)) as $conta) {
         if ($conta['num_jogos'] > 0) {
             $plataformas[] = $conta;
+        }
+    }
+
+    // só as plataformas que dão reputação (steam e xbox) e que já foram sincronizadas
+    $reputacoes = [];
+    foreach ($plataformas as $conta) {
+        if ($mostrarReputacao && $conta['reputacao'] !== null) {
+            $reputacoes[] = $conta;
         }
     }
 
@@ -241,6 +250,19 @@ require_once __DIR__ . '/includes/header.php';
                         </div>
                     <?php endif; ?>
                 </div>
+            <?php endif; ?>
+
+            <?php if ($reputacoes): ?>
+                <h2>Reputação</h2>
+                <div class="numeros">
+                    <?php foreach ($reputacoes as $conta): ?>
+                        <div class="numero">
+                            <strong><?= htmlspecialchars($conta['reputacao']) ?></strong>
+                            <span><?= ContasLigadas::SERVICOS[$conta['servico']] ?></span>
+                        </div>
+                    <?php endforeach; ?>
+                </div>
+                <p class="texto-dim ajuda-estatistica">Na Steam são os bans da conta, na Xbox é a reputação que a Microsoft dá com base nas denúncias de outros jogadores.</p>
             <?php endif; ?>
 
             <?php if ($produtoras || $editoras): ?>

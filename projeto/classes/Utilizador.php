@@ -10,7 +10,7 @@ class Utilizador
     ];
 
     // campos usados nas duas pesquisas de utilizador, já com o nome do jogo favorito e da plataforma preferida
-    const SELECT = 'SELECT u.id, u.nome_utilizador, u.email, u.bio, u.foto_perfil, u.foto_capa, u.moeda, u.esconder_valores,
+    const SELECT = 'SELECT u.id, u.nome_utilizador, u.email, u.bio, u.foto_perfil, u.foto_capa, u.moeda, u.esconder_valores, u.esconder_reputacao,
         u.is_admin, u.data_criacao, u.jogo_favorito_id, j.rawg_id AS jogo_favorito_rawg_id, j.nome AS jogo_favorito,
         u.plataforma_preferida_id, p.nome AS plataforma_preferida
         FROM Utilizadores u
@@ -58,7 +58,8 @@ class Utilizador
     {
         $pdo = Database::ligar();
         $stmt = $pdo->prepare('UPDATE Utilizadores SET nome_utilizador = :nome, bio = :bio, foto_perfil = :foto, foto_capa = :capa,
-            jogo_favorito_id = :jogo, plataforma_preferida_id = :plataforma, esconder_valores = :esconder WHERE id = :id');
+            jogo_favorito_id = :jogo, plataforma_preferida_id = :plataforma, esconder_valores = :esconder,
+            esconder_reputacao = :esconder_reputacao WHERE id = :id');
 
         $stmt->execute([
             'nome' => $dados['nome'],
@@ -68,6 +69,7 @@ class Utilizador
             'jogo' => $dados['jogo'],
             'plataforma' => $dados['plataforma'],
             'esconder' => $dados['esconder'],
+            'esconder_reputacao' => $dados['esconder_reputacao'],
             'id' => $id,
         ]);
     }

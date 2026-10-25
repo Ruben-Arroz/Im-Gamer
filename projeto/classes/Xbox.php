@@ -119,6 +119,13 @@ class Xbox
         return $gratis ? 0 : null;
     }
 
+    // a reputação que a xbox dá a cada jogador, com base nas denúncias de outros jogadores
+    const REPUTACOES = [
+        'GoodPlayer' => 'Bom jogador',
+        'NeedsWork' => 'Precisa de melhorar',
+        'AvoidMe' => 'A evitar',
+    ];
+
     public static function sincronizar(array $conta): array
     {
         $xuid = self::descobrirXuid(trim($conta['identificador']));
@@ -209,7 +216,7 @@ class Xbox
             }
 
             $stmt = $pdo->prepare('UPDATE Contas_Ligadas SET id_externo = :xuid, nome_publico = :nome, avatar = :avatar, nivel = NULL,
-                pontuacao = :pontuacao, num_jogos = :jogos, minutos_jogados = :minutos, num_conquistas = :conquistas,
+                reputacao = :reputacao, pontuacao = :pontuacao, num_jogos = :jogos, minutos_jogados = :minutos, num_conquistas = :conquistas,
                 valor_jogos = :valor_jogos, valor_inventario = 0, ultima_sincronizacao = NOW() WHERE id = :id');
 
             $stmt->execute([
@@ -217,6 +224,7 @@ class Xbox
                 'nome' => $perfil['gamertag'],
                 'avatar' => $avatar,
                 'pontuacao' => $perfil['gamerScore'],
+                'reputacao' => self::REPUTACOES[$perfil['xboxOneRep'] ?? ''] ?? null,
                 'jogos' => count($jogos),
                 'minutos' => $minutosTotal,
                 'conquistas' => $conquistasTotal,

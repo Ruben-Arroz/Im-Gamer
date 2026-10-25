@@ -66,6 +66,9 @@ class Steam
         $nivel = $dados['response']['player_level'] ?? null;
         self::progresso('Perfil: ' . $perfil['personaname'] . ' (nível ' . ($nivel ?? '?') . ')');
 
+        $reputacao = self::reputacao($steamId);
+        self::progresso('Reputação: ' . ($reputacao ?? '?'));
+
         // se os detalhes dos jogos forem privados a lista vem vazia
         $dados = Api::pedir('https://api.steampowered.com/IPlayerService/GetOwnedGames/v1/?key=' . STEAM_API_KEY . '&steamid=' . $steamId . '&include_appinfo=1&include_played_free_games=1');
         $jogos = $dados['response']['games'] ?? [];
@@ -127,7 +130,7 @@ class Steam
             self::guardar($pdo, $conta['id'], $jogos, $detalhes, $precos, $itens);
 
             $stmt = $pdo->prepare('UPDATE Contas_Ligadas SET id_externo = :steamid, nome_publico = :nome, avatar = :avatar, nivel = :nivel,
-                num_jogos = :jogos, minutos_jogados = :minutos, num_conquistas = :conquistas, valor_jogos = :valor_jogos,
+                reputacao = :reputacao, num_jogos = :jogos, minutos_jogados = :minutos, num_conquistas = :conquistas, valor_jogos = :valor_jogos,
                 valor_inventario = :valor_inventario, ultima_sincronizacao = NOW() WHERE id = :id');
 
             $stmt->execute([
@@ -135,6 +138,7 @@ class Steam
                 'nome' => $perfil['personaname'],
                 'avatar' => $perfil['avatarfull'],
                 'nivel' => $nivel,
+                'reputacao' => $reputacao,
                 'jogos' => count($jogos),
                 'minutos' => $minutosTotal,
                 'conquistas' => $conquistasTotal,
@@ -155,6 +159,42 @@ class Steam
     }
 
     // apaga o que havia e volta a guardar tudo, assim jogos e itens que já não existem desaparecem
+    // bans da conta (vac, de jogos, da comunidade e de trocas) num texto curto, null se a steam não responder
+    private static function reputacao(string $steamId): ?string
+    {
+        $dados = Api::pedir('https://api.steampowered.com/ISteamUser/GetPlayerBans/v1/?key=' . STEAM_API_KEY . '&steamids=' . $steamId);
+        $bans = $dados['players'][0] ?? null;
+
+        if (!$bans) {
+            return null;
+        }
+
+        $partes = [];
+        if ($bans['NumberOfVACBans'] > 0) {
+            $partes[] = $bans['NumberOfVACBans'] . ' VAC ' . ($bans['NumberOfVACBans'] == 1 ? 'ban' : 'bans');
+        }
+        if ($bans['NumberOfGameBans'] > 0) {
+            $partes[] = $bans['NumberOfGameBans'] . ($bans['NumberOfGameBans'] == 1 ? ' ban' : ' bans') . ' de jogo';
+        }
+        if ($bans['CommunityBanned']) {
+            $partes[] = 'ban da comunidade';
+        }
+        if ($bans['EconomyBan'] !== 'none') {
+            $partes[] = 'ban de trocas';
+        }
+
+        if (!$partes) {
+            return 'Sem bans';
+        }
+
+        $texto = ucfirst(implode(', ', $partes));
+        if ($bans['DaysSinceLastBan'] > 0) {
+            $texto .= ' (o último há ' . $bans['DaysSinceLastBan'] . ' dias)';
+        }
+
+        return $texto;
+    }
+
     private static function guardar(PDO $pdo, int $contaId, array $jogos, array $detalhes, array $precos, array $itens): void
     {
         $stmt = $pdo->prepare('DELETE FROM Biblioteca_Jogos WHERE conta_id = :conta');

@@ -21,6 +21,9 @@ foreach ($contas as $conta) {
 
     // se a ligação à bd ou à internet falhar mostra o erro e passa à conta seguinte
     try {
+        // a conta anterior pode ter demorado e a bd fecha as ligações paradas, por isso cada conta começa com uma nova
+        Database::religar();
+
         if ($conta['servico'] === 'steam') {
             $resultado = Steam::sincronizar($conta);
         } elseif ($conta['servico'] === 'gog') {
