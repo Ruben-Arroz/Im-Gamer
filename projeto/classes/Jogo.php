@@ -51,8 +51,8 @@ class Jogo
         $categorias = array_column($info['categories'] ?? [], 'id');
 
         $stmt = $pdo->prepare('INSERT INTO Jogos (steam_app_id, nome, imagem_capa, data_lancamento, descricao, nota_metacritic,
-            modo_um_jogador, modo_multijogador, modo_cooperativo)
-            VALUES (:appid, :nome, :imagem, :lancamento, :descricao, :metacritic, :um_jogador, :multijogador, :cooperativo)');
+            produtora, editora, modo_um_jogador, modo_multijogador, modo_cooperativo)
+            VALUES (:appid, :nome, :imagem, :lancamento, :descricao, :metacritic, :produtora, :editora, :um_jogador, :multijogador, :cooperativo)');
 
         $stmt->execute([
             'appid' => $appid,
@@ -61,6 +61,9 @@ class Jogo
             'lancamento' => self::converterData($info['release_date']['date'] ?? ''),
             'descricao' => $info['short_description'] ?? null,
             'metacritic' => $info['metacritic']['score'] ?? null,
+            // a steam dá listas, fica só a primeira
+            'produtora' => $info['developers'][0] ?? null,
+            'editora' => $info['publishers'][0] ?? null,
             'um_jogador' => in_array(2, $categorias) ? 1 : 0,
             'multijogador' => array_intersect([1, 36, 49], $categorias) ? 1 : 0,
             'cooperativo' => array_intersect([9, 38, 39], $categorias) ? 1 : 0,
