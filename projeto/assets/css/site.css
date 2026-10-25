@@ -1488,3 +1488,53 @@ a.barra-nome:hover {
         gap: 18px;
     }
 }
+
+/* links ao lado do título "Resumo" do perfil */
+.links-linha {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16px;
+}
+
+/* lista de desejos: o cartão tem o link e o botão "Tirar" separados, por isso a imagem fica dentro do link */
+.desejos .cartao-jogo > a {
+    color: var(--text);
+    text-decoration: none;
+}
+
+.desejos .cartao-jogo > a > img,
+.desejos .cartao-jogo > a > .cartao-sem-imagem {
+    width: 100%;
+    aspect-ratio: 460 / 215;
+    object-fit: cover;
+    display: block;
+}
+
+.desejos .cartao-loja + .cartao-loja {
+    padding-top: 2px;
+}
+
+.desejos .cartao-precos {
+    justify-content: space-between;
+}
+
+.desejos .botao-contorno {
+    padding: 5px 10px;
+    font-size: 0.75rem;
+}
+
+.ordem-desejos select {
+    appearance: none;
+    background: transparent url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%238f9198' stroke-width='1.5' fill='none'/%3E%3C/svg%3E") no-repeat right 14px center;
+    border: 1px solid var(--border);
+    color: var(--text);
+    font-family: inherit;
+    font-size: 0.85rem;
+    padding: 9px 36px 9px 12px;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.ordem-desejos select option {
+    background: var(--bg);
+}

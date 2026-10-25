@@ -120,61 +120,20 @@ async function carregarCarrossel(carrossel) {
 async function carregarDesejos(carrossel) {
     const faixa = carrossel.querySelector('.carrossel-faixa');
     const desejos = JSON.parse(carrossel.dataset.desejos).slice(0, POR_CARROSSEL);
-    const lojas = todasLojas.split(',');
 
     try {
-        // primeiro descobre o id de cada jogo na cheapshark, pela steam ou pelo nome
-        const pedidos = desejos.map(async function (jogo) {
-            const url = CHEAPSHARK + '/games?' + (jogo.steam ? 'steamAppID=' + jogo.steam : 'exact=1&title=' + encodeURIComponent(jogo.nome));
-            const lista = await (await fetch(url)).json();
-            return lista.length ? { id: jogo.id, gameID: lista[0].gameID } : null;
-        });
-
-        const encontrados = (await Promise.all(pedidos)).filter(function (jogo) {
-            return jogo;
-        });
-
+        const precos = await melhoresPrecos(desejos, todasLojas.split(','));
         faixa.innerHTML = '';
 
-        if (encontrados.length) {
-            // depois pede os preços de todos de uma vez
-            const ids = encontrados.map(function (jogo) {
-                return jogo.gameID;
-            });
-            const precos = await (await fetch(CHEAPSHARK + '/games?ids=' + ids.join(','))).json();
-
-            for (const jogo of encontrados) {
-                const info = precos[jogo.gameID];
-                if (!info) {
-                    continue;
-                }
-
-                const promocoes = info.deals.filter(function (promo) {
-                    return lojas.includes(promo.storeID);
-                }).sort(function (a, b) {
-                    return parseFloat(a.price) - parseFloat(b.price);
-                });
-
-                if (!promocoes.length) {
-                    continue;
-                }
-
-                // o cartão é o mesmo das promoções, só muda o link para a página do jogo
-                const melhor = promocoes[0];
-                const cartao = criarCartaoPromocao({
-                    title: info.info.title,
-                    steamAppID: info.info.steamAppID,
-                    thumb: info.info.thumb,
-                    storeID: melhor.storeID,
-                    salePrice: melhor.price,
-                    normalPrice: melhor.retailPrice,
-                    savings: melhor.savings,
-                    metacriticScore: '0',
-                    steamRatingText: null,
-                });
-                cartao.href = base + '/projeto/jogo.php?id=' + jogo.id;
-                faixa.appendChild(cartao);
+        for (const jogo of desejos) {
+            if (!precos[jogo.id]) {
+                continue;
             }
+
+            // o cartão é o mesmo das promoções, só muda o link para a página do jogo
+            const cartao = criarCartaoPromocao(precos[jogo.id]);
+            cartao.href = base + '/projeto/jogo.php?id=' + jogo.id;
+            faixa.appendChild(cartao);
         }
 
         if (!faixa.children.length) {
