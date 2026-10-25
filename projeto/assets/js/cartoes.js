@@ -242,3 +242,65 @@ function mostrarPaginacao(elemento, parametros, atual, totalPaginas) {
         link('Seguinte', atual + 1);
     }
 }
+
+// o preço mais barato agora de cada jogo (lista de {id, nome, steam}), nas lojas que o site usa
+// devolve {id do jogo: promoção no formato das promoções da cheapshark}
+async function melhoresPrecos(jogos, lojas) {
+    const encontrados = [];
+
+    // primeiro descobre o id de cada jogo na cheapshark, pela steam ou pelo nome
+    // vai de 10 em 10 para não fazer pedidos a mais ao mesmo tempo
+    for (let i = 0; i < jogos.length; i += 10) {
+        const pedidos = jogos.slice(i, i + 10).map(async function (jogo) {
+            const url = CHEAPSHARK + '/games?' + (jogo.steam ? 'steamAppID=' + jogo.steam : 'exact=1&title=' + encodeURIComponent(jogo.nome));
+            const lista = await (await fetch(url)).json();
+            return lista.length ? { id: jogo.id, gameID: lista[0].gameID } : null;
+        });
+
+        for (const jogo of await Promise.all(pedidos)) {
+            if (jogo) {
+                encontrados.push(jogo);
+            }
+        }
+    }
+
+    const resultado = {};
+
+    // depois pede os preços de todos, a cheapshark aceita até 25 jogos por pedido
+    for (let i = 0; i < encontrados.length; i += 25) {
+        const grupo = encontrados.slice(i, i + 25);
+        const ids = grupo.map(function (jogo) {
+            return jogo.gameID;
+        });
+        const precos = await (await fetch(CHEAPSHARK + '/games?ids=' + ids.join(','))).json();
+
+        for (const jogo of grupo) {
+            const info = precos[jogo.gameID];
+            if (!info) {
+                continue;
+            }
+
+            const promocoes = info.deals.filter(function (promo) {
+                return lojas.includes(promo.storeID);
+            }).sort(function (a, b) {
+                return parseFloat(a.price) - parseFloat(b.price);
+            });
+
+            if (promocoes.length) {
+                resultado[jogo.id] = {
+                    title: info.info.title,
+                    steamAppID: info.info.steamAppID,
+                    thumb: info.info.thumb,
+                    storeID: promocoes[0].storeID,
+                    salePrice: promocoes[0].price,
+                    normalPrice: promocoes[0].retailPrice,
+                    savings: promocoes[0].savings,
+                    metacriticScore: '0',
+                    steamRatingText: null,
+                };
+            }
+        }
+    }
+
+    return resultado;
+}

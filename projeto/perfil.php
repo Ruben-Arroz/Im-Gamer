@@ -91,7 +91,10 @@ require_once __DIR__ . '/includes/header.php';
 
         <div class="subtitulo-linha">
             <h2>Resumo</h2>
-            <a href="<?= BASE_URL ?>/projeto/estatisticas.php?u=<?= urlencode($utilizador['nome_utilizador']) ?>">Ver estatísticas</a>
+            <span class="links-linha">
+                <a href="<?= BASE_URL ?>/projeto/desejos.php?u=<?= urlencode($utilizador['nome_utilizador']) ?>">Lista de desejos</a>
+                <a href="<?= BASE_URL ?>/projeto/estatisticas.php?u=<?= urlencode($utilizador['nome_utilizador']) ?>">Ver estatísticas</a>
+            </span>
         </div>
 
         <div class="numeros">

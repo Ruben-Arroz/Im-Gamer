@@ -26,13 +26,20 @@ class ListaDesejos
         $stmt->execute(['utilizador' => $utilizadorId, 'jogo' => $jogoId]);
     }
 
-    public static function listar(int $utilizadorId): array
+    // o preço vem da cheapshark no browser, por isso essa ordem é feita no desejos.js
+    const ORDENS = [
+        'data' => ['Adicionados há menos tempo', 'd.data_adicionado DESC'],
+        'nome' => ['Nome', 'j.nome ASC'],
+        'preco' => ['Mais baratos', 'd.data_adicionado DESC'],
+    ];
+
+    public static function listar(int $utilizadorId, string $ordem = 'data'): array
     {
         $pdo = Database::ligar();
-        $stmt = $pdo->prepare('SELECT j.id, j.nome, j.steam_app_id, j.imagem_capa FROM Lista_Desejos d
+        $stmt = $pdo->prepare('SELECT j.id, j.nome, j.steam_app_id, j.imagem_capa, d.data_adicionado FROM Lista_Desejos d
             JOIN Jogos j ON j.id = d.jogo_id
             WHERE d.utilizador_id = :utilizador
-            ORDER BY d.data_adicionado DESC');
+            ORDER BY ' . self::ORDENS[$ordem][1]);
         $stmt->execute(['utilizador' => $utilizadorId]);
 
         return $stmt->fetchAll();

@@ -48,6 +48,7 @@ require_once __DIR__ . '/includes/header.php';
         <section class="carrossel" data-fonte="desejos" data-desejos='<?= htmlspecialchars(json_encode($desejos), ENT_QUOTES) ?>'>
             <div class="carrossel-topo">
                 <h2>Da tua lista de desejos</h2>
+                <a href="<?= BASE_URL ?>/projeto/desejos.php">Ver todos</a>
                 <div class="carrossel-setas">
                     <button type="button" data-direcao="-1" aria-label="Anteriores">&lsaquo;</button>
                     <button type="button" data-direcao="1" aria-label="Seguintes">&rsaquo;</button>
@@ -81,7 +82,7 @@ require_once __DIR__ . '/includes/header.php';
     </p>
 </section>
 
-<script src="<?= BASE_URL ?>/projeto/assets/js/cartoes.js?v=2"></script>
-<script src="<?= BASE_URL ?>/projeto/assets/js/inicio.js?v=3"></script>
+<script src="<?= BASE_URL ?>/projeto/assets/js/cartoes.js?v=3"></script>
+<script src="<?= BASE_URL ?>/projeto/assets/js/inicio.js?v=4"></script>
 
 <?php require_once __DIR__ . '/includes/footer.php'; ?>

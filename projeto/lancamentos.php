@@ -93,7 +93,7 @@ require_once __DIR__ . '/includes/header.php';
 </section>
 
 <script src="<?= BASE_URL ?>/projeto/assets/js/biblioteca.js?v=1"></script>
-<script src="<?= BASE_URL ?>/projeto/assets/js/cartoes.js?v=2"></script>
+<script src="<?= BASE_URL ?>/projeto/assets/js/cartoes.js?v=3"></script>
 <script src="<?= BASE_URL ?>/projeto/assets/js/lancamentos.js?v=3"></script>
 
 <?php require_once __DIR__ . '/includes/footer.php'; ?>
