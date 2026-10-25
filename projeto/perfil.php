@@ -89,7 +89,10 @@ require_once __DIR__ . '/includes/header.php';
             <p class="perfil-bio"><?= nl2br(htmlspecialchars($utilizador['bio'])) ?></p>
         <?php endif; ?>
 
-        <h2>Resumo</h2>
+        <div class="subtitulo-linha">
+            <h2>Resumo</h2>
+            <a href="<?= BASE_URL ?>/projeto/estatisticas.php?u=<?= urlencode($utilizador['nome_utilizador']) ?>">Ver estatísticas</a>
+        </div>
 
         <div class="numeros">
             <?php if ($mostrarValores): ?>

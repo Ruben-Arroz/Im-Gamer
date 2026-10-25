@@ -1182,3 +1182,88 @@ main:has(.pagina-larga) {
     margin: 0 0 16px;
     line-height: 1.7;
 }
+
+/* página das estatísticas, as barras são só divs com a largura em percentagem */
+.estatisticas h2 {
+    margin-top: 40px;
+}
+
+.barras {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.barra-linha {
+    display: grid;
+    grid-template-columns: 200px 1fr 150px;
+    gap: 14px;
+    align-items: center;
+    font-size: 0.85rem;
+}
+
+.barra-nome {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.barra {
+    height: 8px;
+    background: var(--border);
+    border-radius: 2px;
+}
+
+.barra div {
+    height: 100%;
+    background: var(--text);
+    border-radius: 2px;
+}
+
+.barra-valor {
+    color: var(--text-dim);
+    font-size: 0.8rem;
+    text-align: right;
+}
+
+.ajuda-estatistica {
+    font-size: 0.75rem;
+    margin: -4px 0 14px;
+}
+
+.duas-colunas {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+}
+
+.lista-simples {
+    padding-left: 20px;
+    line-height: 1.9;
+    font-size: 0.85rem;
+}
+
+.lista-simples .texto-dim {
+    margin-left: 6px;
+}
+
+@media (max-width: 640px) {
+    /* no telemóvel o nome e o valor ficam em cima e a barra por baixo */
+    .barra-linha {
+        grid-template-columns: 1fr auto;
+        gap: 6px 10px;
+    }
+
+    .barra {
+        grid-column: 1 / -1;
+        grid-row: 2;
+    }
+
+    .duas-colunas {
+        grid-template-columns: 1fr;
+    }
+}
+
+.estatisticas > .perfil-data {
+    margin-bottom: 20px;
+}
