@@ -1272,11 +1272,12 @@ main:has(.pagina-larga) {
 a.mini-jogo {
     color: var(--text);
     text-decoration: none;
-    transition: border-color 0.15s ease;
+    transition: background 0.15s ease;
 }
 
+/* no hover o fundo fica mais claro, como nos cartões da biblioteca */
 a.mini-jogo[href]:hover {
-    border-color: var(--text-dim);
+    background: #1a1b20;
 }
 
 a.barra-nome {
