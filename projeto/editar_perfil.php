@@ -15,6 +15,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $bio = trim($_POST['bio'] ?? '');
     $plataformaId = (int) ($_POST['plataforma_id'] ?? 0);
     $esconder = isset($_POST['esconder_valores']) ? 1 : 0;
+    $esconderReputacao = isset($_POST['esconder_reputacao']) ? 1 : 0;
     $pesquisaJogo = trim($_POST['jogo_pesquisa'] ?? '');
     $rawgId = (int) ($_POST['jogo_rawg_id'] ?? 0);
     $jogoId = $utilizador['jogo_favorito_id'];
@@ -70,6 +71,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             'jogo' => $jogoId,
             'plataforma' => $plataformaId ?: null,
             'esconder' => $esconder,
+            'esconder_reputacao' => $esconderReputacao,
         ]);
 
         // o nome também está guardado na sessão
@@ -143,6 +145,11 @@ require_once __DIR__ . '/includes/header.php';
         <label class="opcao">
             <input type="checkbox" name="esconder_valores" <?= $utilizador['esconder_valores'] ? 'checked' : '' ?>>
             Esconder o valor das minhas contas aos outros utilizadores
+        </label>
+
+        <label class="opcao">
+            <input type="checkbox" name="esconder_reputacao" <?= $utilizador['esconder_reputacao'] ? 'checked' : '' ?>>
+            Esconder a reputação das minhas contas (bans) aos outros utilizadores
         </label>
 
         <button type="submit">Guardar</button>
