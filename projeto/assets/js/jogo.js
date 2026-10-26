@@ -79,6 +79,15 @@ async function carregarPrecos() {
             return;
         }
 
+        // quando o jogo não tem loja conhecida, o botão de cima passa a abrir a loja mais barata
+        const botaoLoja = document.querySelector('#botao-loja');
+        if (botaoLoja) {
+            botaoLoja.href = 'https://www.cheapshark.com/redirect?dealID=' + promocoes[0].dealID;
+            botaoLoja.target = '_blank';
+            botaoLoja.rel = 'noopener';
+            botaoLoja.textContent = 'Ver na ' + (nomesLojas[promocoes[0].storeID] || 'loja');
+        }
+
         caixaPrecos.innerHTML = '';
         for (const promo of promocoes) {
             caixaPrecos.appendChild(criarLinhaPreco(promo));

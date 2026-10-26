@@ -23,6 +23,26 @@ function texto(string $campo, int $maximo): ?string
     return $valor === '' ? null : mb_substr($valor, 0, $maximo);
 }
 
+// jogos que a rawg não tem: ficam só com o nome, a imagem e o id da steam (se houver), que vêm da cheapshark
+if (($_POST['fonte'] ?? '') === 'cheapshark') {
+    $nome = texto('nome', 255);
+    $steam = (int) ($_POST['steam'] ?? 0);
+
+    if (!$nome) {
+        http_response_code(400);
+        responder(['erro' => 'Dados do jogo inválidos.']);
+    }
+
+    // só imagens por https, as da cheapshark vêm de várias lojas
+    $imagem = texto('imagem', 255);
+    if ($imagem && !str_starts_with($imagem, 'https://')) {
+        $imagem = null;
+    }
+
+    $id = Jogo::procurar(0, '', $steam, $nome) ?? Jogo::guardarSimples($nome, $imagem, $steam ?: null);
+    responder(['id' => $id]);
+}
+
 $rawgId = (int) ($_POST['rawg_id'] ?? 0);
 $nome = texto('nome', 255);
 $slug = texto('slug', 255);

@@ -270,6 +270,16 @@ class Jogo
         return $stmt->fetchAll(PDO::FETCH_COLUMN);
     }
 
+    // jogo que a rawg não conhece, guardado só com o que a cheapshark dá
+    public static function guardarSimples(string $nome, ?string $imagem, ?int $steamAppId): int
+    {
+        $pdo = Database::ligar();
+        $stmt = $pdo->prepare('INSERT INTO Jogos (nome, imagem_capa, steam_app_id) VALUES (:nome, :imagem, :steam)');
+        $stmt->execute(['nome' => $nome, 'imagem' => $imagem, 'steam' => $steamAppId]);
+
+        return (int) $pdo->lastInsertId();
+    }
+
     // procura um jogo que já esteja na bd (pela rawg, pela steam ou pelo nome), para não haver repetidos
     public static function procurar(int $rawgId, string $slug, int $steamAppId, string $nome): ?int
     {

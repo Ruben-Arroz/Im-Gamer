@@ -106,7 +106,7 @@ require_once __DIR__ . '/includes/header.php';
         data-base="<?= BASE_URL ?>">
         <p class="texto-dim" id="procurar-estado">A procurar o jogo...</p>
     </section>
-    <script src="<?= BASE_URL ?>/projeto/assets/js/jogo_rawg.js?v=1"></script>
+    <script src="<?= BASE_URL ?>/projeto/assets/js/jogo_rawg.js?v=2"></script>
 
 <?php elseif (!$jogo): ?>
     <section class="jogo">
@@ -181,6 +181,11 @@ require_once __DIR__ . '/includes/header.php';
                     <?php foreach ($lojas as $loja => $link): ?>
                         <a class="botao-contorno" href="<?= htmlspecialchars($link) ?>" target="_blank" rel="noopener">Ver na <?= $loja ?></a>
                     <?php endforeach; ?>
+
+                    <!-- sem loja conhecida, o botão leva à lista de preços, que tem o link de cada loja -->
+                    <?php if (!$lojas): ?>
+                        <a class="botao-contorno" id="botao-loja" href="#precos-titulo">Ver preços nas lojas</a>
+                    <?php endif; ?>
                 </div>
             </div>
         </div>
@@ -229,7 +234,7 @@ require_once __DIR__ . '/includes/header.php';
             <?php endforeach; ?>
         <?php endif; ?>
 
-        <h2>Preços nas lojas de PC</h2>
+        <h2 id="precos-titulo">Preços nas lojas de PC</h2>
         <!-- os preços vêm da cheapshark e é o browser que os pede (jogo.js) -->
         <div id="precos" class="precos"
             data-steam="<?= $jogo['steam_app_id'] ?: '' ?>"
@@ -304,7 +309,7 @@ require_once __DIR__ . '/includes/header.php';
     </section>
 
     <script src="<?= BASE_URL ?>/projeto/assets/js/cartoes.js?v=3"></script>
-    <script src="<?= BASE_URL ?>/projeto/assets/js/jogo.js?v=1"></script>
+    <script src="<?= BASE_URL ?>/projeto/assets/js/jogo.js?v=2"></script>
 <?php endif; ?>
 
 <?php require_once __DIR__ . '/includes/footer.php'; ?>
