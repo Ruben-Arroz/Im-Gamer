@@ -149,6 +149,7 @@ $botaoPublicar = Novo-Botao 'Publicar site' $true
 $botaoSincronizar = Novo-Botao 'Sincronizar contas' $false
 $botaoCredenciais = Novo-Botao 'Enviar credenciais' $false
 $botaoSite = Novo-Botao 'Abrir site' $false
+$botaoLocal = Novo-Botao 'Site local' $false
 $botaoLimpar = Novo-Botao 'Limpar' $false
 
 # o botão principal fica com texto escuro quando o rato passa por cima
@@ -525,6 +526,38 @@ $botaoSite.Add_Click({
     Start-Process $site
 })
 
+# o servidor da UA não tem internet, por isso coisas como ligar a Epic só funcionam com o site a correr aqui no PC
+# arranca o php como servidor (se ainda não estiver ligado) e abre a página das contas ligadas
+$botaoLocal.Add_Click({
+    if (-not (Ha-Vpn)) {
+        return
+    }
+
+    if (-not (Test-Path $php)) {
+        Escrever 'Não encontrei o PHP neste computador.' $corTexto $true
+        return
+    }
+
+    # vê se já há alguma coisa a responder na porta 8124
+    $ligado = $false
+    try {
+        $teste = New-Object System.Net.Sockets.TcpClient('localhost', 8124)
+        $teste.Close()
+        $ligado = $true
+    } catch {
+    }
+
+    if (-not $ligado) {
+        $script:siteLocal = Start-Process -FilePath $php -ArgumentList "-S localhost:8124 -t `"$pastaProjeto`"" -WindowStyle Hidden -PassThru
+        Start-Sleep -Milliseconds 800
+    }
+
+    Start-Process 'http://localhost:8124/projeto/contas.php'
+    Escrever '' $corTexto $false
+    Escrever 'Site local aberto em http://localhost:8124 (fecha quando fechares esta janela).' $corTexto $true
+    $estado.Text = 'Site local a correr.'
+})
+
 $botaoLimpar.Add_Click({
     # enquanto uma tarefa está a correr os botões não fazem nada
     if ($script:ocupado) {
@@ -542,6 +575,13 @@ $janela.Add_HandleCreated({
 })
 $registo.Add_HandleCreated({
     [void][Windows]::SetWindowTheme($registo.Handle, 'DarkMode_Explorer', $null)
+})
+
+# ao fechar a janela desliga o site local, se foi esta janela que o ligou
+$janela.Add_FormClosed({
+    if ($script:siteLocal -and -not $script:siteLocal.HasExited) {
+        Stop-Process -Id $script:siteLocal.Id -Force
+    }
 })
 
 [void]$janela.ShowDialog()
