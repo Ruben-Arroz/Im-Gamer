@@ -211,11 +211,12 @@ class Biblioteca
         return $stmt->fetchAll();
     }
 
-    // para as contas que não dão horas (xbox), mostra os jogos pela última vez que foram jogados
-    public static function porUltimaVez(int $contaId, int $limite): array
+    // jogos sem horas (nunca jogados ou a plataforma não diz), pela última vez que foram jogados e depois pelo nome
+    public static function semHoras(int $contaId, int $limite): array
     {
         $pdo = Database::ligar();
-        $stmt = $pdo->prepare('SELECT * FROM Biblioteca_Jogos WHERE conta_id = :conta ORDER BY ultima_vez_jogado DESC LIMIT :limite');
+        $stmt = $pdo->prepare('SELECT * FROM Biblioteca_Jogos WHERE conta_id = :conta AND (minutos_jogados IS NULL OR minutos_jogados = 0)
+            ORDER BY ultima_vez_jogado DESC, nome ASC LIMIT :limite');
         $stmt->bindValue('conta', $contaId, PDO::PARAM_INT);
         $stmt->bindValue('limite', $limite, PDO::PARAM_INT);
         $stmt->execute();
