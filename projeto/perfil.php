@@ -155,7 +155,8 @@ require_once __DIR__ . '/includes/header.php';
             $temInventario = $conta['servico'] === 'steam';
 
             $jogosConta = Biblioteca::maisJogados($conta['id'], 8);
-            $jogosPorData = $temHoras ? [] : Biblioteca::porUltimaVez($conta['id'], 8);
+            // os jogos sem horas não entram nos mais jogados, por isso têm a sua própria fila
+            $jogosPorData = Biblioteca::semHoras($conta['id'], 8);
             $recentes = Biblioteca::jogadosRecentemente($conta['id'], 8);
             $itens = $mostrarValores ? Biblioteca::inventario($conta['id'], 8) : [];
             ?>
@@ -242,7 +243,7 @@ require_once __DIR__ . '/includes/header.php';
 
                     <?php if ($jogosPorData): ?>
                         <div class="subtitulo-linha">
-                            <p class="subtitulo">Jogos</p>
+                            <p class="subtitulo"><?= $jogosConta ? 'Outros jogos' : 'Jogos' ?></p>
                             <a href="<?= BASE_URL ?>/projeto/biblioteca.php?u=<?= urlencode($utilizador['nome_utilizador']) ?>&amp;servico[]=<?= $conta['servico'] ?>">Ver todos</a>
                         </div>
                         <div class="fila-jogos">
@@ -253,7 +254,11 @@ require_once __DIR__ . '/includes/header.php';
                                     <?php endif; ?>
                                     <p><?= htmlspecialchars($jogo['nome']) ?></p>
                                     <span>
-                                        <?= $jogo['ultima_vez_jogado'] ? (new DateTime($jogo['ultima_vez_jogado']))->format('d/m/Y') : 'nunca jogado' ?>
+                                        <?php if ($jogo['ultima_vez_jogado']): ?>
+                                            <?= (new DateTime($jogo['ultima_vez_jogado']))->format('d/m/Y') ?>
+                                        <?php elseif ($jogo['minutos_jogados'] !== null): ?>
+                                            nunca jogado
+                                        <?php endif; ?>
                                     </span>
                                 </a>
                             <?php endforeach; ?>
