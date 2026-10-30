@@ -117,9 +117,18 @@ require_once __DIR__ . '/includes/header.php';
 <?php else: ?>
     <section class="jogo">
         <div class="jogo-topo">
-            <?php if ($jogo['imagem_capa']): ?>
-                <img class="jogo-capa" src="<?= htmlspecialchars($jogo['imagem_capa']) ?>" alt="">
-            <?php endif; ?>
+            <!-- a imagem do jogo e as capturas de ecrã da rawg, que o browser vai buscar (galeria.js) -->
+            <div class="galeria" id="galeria"
+                data-chave="<?= htmlspecialchars(RAWG_API_KEY) ?>"
+                data-slug="<?= htmlspecialchars($jogo['slug'] ?? '') ?>"
+                data-nome="<?= htmlspecialchars($jogo['nome']) ?>">
+                <div class="galeria-principal">
+                    <img class="jogo-capa <?= $jogo['imagem_capa'] ? '' : 'escondido' ?>" id="galeria-imagem" src="<?= htmlspecialchars($jogo['imagem_capa'] ?? '') ?>" alt="">
+                    <button type="button" class="galeria-seta escondido" data-direcao="-1" aria-label="Imagem anterior">&lsaquo;</button>
+                    <button type="button" class="galeria-seta escondido" data-direcao="1" aria-label="Imagem seguinte">&rsaquo;</button>
+                </div>
+                <div class="galeria-miniaturas" id="galeria-miniaturas"></div>
+            </div>
 
             <div class="jogo-info">
                 <h1><?= htmlspecialchars($jogo['nome']) ?></h1>
@@ -310,6 +319,7 @@ require_once __DIR__ . '/includes/header.php';
 
     <script src="<?= BASE_URL ?>/projeto/assets/js/cartoes.js?v=3"></script>
     <script src="<?= BASE_URL ?>/projeto/assets/js/jogo.js?v=2"></script>
+    <script src="<?= BASE_URL ?>/projeto/assets/js/galeria.js?v=1"></script>
 <?php endif; ?>
 
 <?php require_once __DIR__ . '/includes/footer.php'; ?>

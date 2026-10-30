@@ -1538,3 +1538,67 @@ a.barra-nome:hover {
 .ordem-desejos select option {
     background: var(--bg);
 }
+
+/* galeria da página do jogo */
+/* sem o min-width a fila das miniaturas alarga a coluna e no telemóvel sai do ecrã */
+.galeria {
+    min-width: 0;
+}
+
+.galeria-principal {
+    position: relative;
+}
+
+.galeria-seta {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 34px;
+    height: 34px;
+    background: rgba(14, 15, 18, 0.8);
+    color: var(--text);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    font-size: 1.3rem;
+    line-height: 1;
+    cursor: pointer;
+}
+
+.galeria-seta:hover {
+    background: var(--bg);
+}
+
+.galeria-seta[data-direcao="-1"] {
+    left: 8px;
+}
+
+.galeria-seta[data-direcao="1"] {
+    right: 8px;
+}
+
+.galeria-miniaturas {
+    display: flex;
+    gap: 8px;
+    overflow-x: auto;
+    margin-top: 10px;
+    padding-bottom: 6px;
+    scrollbar-width: thin;
+    scrollbar-color: var(--border) transparent;
+}
+
+.galeria-miniaturas img {
+    /* sem largura fixa a imagem não encolhe abaixo do tamanho real */
+    width: 96px;
+    flex-shrink: 0;
+    aspect-ratio: 16 / 9;
+    object-fit: cover;
+    border-radius: 2px;
+    opacity: 0.45;
+    cursor: pointer;
+    transition: opacity 0.15s ease;
+}
+
+.galeria-miniaturas img:hover,
+.galeria-miniaturas img.ativa {
+    opacity: 1;
+}
