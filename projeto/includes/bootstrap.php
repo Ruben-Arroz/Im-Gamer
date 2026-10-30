@@ -1,5 +1,8 @@
 <?php
 
+// as horas dos anúncios de LFG são as de Portugal, mesmo que o servidor esteja configurado com outra
+date_default_timezone_set('Europe/Lisbon');
+
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
@@ -34,3 +37,6 @@ require_once __DIR__ . '/../classes/Epic.php';
 require_once __DIR__ . '/../classes/Estatisticas.php';
 require_once __DIR__ . '/../classes/ListaDesejos.php';
 require_once __DIR__ . '/../classes/Avaliacoes.php';
+require_once __DIR__ . '/../classes/Notificacoes.php';
+require_once __DIR__ . '/../classes/Convites.php';
+require_once __DIR__ . '/../classes/Lfg.php';

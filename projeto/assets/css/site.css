@@ -998,6 +998,7 @@ main:has(.pagina-larga) {
 /* separadores dos lançamentos */
 .abas {
     display: flex;
+    flex-wrap: wrap;
     gap: 10px;
     margin-bottom: 28px;
 }
@@ -1576,4 +1577,181 @@ a.barra-nome:hover {
 
 .galeria-seta[data-direcao="1"] {
     right: 4px;
+}
+
+/* LFG e convites */
+.contador {
+    display: inline-block;
+    min-width: 18px;
+    margin-left: 4px;
+    padding: 1px 5px;
+    background: var(--text);
+    color: var(--bg);
+    border-radius: 9px;
+    font-size: 0.7rem;
+    line-height: 1.4;
+    text-align: center;
+}
+
+.abas a.ativo .contador {
+    background: var(--bg);
+    color: var(--text);
+}
+
+.lfg-topo {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 16px;
+    margin-bottom: 24px;
+}
+
+.lfg-topo h1 {
+    font-size: 1.1rem;
+    margin-bottom: 8px;
+}
+
+.botao-principal {
+    background: var(--text);
+    color: var(--bg);
+    padding: 9px 16px;
+    border-radius: 4px;
+    font-size: 0.85rem;
+    text-decoration: none;
+}
+
+.botao-principal:hover {
+    background: var(--hover);
+}
+
+.filtros-lfg {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 24px;
+}
+
+.filtros-lfg input[type="text"],
+.filtros-lfg select {
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--text);
+    font-family: inherit;
+    font-size: 0.85rem;
+    padding: 8px 12px;
+    border-radius: 4px;
+}
+
+.filtros-lfg select option {
+    background: var(--bg);
+}
+
+.filtros-lfg .opcao {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.85rem;
+}
+
+.filtros-lfg button {
+    background: transparent;
+    color: var(--text);
+    border: 1px solid var(--border);
+    font-family: inherit;
+    font-size: 0.85rem;
+    padding: 8px 14px;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.filtros-lfg button:hover {
+    border-color: var(--text-dim);
+}
+
+.lfg .grelha-jogos {
+    grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+    gap: 20px;
+}
+
+.lfg .cartao-titulo {
+    padding: 14px 14px 4px;
+}
+
+.lfg .cartao-loja {
+    padding: 0 14px;
+}
+
+.lfg .cartao-loja + .cartao-loja {
+    padding-top: 2px;
+}
+
+.lfg .cartao-precos {
+    padding: 12px 14px 14px;
+}
+
+.colunas-convites {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 40px;
+}
+
+.colunas-convites h2:first-child {
+    margin-top: 0;
+}
+
+/* botão pequeno à direita numa linha das listas (tirar participante, cancelar convite) */
+.lista-acao {
+    margin-left: auto;
+}
+
+.lista-acao button,
+a.lista-acao {
+    padding: 5px 10px;
+    font-size: 0.75rem;
+}
+
+.lista-avaliacoes .jogo-acoes {
+    flex-basis: 100%;
+}
+
+.aviso-novo {
+    color: var(--text);
+}
+
+.link-discreto {
+    margin-left: 8px;
+    font-size: 0.8rem;
+    color: var(--text-dim);
+}
+
+.link-discreto:hover {
+    color: var(--text);
+}
+
+.lista-lfg {
+    max-width: none;
+}
+
+.perfil-acoes .botao-contorno {
+    padding: 8px 12px;
+    font-size: 0.8rem;
+}
+
+/* o calendário do campo de data fica escuro, como o resto do site */
+.formulario input[type="datetime-local"] {
+    color-scheme: dark;
+}
+
+@media (max-width: 760px) {
+    .colunas-convites {
+        grid-template-columns: 1fr;
+        gap: 0;
+    }
+
+    /* no telemóvel os enviados ficam por baixo, por isso o título precisa do espaço normal */
+    .colunas-convites > div + div h2:first-child {
+        margin-top: 40px;
+    }
 }

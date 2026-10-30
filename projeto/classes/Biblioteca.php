@@ -173,7 +173,7 @@ class Biblioteca
     public static function quemTem(int $jogoId, string $nome, int $limite): array
     {
         $pdo = Database::ligar();
-        $stmt = $pdo->prepare('SELECT u.nome_utilizador, u.foto_perfil, c.servico, b.minutos_jogados FROM Biblioteca_Jogos b
+        $stmt = $pdo->prepare('SELECT u.id AS utilizador_id, u.nome_utilizador, u.foto_perfil, c.servico, b.minutos_jogados FROM Biblioteca_Jogos b
             JOIN Contas_Ligadas c ON c.id = b.conta_id
             JOIN Utilizadores u ON u.id = c.utilizador_id
             WHERE b.jogo_id = :jogo OR b.nome = :nome
