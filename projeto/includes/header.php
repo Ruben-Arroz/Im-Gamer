@@ -5,6 +5,12 @@ require_once __DIR__ . '/bootstrap.php';
 if (!isset($tituloPagina)) {
     $tituloPagina = "I'm Gamer";
 }
+
+// convites por responder e avisos por ler, aparecem ao lado do LFG
+$avisosLfg = 0;
+if (Auth::autenticado()) {
+    $avisosLfg = Convites::pendentes($_SESSION['utilizador_id']) + Notificacoes::porLer($_SESSION['utilizador_id']);
+}
 ?>
 <!DOCTYPE html>
 <html lang="pt-PT">
@@ -17,7 +23,7 @@ if (!isset($tituloPagina)) {
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Share+Tech+Mono&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="<?= BASE_URL ?>/common/style.css?v=2">
-<link rel="stylesheet" href="<?= BASE_URL ?>/projeto/assets/css/site.css?v=25">
+<link rel="stylesheet" href="<?= BASE_URL ?>/projeto/assets/css/site.css?v=27">
 </head>
 <body>
 
@@ -26,7 +32,12 @@ if (!isset($tituloPagina)) {
     <nav>
         <a href="<?= BASE_URL ?>/projeto/catalogo.php">Catálogo</a>
         <a href="<?= BASE_URL ?>/projeto/lancamentos.php">Lançamentos</a>
-        <a href="<?= BASE_URL ?>/projeto/lfg.php">LFG</a>
+        <a href="<?= BASE_URL ?>/projeto/lfg.php">
+            LFG
+            <?php if ($avisosLfg > 0): ?>
+                <span class="contador" title="Convites e avisos por ver"><?= $avisosLfg ?></span>
+            <?php endif; ?>
+        </a>
         <?php if (Auth::autenticado()): ?>
             <a href="<?= BASE_URL ?>/projeto/perfil.php">Perfil</a>
             <a href="<?= BASE_URL ?>/projeto/logout.php">Sair</a>

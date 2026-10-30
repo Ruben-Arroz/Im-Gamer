@@ -35,6 +35,21 @@ class Utilizador
         return $stmt->fetch();
     }
 
+    // pesquisa de jogadores pelo nome, para os convites (sem o próprio utilizador)
+    public static function pesquisar(string $texto, int $excetoId, int $limite): array
+    {
+        $pdo = Database::ligar();
+        $stmt = $pdo->prepare('SELECT id, nome_utilizador, foto_perfil FROM Utilizadores
+            WHERE nome_utilizador LIKE :nome AND id != :eu
+            ORDER BY nome_utilizador LIMIT :limite');
+        $stmt->bindValue('nome', '%' . $texto . '%');
+        $stmt->bindValue('eu', $excetoId, PDO::PARAM_INT);
+        $stmt->bindValue('limite', $limite, PDO::PARAM_INT);
+        $stmt->execute();
+
+        return $stmt->fetchAll();
+    }
+
     public static function nomeEmUso(string $nome, int $id): bool
     {
         $pdo = Database::ligar();

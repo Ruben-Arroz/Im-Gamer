@@ -270,6 +270,50 @@ class Jogo
         return $stmt->fetchAll(PDO::FETCH_COLUMN);
     }
 
+    // o jogo escolhido num formulário (criar anúncio de LFG, convidar): ou já vem da bd (jogo_id, a partir da página do jogo)
+    // ou foi escolhido na pesquisa da rawg feita no browser (pesquisa_jogo.js). devolve o id na tabela Jogos, ou null
+    public static function doFormulario(array $dados): ?int
+    {
+        $pesquisa = trim($dados['jogo_pesquisa'] ?? '');
+        $rawgId = (int) ($dados['jogo_rawg_id'] ?? 0);
+
+        if ($rawgId > 0) {
+            $nome = trim($dados['jogo_nome'] ?? '');
+            if ($nome === '') {
+                $nome = $pesquisa;
+            }
+
+            $slug = $dados['jogo_slug'] ?? '';
+            if ($nome === '' || mb_strlen($nome) > 255 || !preg_match('/^[a-z0-9-]*$/', $slug)) {
+                return null;
+            }
+
+            // os dados vêm do browser, por isso só se aceitam imagens da rawg e datas no formato certo
+            $imagem = $dados['jogo_imagem'] ?? '';
+            if (!str_starts_with($imagem, 'https://media.rawg.io/') || strlen($imagem) > 255) {
+                $imagem = null;
+            }
+            $lancamento = $dados['jogo_lancamento'] ?? '';
+            if (!preg_match('/^\d{4}-\d{2}-\d{2}$/', $lancamento)) {
+                $lancamento = null;
+            }
+
+            return self::procurar($rawgId, $slug, 0, '') ?? self::guardarDaRawg($rawgId, $nome, $slug, $imagem, $lancamento);
+        }
+
+        $jogoId = (int) ($dados['jogo_id'] ?? 0);
+        if ($jogoId > 0) {
+            $jogo = self::buscarPorId($jogoId);
+
+            // se o texto da pesquisa não for o nome desse jogo, o utilizador escreveu outro e não o escolheu da lista
+            if ($jogo && $jogo['nome'] === $pesquisa) {
+                return $jogoId;
+            }
+        }
+
+        return null;
+    }
+
     // jogo que a rawg não conhece, guardado só com o que a cheapshark dá
     public static function guardarSimples(string $nome, ?string $imagem, ?int $steamAppId): int
     {

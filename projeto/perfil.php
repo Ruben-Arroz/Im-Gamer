@@ -17,6 +17,7 @@ if ($utilizador) {
     $proprio = (int) $utilizador['id'] === (int) $_SESSION['utilizador_id'];
     $contas = ContasLigadas::ordenarPorFama(ContasLigadas::listar($utilizador['id']));
     $maisJogados = Biblioteca::maisJogadosDeTodas($utilizador['id'], 8);
+    $anunciosLfg = Lfg::doUtilizador($utilizador['id'], 4);
 
     // os valores aparecem na moeda de quem está a ver, e só se o dono não os escondeu
     $moeda = $_SESSION['moeda'] ?? 'EUR';
@@ -82,6 +83,10 @@ require_once __DIR__ . '/includes/header.php';
                         <img src="<?= BASE_URL ?>/projeto/assets/img/icones/definicoes.svg" alt="Definições">
                     </a>
                 </nav>
+            <?php else: ?>
+                <div class="perfil-acoes">
+                    <a class="botao-contorno" href="<?= BASE_URL ?>/projeto/convidar.php?u=<?= urlencode($utilizador['nome_utilizador']) ?>">Convidar para jogar</a>
+                </div>
             <?php endif; ?>
         </div>
 
@@ -136,6 +141,24 @@ require_once __DIR__ . '/includes/header.php';
                     </a>
                 <?php endforeach; ?>
             </div>
+        <?php endif; ?>
+
+        <?php if ($anunciosLfg): ?>
+            <div class="subtitulo-linha">
+                <p class="subtitulo">Próximos jogos (LFG)</p>
+                <?php if ($proprio): ?>
+                    <a href="<?= BASE_URL ?>/projeto/lfg.php?aba=meus">Ver todos</a>
+                <?php endif; ?>
+            </div>
+            <ul class="lista-avaliacoes lista-lfg">
+                <?php foreach ($anunciosLfg as $anuncio): ?>
+                    <li>
+                        <a href="<?= BASE_URL ?>/projeto/lfg_ver.php?id=<?= $anuncio['id'] ?>"><?= htmlspecialchars($anuncio['jogo']) ?></a>
+                        <span><?= formatarDataEvento($anuncio['data_hora_evento']) ?></span>
+                        <span class="texto-dim"><?= Lfg::estado($anuncio) ?></span>
+                    </li>
+                <?php endforeach; ?>
+            </ul>
         <?php endif; ?>
 
         <?php if (!$contas): ?>

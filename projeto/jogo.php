@@ -74,6 +74,7 @@ if ($jogo) {
 
     $progresso = Biblioteca::progressoNoJogo($utilizadorId, $jogo['id'], $jogo['nome']);
     $quemTem = Biblioteca::quemTem($jogo['id'], $jogo['nome'], 12);
+    $anunciosLfg = Lfg::doJogo($jogo['id'], 5);
 
     $modos = [];
     foreach (Biblioteca::MODOS as $modo => $nomeModo) {
@@ -186,6 +187,8 @@ require_once __DIR__ . '/includes/header.php';
                         <?php endif; ?>
                     </form>
 
+                    <a class="botao-contorno" href="<?= BASE_URL ?>/projeto/lfg_criar.php?jogo=<?= $jogo['id'] ?>">Procurar equipa</a>
+
                     <?php foreach ($lojas as $loja => $link): ?>
                         <a class="botao-contorno" href="<?= htmlspecialchars($link) ?>" target="_blank" rel="noopener">Ver na <?= $loja ?></a>
                     <?php endforeach; ?>
@@ -254,6 +257,19 @@ require_once __DIR__ . '/includes/header.php';
             <p class="texto-dim">A carregar...</p>
         </div>
 
+        <?php if ($anunciosLfg): ?>
+            <h2>Procura de equipa</h2>
+            <ul class="lista-avaliacoes lista-lfg">
+                <?php foreach ($anunciosLfg as $anuncio): ?>
+                    <li>
+                        <a href="<?= BASE_URL ?>/projeto/lfg_ver.php?id=<?= $anuncio['id'] ?>"><?= formatarDataEvento($anuncio['data_hora_evento']) ?></a>
+                        <span><?= htmlspecialchars($anuncio['plataforma'] ?? 'Qualquer plataforma') ?> · de <?= htmlspecialchars($anuncio['nome_utilizador']) ?></span>
+                        <span class="texto-dim"><?= Lfg::estado($anuncio) ?></span>
+                    </li>
+                <?php endforeach; ?>
+            </ul>
+        <?php endif; ?>
+
         <h2 id="avaliacoes">Avaliações</h2>
 
         <form method="post" class="formulario-avaliacao">
@@ -305,6 +321,9 @@ require_once __DIR__ . '/includes/header.php';
                             <?= ContasLigadas::SERVICOS[$pessoa['servico']] ?>
                             <?= $pessoa['minutos_jogados'] !== null ? '· ' . formatarHoras($pessoa['minutos_jogados']) : '' ?>
                         </span>
+                        <?php if ((int) $pessoa['utilizador_id'] !== $utilizadorId): ?>
+                            <a class="link-discreto" href="<?= BASE_URL ?>/projeto/convidar.php?u=<?= urlencode($pessoa['nome_utilizador']) ?>&amp;jogo=<?= $jogo['id'] ?>">Convidar</a>
+                        <?php endif; ?>
                     </li>
                 <?php endforeach; ?>
             </ul>
