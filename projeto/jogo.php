@@ -127,7 +127,6 @@ require_once __DIR__ . '/includes/header.php';
                     <button type="button" class="galeria-seta escondido" data-direcao="-1" aria-label="Imagem anterior">&lsaquo;</button>
                     <button type="button" class="galeria-seta escondido" data-direcao="1" aria-label="Imagem seguinte">&rsaquo;</button>
                 </div>
-                <div class="galeria-miniaturas" id="galeria-miniaturas"></div>
             </div>
 
             <div class="jogo-info">
@@ -319,7 +318,7 @@ require_once __DIR__ . '/includes/header.php';
 
     <script src="<?= BASE_URL ?>/projeto/assets/js/cartoes.js?v=3"></script>
     <script src="<?= BASE_URL ?>/projeto/assets/js/jogo.js?v=2"></script>
-    <script src="<?= BASE_URL ?>/projeto/assets/js/galeria.js?v=1"></script>
+    <script src="<?= BASE_URL ?>/projeto/assets/js/galeria.js?v=2"></script>
 <?php endif; ?>
 
 <?php require_once __DIR__ . '/includes/footer.php'; ?>

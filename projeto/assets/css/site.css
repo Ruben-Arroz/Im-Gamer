@@ -1553,52 +1553,27 @@ a.barra-nome:hover {
     position: absolute;
     top: 50%;
     transform: translateY(-50%);
-    width: 34px;
-    height: 34px;
-    background: rgba(14, 15, 18, 0.8);
+    padding: 8px 10px;
+    background: none;
+    border: none;
     color: var(--text);
-    border: 1px solid var(--border);
-    border-radius: 4px;
-    font-size: 1.3rem;
+    font-size: 2.2rem;
     line-height: 1;
     cursor: pointer;
-}
-
-.galeria-seta:hover {
-    background: var(--bg);
-}
-
-.galeria-seta[data-direcao="-1"] {
-    left: 8px;
-}
-
-.galeria-seta[data-direcao="1"] {
-    right: 8px;
-}
-
-.galeria-miniaturas {
-    display: flex;
-    gap: 8px;
-    overflow-x: auto;
-    margin-top: 10px;
-    padding-bottom: 6px;
-    scrollbar-width: thin;
-    scrollbar-color: var(--border) transparent;
-}
-
-.galeria-miniaturas img {
-    /* sem largura fixa a imagem não encolhe abaixo do tamanho real */
-    width: 96px;
-    flex-shrink: 0;
-    aspect-ratio: 16 / 9;
-    object-fit: cover;
-    border-radius: 2px;
-    opacity: 0.45;
-    cursor: pointer;
+    opacity: 0.7;
+    /* a sombra deixa ver a seta mesmo nas imagens claras */
+    text-shadow: 0 0 6px rgba(0, 0, 0, 0.9);
     transition: opacity 0.15s ease;
 }
 
-.galeria-miniaturas img:hover,
-.galeria-miniaturas img.ativa {
+.galeria-seta:hover {
     opacity: 1;
+}
+
+.galeria-seta[data-direcao="-1"] {
+    left: 4px;
+}
+
+.galeria-seta[data-direcao="1"] {
+    right: 4px;
 }
