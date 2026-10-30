@@ -17,7 +17,7 @@ if (!isset($tituloPagina)) {
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Share+Tech+Mono&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="<?= BASE_URL ?>/common/style.css?v=2">
-<link rel="stylesheet" href="<?= BASE_URL ?>/projeto/assets/css/site.css?v=21">
+<link rel="stylesheet" href="<?= BASE_URL ?>/projeto/assets/css/site.css?v=24">
 </head>
 <body>
 
