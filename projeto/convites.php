@@ -13,7 +13,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $acao = $_POST['acao'] ?? '';
     $conviteId = (int) ($_POST['convite_id'] ?? 0);
 
-    // a classe Convites só deixa responder quem recebeu e cancelar quem enviou
+    // a classe Convites confirma quem pode responder e cancelar
     if (!Auth::tokenValido($_POST['token'] ?? '')) {
         $erro = 'A sessão expirou. Tenta outra vez.';
     } elseif ($acao === 'aceitar' || $acao === 'recusar') {
@@ -32,7 +32,7 @@ $recebidos = Convites::recebidos($utilizadorId);
 $enviados = Convites::enviados($utilizadorId);
 $avisos = Notificacoes::listar($utilizadorId, 30);
 
-// os avisos ficam lidos ao abrir esta página (os que eram novos ainda aparecem marcados desta vez)
+// os avisos ficam lidos ao abrir a página (desta vez ainda aparecem como novos)
 Notificacoes::marcarLidas($utilizadorId);
 
 const ESTADOS_CONVITE = [
@@ -48,10 +48,7 @@ require_once __DIR__ . '/includes/header.php';
 
 <section class="lfg pagina-larga">
     <div class="lfg-topo">
-        <div>
-            <h1>Convites</h1>
-            <p class="texto-dim">Convites para jogar e avisos dos teus anúncios de LFG.</p>
-        </div>
+        <h1>Convites</h1>
         <a class="botao-principal" href="<?= BASE_URL ?>/projeto/convidar.php">Convidar jogadores</a>
     </div>
 

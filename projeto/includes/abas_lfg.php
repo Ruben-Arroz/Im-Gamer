@@ -1,6 +1,6 @@
 <?php
 // separadores do LFG, usados no lfg.php e no convites.php
-// $abaAtual diz qual está ativo e $avisosLfg (do header.php) é o número de convites e avisos por ver
+// precisa do $abaAtual e do $avisosLfg (vem do header.php)
 ?>
 <nav class="abas">
     <?php foreach (Lfg::ABAS as $chave => $nome): ?>

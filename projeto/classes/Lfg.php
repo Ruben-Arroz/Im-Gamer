@@ -1,20 +1,32 @@
 <?php
 
-// LFG (looking for group): anúncios para encontrar pessoas para jogar e quem entrou em cada um
+// LFG (looking for group): anúncios e quem entrou em cada um
 class Lfg
 {
-    // para ninguém encher a lista, cada utilizador só pode ter alguns anúncios abertos ao mesmo tempo
+    // limites para ninguém encher a lista
     const MAX_ABERTOS = 5;
     const MAX_VAGAS = 10;
     const MAX_DESCRICAO = 500;
 
     const ABAS = [
-        'proximos' => 'Próximos',
+        'proximos' => 'Anúncios',
         'meus' => 'Os meus',
-        'terminados' => 'Terminados',
     ];
 
-    // campos usados em todas as listas, já com o jogo, a plataforma, quem publicou e quantos entraram
+    const QUANDO = [
+        'hoje' => 'Hoje',
+        'amanha' => 'Amanhã',
+        'semana' => 'Próximos 7 dias',
+        'mes' => 'Próximos 30 dias',
+    ];
+
+    const ORDENS = [
+        'data' => ['Mais próximos', 'p.data_hora_evento ASC'],
+        'recentes' => ['Publicados há menos tempo', 'p.data_criacao DESC'],
+        'vagas' => ['Mais vagas livres', '(p.vagas - (SELECT COUNT(*) FROM LFG_Participantes lo WHERE lo.post_id = p.id)) DESC, p.data_hora_evento ASC'],
+    ];
+
+    // campos de todas as listas (com o jogo, a plataforma, o dono e quantos entraram)
     const CAMPOS = 'SELECT p.*, j.nome AS jogo, j.imagem_capa, pl.nome AS plataforma, u.nome_utilizador,
         (SELECT COUNT(*) FROM LFG_Participantes lp WHERE lp.post_id = p.id) AS participantes';
 
@@ -23,31 +35,54 @@ class Lfg
         JOIN Utilizadores u ON u.id = p.utilizador_id
         LEFT JOIN Plataformas pl ON pl.id = p.plataforma_id';
 
-    // a hora de agora vem do php e não do NOW() da bd, para ficar igual à que o utilizador escreve no formulário
+    // a hora vem do php e não do NOW() da bd, para bater certo com a do formulário
     private static function agora(): string
     {
         return date('Y-m-d H:i:s');
+    }
+
+    // início e fim de cada opção do filtro "quando"
+    private static function intervalo(string $quando): array
+    {
+        if ($quando === 'hoje') {
+            return [date('Y-m-d 00:00:00'), date('Y-m-d 23:59:59')];
+        }
+        if ($quando === 'amanha') {
+            $amanha = strtotime('+1 day');
+            return [date('Y-m-d 00:00:00', $amanha), date('Y-m-d 23:59:59', $amanha)];
+        }
+
+        $dias = $quando === 'semana' ? 7 : 30;
+        return [self::agora(), date('Y-m-d H:i:s', strtotime('+' . $dias . ' days'))];
     }
 
     public static function pesquisar(string $aba, array $filtros, int $utilizadorId, int $pagina, int $porPagina): array
     {
         $condicoes = [];
         $parametros = [];
+        // os da ordem ficam à parte porque a query do COUNT não tem ORDER BY
+        $parametrosOrdem = [];
 
-        // cada aba tem a sua condição e a sua ordem (os nomes vêm da lista ABAS, validada na página)
-        if ($aba === 'proximos') {
-            $condicoes[] = "p.estado = 'aberto' AND p.data_hora_evento >= :agora";
-            $parametros['agora'] = self::agora();
-            $ordem = 'p.data_hora_evento ASC';
-        } elseif ($aba === 'meus') {
+        if ($aba === 'meus') {
             $condicoes[] = '(p.utilizador_id = :eu OR p.id IN (SELECT post_id FROM LFG_Participantes WHERE utilizador_id = :eu2))';
             $parametros['eu'] = $utilizadorId;
             $parametros['eu2'] = $utilizadorId;
-            $ordem = 'p.data_hora_evento DESC';
+
+            // primeiro os que ainda vão acontecer, depois os que já passaram
+            $ordem = 'p.data_hora_evento < :agora_ordem, ABS(TIMESTAMPDIFF(SECOND, p.data_hora_evento, :agora_ordem2))';
+            $parametrosOrdem['agora_ordem'] = self::agora();
+            $parametrosOrdem['agora_ordem2'] = self::agora();
         } else {
-            $condicoes[] = "(p.estado = 'fechado' OR p.data_hora_evento < :agora)";
+            $condicoes[] = "p.estado = 'aberto' AND p.data_hora_evento >= :agora";
             $parametros['agora'] = self::agora();
-            $ordem = 'p.data_hora_evento DESC';
+            $ordem = self::ORDENS[$filtros['ordem']][1];
+        }
+
+        if ($filtros['quando'] !== '') {
+            $intervalo = self::intervalo($filtros['quando']);
+            $condicoes[] = 'p.data_hora_evento BETWEEN :de AND :ate';
+            $parametros['de'] = $intervalo[0];
+            $parametros['ate'] = $intervalo[1];
         }
 
         if ($filtros['jogo'] !== '') {
@@ -72,7 +107,7 @@ class Lfg
         $total = (int) $stmt->fetchColumn();
 
         $stmt = $pdo->prepare(self::CAMPOS . self::DE . $where . ' ORDER BY ' . $ordem . ', p.id DESC LIMIT :limite OFFSET :inicio');
-        foreach ($parametros as $nome => $valor) {
+        foreach (array_merge($parametros, $parametrosOrdem) as $nome => $valor) {
             $stmt->bindValue($nome, $valor);
         }
         $stmt->bindValue('limite', $porPagina, PDO::PARAM_INT);
@@ -80,6 +115,17 @@ class Lfg
         $stmt->execute();
 
         return ['anuncios' => $stmt->fetchAll(), 'total' => $total];
+    }
+
+    // nomes dos jogos com anúncios abertos, para as sugestões da pesquisa
+    public static function jogosComAnuncios(): array
+    {
+        $pdo = Database::ligar();
+        $stmt = $pdo->prepare("SELECT DISTINCT j.nome FROM LFG_Posts p JOIN Jogos j ON j.id = p.jogo_id
+            WHERE p.estado = 'aberto' AND p.data_hora_evento >= :agora ORDER BY j.nome LIMIT 100");
+        $stmt->execute(['agora' => self::agora()]);
+
+        return $stmt->fetchAll(PDO::FETCH_COLUMN);
     }
 
     public static function buscar(int $id): ?array
@@ -105,7 +151,7 @@ class Lfg
         return $stmt->fetchAll();
     }
 
-    // próximos anúncios em que o utilizador está (os dele e aqueles em que entrou), para o perfil
+    // próximos anúncios do utilizador (os dele e onde entrou), para o perfil
     public static function doUtilizador(int $utilizadorId, int $limite): array
     {
         $pdo = Database::ligar();
@@ -167,7 +213,7 @@ class Lfg
         return (int) $pdo->lastInsertId();
     }
 
-    // o texto do estado do anúncio, que aparece nos cartões e na página dele
+    // texto do estado que aparece nos cartões
     public static function estado(array $anuncio): string
     {
         if ($anuncio['data_hora_evento'] < self::agora()) {
@@ -189,7 +235,7 @@ class Lfg
         $pdo->beginTransaction();
 
         try {
-            // o FOR UPDATE bloqueia o anúncio até ao commit, assim duas pessoas não ficam com a última vaga ao mesmo tempo
+            // o FOR UPDATE bloqueia o anúncio até ao commit, para duas pessoas não ficarem com a última vaga
             $stmt = $pdo->prepare('SELECT p.*, j.nome AS jogo FROM LFG_Posts p JOIN Jogos j ON j.id = p.jogo_id WHERE p.id = :id FOR UPDATE');
             $stmt->execute(['id' => $postId]);
             $anuncio = $stmt->fetch();
@@ -248,7 +294,7 @@ class Lfg
         }
     }
 
-    // fechar (não aceita mais ninguém) ou reabrir, só o dono pode
+    // fechar ou reabrir, só o dono
     public static function mudarEstado(int $postId, int $donoId, string $estado): void
     {
         if (!in_array($estado, ['aberto', 'fechado'])) {
@@ -267,7 +313,7 @@ class Lfg
             return;
         }
 
-        // os participantes são guardados antes, porque ao apagar o anúncio a bd apaga-os também (ON DELETE CASCADE)
+        // guarda os participantes antes, porque o ON DELETE CASCADE apaga-os com o anúncio
         $participantes = self::participantes($postId);
 
         $pdo = Database::ligar();
