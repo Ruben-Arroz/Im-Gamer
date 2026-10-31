@@ -14,7 +14,7 @@ $erro = null;
 if ($anuncio && $_SERVER['REQUEST_METHOD'] === 'POST') {
     $acao = $_POST['acao'] ?? '';
 
-    // as funções da classe Lfg voltam a ver se quem pede pode mesmo fazer aquilo (dono, participante, ...)
+    // a classe Lfg confirma se quem pede pode fazer aquilo
     if (!Auth::tokenValido($_POST['token'] ?? '')) {
         $erro = 'A sessão expirou. Tenta outra vez.';
     } elseif ($acao === 'entrar') {

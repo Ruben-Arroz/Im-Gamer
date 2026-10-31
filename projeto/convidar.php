@@ -9,7 +9,7 @@ if (!Auth::autenticado()) {
 $utilizadorId = (int) $_SESSION['utilizador_id'];
 $erro = null;
 
-// sem ?u= mostra a pesquisa de jogadores, com ?u=nome mostra o formulário do convite para essa pessoa
+// sem ?u= mostra a pesquisa, com ?u=nome mostra o convite para essa pessoa
 $destino = isset($_GET['u']) ? Utilizador::buscarPorNome($_GET['u']) : null;
 $jogoInicial = isset($_GET['jogo']) ? Jogo::buscarPorId((int) $_GET['jogo']) : null;
 
@@ -62,7 +62,6 @@ require_once __DIR__ . '/includes/header.php';
 
     <?php elseif ($destino): ?>
         <h1>Convidar <?= htmlspecialchars($destino['nome_utilizador']) ?></h1>
-        <p class="texto-dim">A pessoa vê o convite na página dos convites e pode aceitar ou recusar. Quando responder, recebes um aviso.</p>
 
         <?php if ($erro): ?>
             <p class="aviso aviso-erro"><?= htmlspecialchars($erro) ?></p>
@@ -98,7 +97,6 @@ require_once __DIR__ . '/includes/header.php';
 
     <?php else: ?>
         <h1>Convidar jogadores</h1>
-        <p class="texto-dim">Procura um jogador pelo nome de utilizador.</p>
 
         <form method="get" novalidate>
             <?php if ($jogoInicial): ?>

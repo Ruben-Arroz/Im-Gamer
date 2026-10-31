@@ -10,17 +10,17 @@ $utilizadorId = (int) $_SESSION['utilizador_id'];
 $plataformas = Jogo::plataformas();
 $erro = null;
 
-// a partir da página de um jogo (?jogo=id) o jogo já vem escolhido
+// vindo da página de um jogo (?jogo=id) o jogo já vem escolhido
 $jogoInicial = isset($_GET['jogo']) ? Jogo::buscarPorId((int) $_GET['jogo']) : null;
 
-// a data e hora vêm do campo datetime-local, no formato 2026-11-01T21:00
+// o campo datetime-local manda a data assim: 2026-11-01T21:00
 $agora = new DateTime();
 $limite = (new DateTime())->modify('+6 months');
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && !Auth::tokenValido($_POST['token'] ?? '')) {
     $erro = 'A sessão expirou. Tenta outra vez.';
 } elseif ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    // o jogo só é procurado (e guardado, se for novo) depois de o token ser válido
+    // o jogo só é guardado depois de o token ser válido
     $jogoId = Jogo::doFormulario($_POST);
     $plataformaId = (int) ($_POST['plataforma_id'] ?? 0);
     $descricao = trim($_POST['descricao'] ?? '');
@@ -58,7 +58,6 @@ require_once __DIR__ . '/includes/header.php';
 
 <section class="formulario">
     <h1>Criar anúncio</h1>
-    <p class="texto-dim">Diz o que queres jogar, quando e quantas pessoas procuras. Quem entrar no anúncio aparece na página dele.</p>
 
     <?php if ($erro): ?>
         <p class="aviso aviso-erro"><?= htmlspecialchars($erro) ?></p>
@@ -98,7 +97,7 @@ require_once __DIR__ . '/includes/header.php';
 
         <label for="vagas">Quantos jogadores procuras</label>
         <input type="number" id="vagas" name="vagas" min="1" max="<?= Lfg::MAX_VAGAS ?>" value="<?= (int) ($_POST['vagas'] ?? 1) ?>">
-        <p class="ajuda">Sem contar contigo. Quando as vagas ficarem cheias, mais ninguém pode entrar.</p>
+        <p class="ajuda">Sem contar contigo.</p>
 
         <label for="descricao">Descrição</label>
         <textarea id="descricao" name="descricao" rows="4" maxlength="<?= Lfg::MAX_DESCRICAO ?>" placeholder="Por exemplo: ranked, nível ouro ou mais, com microfone"><?= htmlspecialchars($_POST['descricao'] ?? '') ?></textarea>

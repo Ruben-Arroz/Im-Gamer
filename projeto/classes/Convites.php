@@ -65,7 +65,7 @@ class Convites
         return $stmt->fetchAll();
     }
 
-    // convites recebidos que ainda não foram aceites nem recusados (é o número que aparece no cabeçalho)
+    // convites recebidos ainda sem resposta
     public static function pendentes(int $utilizadorId): int
     {
         $pdo = Database::ligar();
@@ -75,7 +75,7 @@ class Convites
         return (int) $stmt->fetchColumn();
     }
 
-    // só quem recebeu o convite pode responder, e só enquanto está pendente
+    // só quem recebeu responde, e só enquanto está pendente
     public static function responder(int $conviteId, int $destinatarioId, string $nomeDestinatario, bool $aceitar): void
     {
         $pdo = Database::ligar();
@@ -98,7 +98,7 @@ class Convites
         Notificacoes::criar($convite['remetente_id'], 'convite', $texto . '.');
     }
 
-    // quem enviou pode desistir do convite enquanto ninguém respondeu
+    // quem enviou pode cancelar enquanto não há resposta
     public static function cancelar(int $conviteId, int $remetenteId): void
     {
         $pdo = Database::ligar();
