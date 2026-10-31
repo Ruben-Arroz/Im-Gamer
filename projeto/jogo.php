@@ -262,8 +262,8 @@ require_once __DIR__ . '/includes/header.php';
             <ul class="lista-avaliacoes lista-lfg">
                 <?php foreach ($anunciosLfg as $anuncio): ?>
                     <li>
-                        <a href="<?= BASE_URL ?>/projeto/lfg_ver.php?id=<?= $anuncio['id'] ?>"><?= formatarDataEvento($anuncio['data_hora_evento']) ?></a>
-                        <span><?= htmlspecialchars($anuncio['plataforma'] ?? 'Qualquer plataforma') ?> · de <?= htmlspecialchars($anuncio['nome_utilizador']) ?></span>
+                        <a href="<?= BASE_URL ?>/projeto/lfg_ver.php?id=<?= $anuncio['id'] ?>">Equipa de <?= htmlspecialchars($anuncio['nome_utilizador']) ?></a>
+                        <span><?= htmlspecialchars($anuncio['plataforma'] ?? 'Qualquer plataforma') ?></span>
                         <span class="texto-dim"><?= Lfg::estado($anuncio) ?></span>
                     </li>
                 <?php endforeach; ?>

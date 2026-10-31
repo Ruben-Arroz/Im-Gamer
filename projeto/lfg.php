@@ -18,11 +18,11 @@ $plataformaId = (int) ($_GET['plataforma'] ?? 0);
 $filtros = [
     'jogo' => mb_substr(trim($_GET['jogo'] ?? ''), 0, 100),
     'plataforma' => in_array($plataformaId, array_column($plataformas, 'id')) ? $plataformaId : 0,
-    'quando' => isset(Lfg::QUANDO[$_GET['quando'] ?? '']) ? $_GET['quando'] : '',
-    'ordem' => isset(Lfg::ORDENS[$_GET['ordem'] ?? '']) ? $_GET['ordem'] : 'data',
-    'vagas' => isset($_GET['vagas']),
+    'ordem' => isset(Lfg::ORDENS[$_GET['ordem'] ?? '']) ? $_GET['ordem'] : 'recentes',
+    // o "só com vagas" vem ligado por defeito, o campo escondido "filtrado" diz se o formulário já foi usado
+    'vagas' => isset($_GET['filtrado']) ? isset($_GET['vagas']) : true,
 ];
-$comFiltros = $filtros['jogo'] !== '' || $filtros['plataforma'] || $filtros['quando'] !== '' || $filtros['vagas'];
+$comFiltros = $filtros['jogo'] !== '' || $filtros['plataforma'] || $filtros['ordem'] !== 'recentes' || !$filtros['vagas'];
 $sugestoes = Lfg::jogosComAnuncios();
 
 $pagina = max(1, (int) ($_GET['pagina'] ?? 1));
@@ -51,6 +51,7 @@ require_once __DIR__ . '/includes/header.php';
 
     <form method="get" class="filtros-lfg">
         <input type="hidden" name="aba" value="<?= $abaAtual ?>">
+        <input type="hidden" name="filtrado" value="1">
 
         <div class="pesquisa-lfg">
             <input type="search" name="jogo" list="jogos-lfg" value="<?= htmlspecialchars($filtros['jogo']) ?>" placeholder="Procurar jogo" aria-label="Procurar jogo">
@@ -66,13 +67,6 @@ require_once __DIR__ . '/includes/header.php';
             <option value="0">Todas as plataformas</option>
             <?php foreach ($plataformas as $plataforma): ?>
                 <option value="<?= $plataforma['id'] ?>" <?= $filtros['plataforma'] === (int) $plataforma['id'] ? 'selected' : '' ?>><?= htmlspecialchars($plataforma['nome']) ?></option>
-            <?php endforeach; ?>
-        </select>
-
-        <select name="quando" aria-label="Quando" onchange="this.form.submit()">
-            <option value="">Qualquer dia</option>
-            <?php foreach (Lfg::QUANDO as $chave => $nome): ?>
-                <option value="<?= $chave ?>" <?= $filtros['quando'] === $chave ? 'selected' : '' ?>><?= $nome ?></option>
             <?php endforeach; ?>
         </select>
 
@@ -110,18 +104,18 @@ require_once __DIR__ . '/includes/header.php';
     <div class="grelha-jogos">
         <?php foreach ($resultado['anuncios'] as $anuncio): ?>
             <?php $estado = Lfg::estado($anuncio); ?>
-            <a class="cartao-jogo <?= $estado === 'Terminado' ? 'cartao-passado' : '' ?>" href="<?= BASE_URL ?>/projeto/lfg_ver.php?id=<?= $anuncio['id'] ?>">
+            <a class="cartao-jogo <?= Lfg::expirado($anuncio) ? 'cartao-passado' : '' ?>" href="<?= BASE_URL ?>/projeto/lfg_ver.php?id=<?= $anuncio['id'] ?>">
                 <?php if ($anuncio['imagem_capa']): ?>
                     <img src="<?= htmlspecialchars($anuncio['imagem_capa']) ?>" alt="" loading="lazy">
                 <?php else: ?>
                     <p class="cartao-sem-imagem">sem imagem</p>
                 <?php endif; ?>
                 <p class="cartao-titulo"><?= htmlspecialchars($anuncio['jogo']) ?></p>
-                <p class="cartao-loja"><?= formatarDataEvento($anuncio['data_hora_evento']) ?></p>
                 <p class="cartao-loja">
                     <?= htmlspecialchars($anuncio['plataforma'] ?? 'Qualquer plataforma') ?>
                     · de <?= htmlspecialchars($anuncio['nome_utilizador']) ?>
                 </p>
+                <p class="cartao-loja">No ar até <?= formatarDia($anuncio['data_fim']) ?></p>
                 <p class="cartao-precos"><strong><?= $estado ?></strong></p>
             </a>
         <?php endforeach; ?>
