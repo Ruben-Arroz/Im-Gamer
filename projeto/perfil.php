@@ -145,7 +145,7 @@ require_once __DIR__ . '/includes/header.php';
 
         <?php if ($anunciosLfg): ?>
             <div class="subtitulo-linha">
-                <p class="subtitulo">Próximos jogos (LFG)</p>
+                <p class="subtitulo">Equipas (LFG)</p>
                 <?php if ($proprio): ?>
                     <a href="<?= BASE_URL ?>/projeto/lfg.php?aba=meus">Ver todos</a>
                 <?php endif; ?>
@@ -154,7 +154,7 @@ require_once __DIR__ . '/includes/header.php';
                 <?php foreach ($anunciosLfg as $anuncio): ?>
                     <li>
                         <a href="<?= BASE_URL ?>/projeto/lfg_ver.php?id=<?= $anuncio['id'] ?>"><?= htmlspecialchars($anuncio['jogo']) ?></a>
-                        <span><?= formatarDataEvento($anuncio['data_hora_evento']) ?></span>
+                        <span>de <?= htmlspecialchars($anuncio['nome_utilizador']) ?></span>
                         <span class="texto-dim"><?= Lfg::estado($anuncio) ?></span>
                     </li>
                 <?php endforeach; ?>

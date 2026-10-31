@@ -21,11 +21,11 @@ function percentagem(float $valor, float $maximo): int
     return (int) round($valor / $maximo * 100);
 }
 
-// data e hora dos anúncios de LFG, por exemplo "sáb, 01/11 às 21:00"
-function formatarDataEvento(string $data): string
+// dia com o dia da semana, por exemplo "sáb, 15/11" (até quando os anúncios de LFG ficam no ar)
+function formatarDia(string $data): string
 {
     $dias = ['dom', 'seg', 'ter', 'qua', 'qui', 'sex', 'sáb'];
-    $momento = new DateTime($data);
+    $dia = new DateTime($data);
 
-    return $dias[(int) $momento->format('w')] . ', ' . $momento->format('d/m') . ' às ' . $momento->format('H:i');
+    return $dias[(int) $dia->format('w')] . ', ' . $dia->format('d/m');
 }

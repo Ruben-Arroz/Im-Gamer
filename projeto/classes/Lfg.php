@@ -1,6 +1,7 @@
 <?php
 
-// LFG (looking for group): anúncios e quem entrou em cada um
+// LFG (looking for group): anúncios para completar equipas e quem entrou em cada um
+// cada anúncio fica no ar até ao dia que o dono escolher (data_fim)
 class Lfg
 {
     // limites para ninguém encher a lista
@@ -8,22 +9,19 @@ class Lfg
     const MAX_VAGAS = 10;
     const MAX_DESCRICAO = 500;
 
+    // por defeito o anúncio fica 14 dias no ar, no máximo 60
+    const DIAS_NO_AR = 14;
+    const MAX_DIAS = 60;
+
     const ABAS = [
         'proximos' => 'Anúncios',
         'meus' => 'Os meus',
     ];
 
-    const QUANDO = [
-        'hoje' => 'Hoje',
-        'amanha' => 'Amanhã',
-        'semana' => 'Próximos 7 dias',
-        'mes' => 'Próximos 30 dias',
-    ];
-
     const ORDENS = [
-        'data' => ['Mais próximos', 'p.data_hora_evento ASC'],
         'recentes' => ['Publicados há menos tempo', 'p.data_criacao DESC'],
-        'vagas' => ['Mais vagas livres', '(p.vagas - (SELECT COUNT(*) FROM LFG_Participantes lo WHERE lo.post_id = p.id)) DESC, p.data_hora_evento ASC'],
+        'vagas' => ['Mais vagas livres', '(p.vagas - (SELECT COUNT(*) FROM LFG_Participantes lo WHERE lo.post_id = p.id)) DESC, p.data_criacao DESC'],
+        'fim' => ['A sair do ar em breve', 'p.data_fim ASC, p.data_criacao DESC'],
     ];
 
     // campos de todas as listas (com o jogo, a plataforma, o dono e quantos entraram)
@@ -35,25 +33,10 @@ class Lfg
         JOIN Utilizadores u ON u.id = p.utilizador_id
         LEFT JOIN Plataformas pl ON pl.id = p.plataforma_id';
 
-    // a hora vem do php e não do NOW() da bd, para bater certo com a do formulário
-    private static function agora(): string
+    // o dia de hoje vem do php e não do CURDATE() da bd, para bater certo com o do formulário
+    private static function hoje(): string
     {
-        return date('Y-m-d H:i:s');
-    }
-
-    // início e fim de cada opção do filtro "quando"
-    private static function intervalo(string $quando): array
-    {
-        if ($quando === 'hoje') {
-            return [date('Y-m-d 00:00:00'), date('Y-m-d 23:59:59')];
-        }
-        if ($quando === 'amanha') {
-            $amanha = strtotime('+1 day');
-            return [date('Y-m-d 00:00:00', $amanha), date('Y-m-d 23:59:59', $amanha)];
-        }
-
-        $dias = $quando === 'semana' ? 7 : 30;
-        return [self::agora(), date('Y-m-d H:i:s', strtotime('+' . $dias . ' days'))];
+        return date('Y-m-d');
     }
 
     public static function pesquisar(string $aba, array $filtros, int $utilizadorId, int $pagina, int $porPagina): array
@@ -68,21 +51,13 @@ class Lfg
             $parametros['eu'] = $utilizadorId;
             $parametros['eu2'] = $utilizadorId;
 
-            // primeiro os que ainda vão acontecer, depois os que já passaram
-            $ordem = 'p.data_hora_evento < :agora_ordem, ABS(TIMESTAMPDIFF(SECOND, p.data_hora_evento, :agora_ordem2))';
-            $parametrosOrdem['agora_ordem'] = self::agora();
-            $parametrosOrdem['agora_ordem2'] = self::agora();
+            // primeiro os que ainda estão no ar, depois os que já saíram
+            $ordem = 'p.data_fim < :hoje_ordem, p.data_criacao DESC';
+            $parametrosOrdem['hoje_ordem'] = self::hoje();
         } else {
-            $condicoes[] = "p.estado = 'aberto' AND p.data_hora_evento >= :agora";
-            $parametros['agora'] = self::agora();
+            $condicoes[] = "p.estado = 'aberto' AND p.data_fim >= :hoje";
+            $parametros['hoje'] = self::hoje();
             $ordem = self::ORDENS[$filtros['ordem']][1];
-        }
-
-        if ($filtros['quando'] !== '') {
-            $intervalo = self::intervalo($filtros['quando']);
-            $condicoes[] = 'p.data_hora_evento BETWEEN :de AND :ate';
-            $parametros['de'] = $intervalo[0];
-            $parametros['ate'] = $intervalo[1];
         }
 
         if ($filtros['jogo'] !== '') {
@@ -117,13 +92,13 @@ class Lfg
         return ['anuncios' => $stmt->fetchAll(), 'total' => $total];
     }
 
-    // nomes dos jogos com anúncios abertos, para as sugestões da pesquisa
+    // nomes dos jogos com anúncios no ar, para as sugestões da pesquisa
     public static function jogosComAnuncios(): array
     {
         $pdo = Database::ligar();
         $stmt = $pdo->prepare("SELECT DISTINCT j.nome FROM LFG_Posts p JOIN Jogos j ON j.id = p.jogo_id
-            WHERE p.estado = 'aberto' AND p.data_hora_evento >= :agora ORDER BY j.nome LIMIT 100");
-        $stmt->execute(['agora' => self::agora()]);
+            WHERE p.estado = 'aberto' AND p.data_fim >= :hoje ORDER BY j.nome LIMIT 100");
+        $stmt->execute(['hoje' => self::hoje()]);
 
         return $stmt->fetchAll(PDO::FETCH_COLUMN);
     }
@@ -137,29 +112,29 @@ class Lfg
         return $stmt->fetch() ?: null;
     }
 
-    // anúncios abertos de um jogo, para a página do jogo
+    // anúncios no ar de um jogo, para a página do jogo
     public static function doJogo(int $jogoId, int $limite): array
     {
         $pdo = Database::ligar();
-        $stmt = $pdo->prepare(self::CAMPOS . self::DE . " WHERE p.jogo_id = :jogo AND p.estado = 'aberto' AND p.data_hora_evento >= :agora
-            ORDER BY p.data_hora_evento ASC LIMIT :limite");
+        $stmt = $pdo->prepare(self::CAMPOS . self::DE . " WHERE p.jogo_id = :jogo AND p.estado = 'aberto' AND p.data_fim >= :hoje
+            ORDER BY p.data_criacao DESC LIMIT :limite");
         $stmt->bindValue('jogo', $jogoId, PDO::PARAM_INT);
-        $stmt->bindValue('agora', self::agora());
+        $stmt->bindValue('hoje', self::hoje());
         $stmt->bindValue('limite', $limite, PDO::PARAM_INT);
         $stmt->execute();
 
         return $stmt->fetchAll();
     }
 
-    // próximos anúncios do utilizador (os dele e onde entrou), para o perfil
+    // anúncios no ar do utilizador (os dele e onde entrou), para o perfil
     public static function doUtilizador(int $utilizadorId, int $limite): array
     {
         $pdo = Database::ligar();
         $stmt = $pdo->prepare(self::CAMPOS . self::DE . ' WHERE (p.utilizador_id = :eu OR p.id IN (SELECT post_id FROM LFG_Participantes WHERE utilizador_id = :eu2))
-            AND p.data_hora_evento >= :agora ORDER BY p.data_hora_evento ASC LIMIT :limite');
+            AND p.data_fim >= :hoje ORDER BY p.data_criacao DESC LIMIT :limite');
         $stmt->bindValue('eu', $utilizadorId, PDO::PARAM_INT);
         $stmt->bindValue('eu2', $utilizadorId, PDO::PARAM_INT);
-        $stmt->bindValue('agora', self::agora());
+        $stmt->bindValue('hoje', self::hoje());
         $stmt->bindValue('limite', $limite, PDO::PARAM_INT);
         $stmt->execute();
 
@@ -190,43 +165,50 @@ class Lfg
     public static function abertosDoUtilizador(int $utilizadorId): int
     {
         $pdo = Database::ligar();
-        $stmt = $pdo->prepare("SELECT COUNT(*) FROM LFG_Posts WHERE utilizador_id = :utilizador AND estado = 'aberto' AND data_hora_evento >= :agora");
-        $stmt->execute(['utilizador' => $utilizadorId, 'agora' => self::agora()]);
+        $stmt = $pdo->prepare("SELECT COUNT(*) FROM LFG_Posts WHERE utilizador_id = :utilizador AND estado = 'aberto' AND data_fim >= :hoje");
+        $stmt->execute(['utilizador' => $utilizadorId, 'hoje' => self::hoje()]);
 
         return (int) $stmt->fetchColumn();
     }
 
-    public static function criar(int $utilizadorId, int $jogoId, ?int $plataformaId, string $descricao, int $vagas, string $dataHora): int
+    public static function criar(int $utilizadorId, int $jogoId, ?int $plataformaId, string $descricao, int $vagas, string $dataFim): int
     {
         $pdo = Database::ligar();
-        $stmt = $pdo->prepare('INSERT INTO LFG_Posts (utilizador_id, jogo_id, plataforma_id, descricao, vagas, data_hora_evento)
-            VALUES (:utilizador, :jogo, :plataforma, :descricao, :vagas, :data_hora)');
+        $stmt = $pdo->prepare('INSERT INTO LFG_Posts (utilizador_id, jogo_id, plataforma_id, descricao, vagas, data_fim)
+            VALUES (:utilizador, :jogo, :plataforma, :descricao, :vagas, :data_fim)');
         $stmt->execute([
             'utilizador' => $utilizadorId,
             'jogo' => $jogoId,
             'plataforma' => $plataformaId,
             'descricao' => $descricao,
             'vagas' => $vagas,
-            'data_hora' => $dataHora,
+            'data_fim' => $dataFim,
         ]);
 
         return (int) $pdo->lastInsertId();
     }
 
+    public static function expirado(array $anuncio): bool
+    {
+        return $anuncio['data_fim'] < self::hoje();
+    }
+
     // texto do estado que aparece nos cartões
     public static function estado(array $anuncio): string
     {
-        if ($anuncio['data_hora_evento'] < self::agora()) {
-            return 'Terminado';
+        if (self::expirado($anuncio)) {
+            return 'Já saiu do ar';
         }
         if ($anuncio['estado'] === 'fechado') {
             return 'Fechado';
         }
-        if ($anuncio['participantes'] >= $anuncio['vagas']) {
-            return 'Cheio';
+
+        $livres = $anuncio['vagas'] - $anuncio['participantes'];
+        if ($livres <= 0) {
+            return 'Equipa completa';
         }
 
-        return $anuncio['participantes'] . ' de ' . $anuncio['vagas'] . ($anuncio['vagas'] == 1 ? ' vaga ocupada' : ' vagas ocupadas');
+        return $livres == 1 ? 'Falta 1 jogador' : 'Faltam ' . $livres . ' jogadores';
     }
 
     public static function entrar(int $postId, int $utilizadorId, string $nome): array
@@ -248,13 +230,13 @@ class Lfg
             if (!$anuncio) {
                 $erro = 'Este anúncio já não existe.';
             } elseif ((int) $anuncio['utilizador_id'] === $utilizadorId) {
-                $erro = 'Não podes entrar no teu próprio anúncio.';
-            } elseif ($anuncio['estado'] !== 'aberto' || $anuncio['data_hora_evento'] < self::agora()) {
+                $erro = 'Não podes entrar na tua própria equipa.';
+            } elseif ($anuncio['estado'] !== 'aberto' || self::expirado($anuncio)) {
                 $erro = 'Este anúncio já não aceita jogadores.';
             } elseif (self::participa($postId, $utilizadorId)) {
-                $erro = 'Já estás neste anúncio.';
+                $erro = 'Já estás nesta equipa.';
             } elseif ($ocupadas >= $anuncio['vagas']) {
-                $erro = 'Já não há vagas.';
+                $erro = 'A equipa já está completa.';
             }
 
             if ($erro) {
@@ -269,10 +251,10 @@ class Lfg
         } catch (PDOException $erro) {
             $pdo->rollBack();
             error_log($erro->getMessage());
-            return ['sucesso' => false, 'erro' => 'Não foi possível entrar no anúncio. Tenta outra vez.'];
+            return ['sucesso' => false, 'erro' => 'Não foi possível entrar na equipa. Tenta outra vez.'];
         }
 
-        Notificacoes::criar($anuncio['utilizador_id'], 'lfg', $nome . ' entrou no teu anúncio de ' . $anuncio['jogo'] . ' (' . formatarDataEvento($anuncio['data_hora_evento']) . ').');
+        Notificacoes::criar($anuncio['utilizador_id'], 'lfg', $nome . ' entrou na tua equipa de ' . $anuncio['jogo'] . '.');
 
         return ['sucesso' => true];
     }
@@ -288,9 +270,9 @@ class Lfg
         $stmt = $pdo->prepare('DELETE FROM LFG_Participantes WHERE post_id = :post AND utilizador_id = :utilizador');
         $stmt->execute(['post' => $postId, 'utilizador' => $utilizadorId]);
 
-        // só avisa o dono se a pessoa estava mesmo no anúncio
+        // só avisa o dono se a pessoa estava mesmo na equipa
         if ($stmt->rowCount()) {
-            Notificacoes::criar($anuncio['utilizador_id'], 'lfg', $nome . ' saiu do teu anúncio de ' . $anuncio['jogo'] . ' (' . formatarDataEvento($anuncio['data_hora_evento']) . ').');
+            Notificacoes::criar($anuncio['utilizador_id'], 'lfg', $nome . ' saiu da tua equipa de ' . $anuncio['jogo'] . '.');
         }
     }
 
@@ -304,6 +286,16 @@ class Lfg
         $pdo = Database::ligar();
         $stmt = $pdo->prepare('UPDATE LFG_Posts SET estado = :estado WHERE id = :id AND utilizador_id = :dono');
         $stmt->execute(['estado' => $estado, 'id' => $postId, 'dono' => $donoId]);
+    }
+
+    // o dono pode deixar o anúncio mais 14 dias no ar (a contar de hoje)
+    public static function prolongar(int $postId, int $donoId): void
+    {
+        $novaData = date('Y-m-d', strtotime('+' . self::DIAS_NO_AR . ' days'));
+
+        $pdo = Database::ligar();
+        $stmt = $pdo->prepare('UPDATE LFG_Posts SET data_fim = GREATEST(data_fim, :nova) WHERE id = :id AND utilizador_id = :dono');
+        $stmt->execute(['nova' => $novaData, 'id' => $postId, 'dono' => $donoId]);
     }
 
     public static function apagar(int $postId, int $donoId): void
@@ -321,7 +313,7 @@ class Lfg
         $stmt->execute(['id' => $postId, 'dono' => $donoId]);
 
         foreach ($participantes as $participante) {
-            Notificacoes::criar($participante['utilizador_id'], 'lfg', 'O anúncio de ' . $anuncio['jogo'] . ' (' . formatarDataEvento($anuncio['data_hora_evento']) . ') foi apagado.');
+            Notificacoes::criar($participante['utilizador_id'], 'lfg', 'A equipa de ' . $anuncio['jogo'] . ' de ' . $anuncio['nome_utilizador'] . ' foi apagada.');
         }
     }
 
@@ -337,7 +329,7 @@ class Lfg
         $stmt->execute(['post' => $postId, 'utilizador' => $participanteId]);
 
         if ($stmt->rowCount()) {
-            Notificacoes::criar($participanteId, 'lfg', 'Foste removido do anúncio de ' . $anuncio['jogo'] . ' (' . formatarDataEvento($anuncio['data_hora_evento']) . ').');
+            Notificacoes::criar($participanteId, 'lfg', 'Foste removido da equipa de ' . $anuncio['jogo'] . ' de ' . $anuncio['nome_utilizador'] . '.');
         }
     }
 }

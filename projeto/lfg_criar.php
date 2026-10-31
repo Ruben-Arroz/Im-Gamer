@@ -13,9 +13,10 @@ $erro = null;
 // vindo da página de um jogo (?jogo=id) o jogo já vem escolhido
 $jogoInicial = isset($_GET['jogo']) ? Jogo::buscarPorId((int) $_GET['jogo']) : null;
 
-// o campo datetime-local manda a data assim: 2026-11-01T21:00
-$agora = new DateTime();
-$limite = (new DateTime())->modify('+6 months');
+// o anúncio fica no ar até ao dia escolhido, de hoje até 60 dias à frente (14 por defeito)
+$hoje = date('Y-m-d');
+$dataPorDefeito = date('Y-m-d', strtotime('+' . Lfg::DIAS_NO_AR . ' days'));
+$dataMaxima = date('Y-m-d', strtotime('+' . Lfg::MAX_DIAS . ' days'));
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && !Auth::tokenValido($_POST['token'] ?? '')) {
     $erro = 'A sessão expirou. Tenta outra vez.';
@@ -25,18 +26,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !Auth::tokenValido($_POST['token'] 
     $plataformaId = (int) ($_POST['plataforma_id'] ?? 0);
     $descricao = trim($_POST['descricao'] ?? '');
     $vagas = (int) ($_POST['vagas'] ?? 0);
-    $dataHora = DateTime::createFromFormat('Y-m-d\TH:i', $_POST['data_hora'] ?? '');
+    $dataFim = $_POST['data_fim'] ?? '';
 
     if (!$jogoId) {
         $erro = 'Escolhe o jogo da lista de sugestões.';
     } elseif ($plataformaId !== 0 && !in_array($plataformaId, array_column($plataformas, 'id'))) {
         $erro = 'Escolhe uma plataforma da lista.';
-    } elseif (!$dataHora || $dataHora->format('Y-m-d\TH:i') !== ($_POST['data_hora'] ?? '')) {
-        $erro = 'Escolhe o dia e a hora em que vão jogar.';
-    } elseif ($dataHora < $agora) {
-        $erro = 'O dia e a hora têm de ser no futuro.';
-    } elseif ($dataHora > $limite) {
-        $erro = 'Só podes marcar jogos até 6 meses à frente.';
+    } elseif (!DateTime::createFromFormat('Y-m-d', $dataFim) || DateTime::createFromFormat('Y-m-d', $dataFim)->format('Y-m-d') !== $dataFim) {
+        $erro = 'Escolhe até que dia o anúncio fica no ar.';
+    } elseif ($dataFim < $hoje) {
+        $erro = 'O anúncio tem de ficar no ar pelo menos até hoje.';
+    } elseif ($dataFim > $dataMaxima) {
+        $erro = 'O anúncio só pode ficar no ar até ' . Lfg::MAX_DIAS . ' dias.';
     } elseif ($vagas < 1 || $vagas > Lfg::MAX_VAGAS) {
         $erro = 'O número de jogadores que procuras tem de ser de 1 a ' . Lfg::MAX_VAGAS . '.';
     } elseif ($descricao === '' || mb_strlen($descricao) > Lfg::MAX_DESCRICAO) {
@@ -46,7 +47,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !Auth::tokenValido($_POST['token'] 
     }
 
     if (!$erro) {
-        $id = Lfg::criar($utilizadorId, $jogoId, $plataformaId ?: null, $descricao, $vagas, $dataHora->format('Y-m-d H:i:s'));
+        $id = Lfg::criar($utilizadorId, $jogoId, $plataformaId ?: null, $descricao, $vagas, $dataFim);
         header('Location: ' . BASE_URL . '/projeto/lfg_ver.php?id=' . $id);
         exit;
     }
@@ -90,17 +91,17 @@ require_once __DIR__ . '/includes/header.php';
             <?php endforeach; ?>
         </select>
 
-        <label for="data_hora">Dia e hora</label>
-        <input type="datetime-local" id="data_hora" name="data_hora"
-            min="<?= $agora->format('Y-m-d\TH:i') ?>" max="<?= $limite->format('Y-m-d\TH:i') ?>"
-            value="<?= htmlspecialchars($_POST['data_hora'] ?? '') ?>">
-
-        <label for="vagas">Quantos jogadores procuras</label>
+        <label for="vagas">Quantos jogadores faltam</label>
         <input type="number" id="vagas" name="vagas" min="1" max="<?= Lfg::MAX_VAGAS ?>" value="<?= (int) ($_POST['vagas'] ?? 1) ?>">
-        <p class="ajuda">Sem contar contigo.</p>
+        <p class="ajuda">Sem contar contigo. Por exemplo, para uma equipa de 5 em que já são 2, faltam 3.</p>
+
+        <label for="data_fim">No ar até</label>
+        <input type="date" id="data_fim" name="data_fim" min="<?= $hoje ?>" max="<?= $dataMaxima ?>"
+            value="<?= htmlspecialchars($_POST['data_fim'] ?? $dataPorDefeito) ?>">
+        <p class="ajuda">Depois deste dia o anúncio sai da lista. Dá para prolongar na página dele.</p>
 
         <label for="descricao">Descrição</label>
-        <textarea id="descricao" name="descricao" rows="4" maxlength="<?= Lfg::MAX_DESCRICAO ?>" placeholder="Por exemplo: ranked, nível ouro ou mais, com microfone"><?= htmlspecialchars($_POST['descricao'] ?? '') ?></textarea>
+        <textarea id="descricao" name="descricao" rows="4" maxlength="<?= Lfg::MAX_DESCRICAO ?>" placeholder="Por exemplo: equipa para jogar Premier à noite, 15k+, com microfone"><?= htmlspecialchars($_POST['descricao'] ?? '') ?></textarea>
 
         <button type="submit">Publicar anúncio</button>
     </form>

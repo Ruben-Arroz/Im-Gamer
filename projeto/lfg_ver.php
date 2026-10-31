@@ -28,6 +28,8 @@ if ($anuncio && $_SERVER['REQUEST_METHOD'] === 'POST') {
         Lfg::mudarEstado($id, $utilizadorId, 'fechado');
     } elseif ($acao === 'reabrir') {
         Lfg::mudarEstado($id, $utilizadorId, 'aberto');
+    } elseif ($acao === 'prolongar') {
+        Lfg::prolongar($id, $utilizadorId);
     } elseif ($acao === 'remover') {
         Lfg::removerParticipante($id, $utilizadorId, (int) ($_POST['participante_id'] ?? 0));
     } elseif ($acao === 'apagar') {
@@ -48,7 +50,7 @@ if ($anuncio) {
     $participantes = Lfg::participantes($id);
     $participo = in_array($utilizadorId, array_map('intval', array_column($participantes, 'utilizador_id')), true);
     $estado = Lfg::estado($anuncio);
-    $terminado = $estado === 'Terminado';
+    $terminado = Lfg::expirado($anuncio);
     $podeEntrar = !$dono && !$participo && $anuncio['estado'] === 'aberto' && !$terminado && $anuncio['participantes'] < $anuncio['vagas'];
 }
 
@@ -79,12 +81,12 @@ require_once __DIR__ . '/includes/header.php';
 
                 <div class="numeros">
                     <div class="numero">
-                        <strong><?= formatarDataEvento($anuncio['data_hora_evento']) ?></strong>
-                        <span>quando</span>
+                        <strong><?= formatarDia($anuncio['data_fim']) ?></strong>
+                        <span><?= $terminado ? 'saiu do ar' : 'no ar até' ?></span>
                     </div>
                     <div class="numero">
                         <strong><?= $estado ?></strong>
-                        <span><?= $anuncio['vagas'] == 1 ? 'procura 1 jogador' : 'procura ' . $anuncio['vagas'] . ' jogadores' ?></span>
+                        <span><?= $anuncio['participantes'] ?> de <?= $anuncio['vagas'] ?> <?= $anuncio['vagas'] == 1 ? 'vaga ocupada' : 'vagas ocupadas' ?></span>
                     </div>
                 </div>
 
@@ -92,14 +94,14 @@ require_once __DIR__ . '/includes/header.php';
                     <?php if ($podeEntrar): ?>
                         <form method="post">
                             <input type="hidden" name="token" value="<?= Auth::token() ?>">
-                            <button type="submit" name="acao" value="entrar">Entrar</button>
+                            <button type="submit" name="acao" value="entrar">Entrar na equipa</button>
                         </form>
                     <?php endif; ?>
 
                     <?php if ($participo && !$terminado): ?>
-                        <form method="post" onsubmit="return confirm('Sair deste anúncio?');">
+                        <form method="post" onsubmit="return confirm('Sair desta equipa?');">
                             <input type="hidden" name="token" value="<?= Auth::token() ?>">
-                            <button type="submit" name="acao" value="sair" class="botao-contorno">Sair</button>
+                            <button type="submit" name="acao" value="sair" class="botao-contorno">Sair da equipa</button>
                         </form>
                     <?php endif; ?>
 
@@ -116,6 +118,10 @@ require_once __DIR__ . '/includes/header.php';
                     <?php endif; ?>
 
                     <?php if ($dono): ?>
+                        <form method="post">
+                            <input type="hidden" name="token" value="<?= Auth::token() ?>">
+                            <button type="submit" name="acao" value="prolongar" class="botao-contorno">Prolongar <?= Lfg::DIAS_NO_AR ?> dias</button>
+                        </form>
                         <form method="post" onsubmit="return confirm('Apagar este anúncio? Quem entrou vai ser avisado.');">
                             <input type="hidden" name="token" value="<?= Auth::token() ?>">
                             <button type="submit" name="acao" value="apagar" class="botao-contorno">Apagar</button>
@@ -131,11 +137,11 @@ require_once __DIR__ . '/includes/header.php';
 
         <p class="jogo-descricao"><?= nl2br(htmlspecialchars($anuncio['descricao'])) ?></p>
 
-        <h2>Jogadores</h2>
+        <h2>Equipa</h2>
         <ul class="lista-avaliacoes">
             <li>
                 <a href="<?= BASE_URL ?>/projeto/perfil.php?u=<?= urlencode($anuncio['nome_utilizador']) ?>"><?= htmlspecialchars($anuncio['nome_utilizador']) ?></a>
-                <span class="texto-dim">criou o anúncio</span>
+                <span class="texto-dim">criou a equipa</span>
             </li>
             <?php foreach ($participantes as $participante): ?>
                 <li>
@@ -143,7 +149,7 @@ require_once __DIR__ . '/includes/header.php';
                     <span class="texto-dim">entrou a <?= (new DateTime($participante['data_entrada']))->format('d/m/Y H:i') ?></span>
 
                     <?php if ($dono && !$terminado): ?>
-                        <form method="post" class="lista-acao" onsubmit="return confirm('Tirar esta pessoa do anúncio?');">
+                        <form method="post" class="lista-acao" onsubmit="return confirm('Tirar esta pessoa da equipa?');">
                             <input type="hidden" name="token" value="<?= Auth::token() ?>">
                             <input type="hidden" name="participante_id" value="<?= $participante['utilizador_id'] ?>">
                             <button type="submit" name="acao" value="remover" class="botao-contorno">Tirar</button>
