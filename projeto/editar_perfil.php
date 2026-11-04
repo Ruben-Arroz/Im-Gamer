@@ -172,7 +172,7 @@ require_once __DIR__ . '/includes/header.php';
     <p class="auth-switch"><a href="<?= BASE_URL ?>/projeto/perfil.php">Voltar ao perfil</a></p>
 </section>
 
-<script src="<?= BASE_URL ?>/projeto/assets/js/pesquisa_jogo.js?v=1"></script>
+<script src="<?= BASE_URL ?>/projeto/assets/js/pesquisa_jogo.js?v=2"></script>
 <script src="<?= BASE_URL ?>/projeto/assets/js/previsao_imagem.js?v=1"></script>
 
 <?php require_once __DIR__ . '/includes/footer.php'; ?>

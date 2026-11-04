@@ -122,6 +122,6 @@ require_once __DIR__ . '/includes/header.php';
     <p class="auth-switch"><a href="<?= BASE_URL ?>/projeto/contas.php">Voltar às contas</a></p>
 </section>
 
-<script src="<?= BASE_URL ?>/projeto/assets/js/pesquisa_jogo.js?v=1"></script>
+<script src="<?= BASE_URL ?>/projeto/assets/js/pesquisa_jogo.js?v=2"></script>
 
 <?php require_once __DIR__ . '/includes/footer.php'; ?>

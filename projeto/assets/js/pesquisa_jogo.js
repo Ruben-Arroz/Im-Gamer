@@ -31,7 +31,11 @@ async function pesquisar(texto) {
         const dados = await resposta.json();
         mostrarSugestoes(dados.results || []);
     } catch (erro) {
+        // se a rawg estiver em baixo a resposta não é json, por isso avisa em vez de ficar tudo vazio
         listaSugestoes.innerHTML = '';
+        const aviso = document.createElement('li');
+        aviso.textContent = 'A RAWG não está a responder. Tenta mais tarde.';
+        listaSugestoes.appendChild(aviso);
     }
 }
 
