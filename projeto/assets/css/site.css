@@ -976,6 +976,14 @@ main:has(.pagina-larga) {
     flex-shrink: 0;
 }
 
+/* capa pequena dos jogos adicionados à mão */
+.capa-manual {
+    width: 64px;
+    height: 36px;
+    object-fit: cover;
+    flex-shrink: 0;
+}
+
 /* catálogo */
 .ajuda-filtro {
     font-size: 0.75rem;

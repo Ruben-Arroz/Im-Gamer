@@ -12,6 +12,9 @@ class ContasLigadas
         'nintendo' => 'Nintendo',
     ];
 
+    // plataformas sem api, os jogos são adicionados à mão (jogos_manuais.php)
+    const MANUAIS = ['nintendo', 'battlenet'];
+
     // da plataforma mais famosa para a menos famosa, usado para ordenar as contas no perfil
     const FAMA = ['steam', 'playstation', 'xbox', 'epic', 'nintendo', 'battlenet', 'gog'];
 

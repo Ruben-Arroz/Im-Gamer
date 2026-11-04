@@ -180,6 +180,8 @@ require_once __DIR__ . '/includes/header.php';
             $temHoras = $conta['minutos_jogados'] > 0;
             $temValores = $conta['valor_jogos'] > 0;
             $temInventario = $conta['servico'] === 'steam';
+            // na nintendo e na battle.net os jogos são postos à mão, sem conquistas
+            $manual = in_array($conta['servico'], ContasLigadas::MANUAIS);
 
             $jogosConta = Biblioteca::maisJogados($conta['id'], 8);
             // os jogos sem horas não entram nos mais jogados, por isso têm a sua própria fila
@@ -211,9 +213,15 @@ require_once __DIR__ . '/includes/header.php';
                     <?php if ($conta['servico'] === 'steam' && $conta['id_externo']): ?>
                         <a class="conta-link" href="https://steamcommunity.com/profiles/<?= htmlspecialchars($conta['id_externo']) ?>" target="_blank" rel="noopener">Ver na Steam</a>
                     <?php endif; ?>
+
+                    <?php if ($manual && $proprio): ?>
+                        <a class="conta-link" href="<?= BASE_URL ?>/projeto/jogos_manuais.php?conta=<?= $conta['id'] ?>">Gerir jogos</a>
+                    <?php endif; ?>
                 </div>
 
-                <?php if (!$conta['ultima_sincronizacao']): ?>
+                <?php if ($manual && $conta['num_jogos'] == 0): ?>
+                    <p class="texto-dim">Ainda sem jogos.</p>
+                <?php elseif (!$conta['ultima_sincronizacao']): ?>
                     <p class="texto-dim">Ainda não sincronizada.</p>
                 <?php else: ?>
                     <div class="numeros">
@@ -227,10 +235,12 @@ require_once __DIR__ . '/includes/header.php';
                                 <span>jogadas</span>
                             </div>
                         <?php endif; ?>
-                        <div class="numero">
-                            <strong><?= $conta['num_conquistas'] ?></strong>
-                            <span>conquistas</span>
-                        </div>
+                        <?php if (!$manual): ?>
+                            <div class="numero">
+                                <strong><?= $conta['num_conquistas'] ?></strong>
+                                <span>conquistas</span>
+                            </div>
+                        <?php endif; ?>
                         <?php if ($conta['pontuacao'] !== null): ?>
                             <div class="numero">
                                 <strong><?= $conta['pontuacao'] ?></strong>
