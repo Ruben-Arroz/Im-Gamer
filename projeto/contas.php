@@ -71,7 +71,7 @@ require_once __DIR__ . '/includes/header.php';
 
 <section class="formulario">
     <h1>Contas ligadas</h1>
-    <p class="texto-dim">Liga as tuas contas das plataformas de jogos para juntar tudo no teu perfil. Por agora só as contas Steam, Xbox, GOG, Epic e PlayStation são atualizadas, e ainda não é automático.</p>
+    <p class="texto-dim">Liga as tuas contas das plataformas de jogos para juntar tudo no teu perfil. Por agora só as contas Steam, Xbox, GOG, Epic e PlayStation são atualizadas, e ainda não é automático. Na Nintendo e na Battle.net os jogos são adicionados à mão depois de ligares a conta.</p>
 
     <?php if ($erro): ?>
         <p class="aviso aviso-erro"><?= htmlspecialchars($erro) ?></p>
@@ -91,7 +91,10 @@ require_once __DIR__ . '/includes/header.php';
                             <span class="conta-identificador"><?= htmlspecialchars($conta['identificador']) ?></span>
                         <?php endif; ?>
                         <span class="texto-dim">
-                            <?php if ($conta['ultima_sincronizacao']): ?>
+                            <?php if (in_array($conta['servico'], ContasLigadas::MANUAIS)): ?>
+                                <?= $conta['num_jogos'] ?> <?= $conta['num_jogos'] == 1 ? 'jogo' : 'jogos' ?> ·
+                                <a href="<?= BASE_URL ?>/projeto/jogos_manuais.php?conta=<?= $conta['id'] ?>">Gerir jogos</a>
+                            <?php elseif ($conta['ultima_sincronizacao']): ?>
                                 Atualizada a <?= (new DateTime($conta['ultima_sincronizacao']))->format('d/m/Y H:i') ?>
                             <?php else: ?>
                                 Ainda não sincronizada
