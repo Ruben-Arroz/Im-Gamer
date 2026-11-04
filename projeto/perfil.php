@@ -68,6 +68,10 @@ require_once __DIR__ . '/includes/header.php';
                     <?php if ($utilizador['jogo_favorito']): ?>
                         · Jogo favorito: <?= htmlspecialchars($utilizador['jogo_favorito']) ?>
                     <?php endif; ?>
+                    <!-- o dono vê sempre o seu, os outros só se ele escolheu mostrar -->
+                    <?php if ($utilizador['discord'] && ($proprio || $utilizador['mostrar_discord'])): ?>
+                        · Discord: <?= htmlspecialchars($utilizador['discord']) ?>
+                    <?php endif; ?>
                 </p>
             </div>
 

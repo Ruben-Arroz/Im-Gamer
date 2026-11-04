@@ -29,3 +29,15 @@ function formatarDia(string $data): string
 
     return $dias[(int) $dia->format('w')] . ', ' . $dia->format('d/m');
 }
+
+// o discord guarda o nome em minúsculas e às vezes as pessoas escrevem o @ antes
+function limparDiscord(string $texto): string
+{
+    return strtolower(ltrim(trim($texto), '@'));
+}
+
+// nome de utilizador do discord: 2 a 32 letras minúsculas, números, pontos ou _ (links não)
+function discordValido(string $nome): bool
+{
+    return (bool) preg_match('/^[a-z0-9._]{2,32}$/', $nome);
+}

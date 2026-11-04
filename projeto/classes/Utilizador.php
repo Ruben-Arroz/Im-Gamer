@@ -10,7 +10,7 @@ class Utilizador
     ];
 
     // campos usados nas duas pesquisas de utilizador, já com o nome do jogo favorito e da plataforma preferida
-    const SELECT = 'SELECT u.id, u.nome_utilizador, u.email, u.bio, u.foto_perfil, u.foto_capa, u.moeda, u.esconder_valores, u.esconder_reputacao,
+    const SELECT = 'SELECT u.id, u.nome_utilizador, u.email, u.bio, u.foto_perfil, u.foto_capa, u.moeda, u.esconder_valores, u.esconder_reputacao, u.discord, u.mostrar_discord,
         u.is_admin, u.data_criacao, u.jogo_favorito_id, j.rawg_id AS jogo_favorito_rawg_id, j.nome AS jogo_favorito,
         u.plataforma_preferida_id, p.nome AS plataforma_preferida
         FROM Utilizadores u
@@ -74,7 +74,7 @@ class Utilizador
         $pdo = Database::ligar();
         $stmt = $pdo->prepare('UPDATE Utilizadores SET nome_utilizador = :nome, bio = :bio, foto_perfil = :foto, foto_capa = :capa,
             jogo_favorito_id = :jogo, plataforma_preferida_id = :plataforma, esconder_valores = :esconder,
-            esconder_reputacao = :esconder_reputacao WHERE id = :id');
+            esconder_reputacao = :esconder_reputacao, discord = :discord, mostrar_discord = :mostrar_discord WHERE id = :id');
 
         $stmt->execute([
             'nome' => $dados['nome'],
@@ -85,6 +85,8 @@ class Utilizador
             'plataforma' => $dados['plataforma'],
             'esconder' => $dados['esconder'],
             'esconder_reputacao' => $dados['esconder_reputacao'],
+            'discord' => $dados['discord'] !== '' ? $dados['discord'] : null,
+            'mostrar_discord' => $dados['mostrar_discord'],
             'id' => $id,
         ]);
     }

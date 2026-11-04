@@ -11,6 +11,7 @@ $erro = null;
 
 // sem ?u= mostra a pesquisa, com ?u=nome mostra o convite para essa pessoa
 $destino = isset($_GET['u']) ? Utilizador::buscarPorNome($_GET['u']) : null;
+$eu = Utilizador::buscarPorId($utilizadorId);
 $jogoInicial = isset($_GET['jogo']) ? Jogo::buscarPorId((int) $_GET['jogo']) : null;
 
 $pesquisa = mb_substr(trim($_GET['q'] ?? ''), 0, 50);
@@ -21,12 +22,15 @@ if (!$destino && mb_strlen($pesquisa) >= 2) {
 
 if ($destino && $_SERVER['REQUEST_METHOD'] === 'POST') {
     $mensagem = trim($_POST['mensagem'] ?? '');
+    $discord = limparDiscord($_POST['discord'] ?? '');
     $textoJogo = trim($_POST['jogo_pesquisa'] ?? '');
 
     if (!Auth::tokenValido($_POST['token'] ?? '')) {
         $erro = 'A sessão expirou. Tenta outra vez.';
     } elseif (mb_strlen($mensagem) > 255) {
         $erro = 'A mensagem só pode ter até 255 letras.';
+    } elseif ($discord !== '' && !discordValido($discord)) {
+        $erro = 'O nome do Discord só pode ter letras minúsculas, números, pontos e _ (de 2 a 32).';
     } else {
         // o jogo é opcional, mas se foi escrito tem de ter sido escolhido da lista
         $jogoId = $textoJogo === '' ? null : Jogo::doFormulario($_POST);
@@ -34,7 +38,7 @@ if ($destino && $_SERVER['REQUEST_METHOD'] === 'POST') {
         if ($textoJogo !== '' && !$jogoId) {
             $erro = 'Escolhe o jogo da lista de sugestões, ou deixa o campo vazio.';
         } else {
-            $resultado = Convites::enviar($utilizadorId, (int) $destino['id'], $jogoId, $mensagem === '' ? null : $mensagem);
+            $resultado = Convites::enviar($utilizadorId, (int) $destino['id'], $jogoId, $mensagem === '' ? null : $mensagem, $discord === '' ? null : $discord);
 
             if ($resultado['sucesso']) {
                 header('Location: ' . BASE_URL . '/projeto/convites.php');
@@ -88,6 +92,10 @@ require_once __DIR__ . '/includes/header.php';
 
             <label for="mensagem">Mensagem (opcional)</label>
             <textarea id="mensagem" name="mensagem" rows="3" maxlength="255" placeholder="Por exemplo: jogamos hoje à noite?"><?= htmlspecialchars($_POST['mensagem'] ?? '') ?></textarea>
+
+            <label for="discord">O teu Discord (opcional)</label>
+            <input type="text" id="discord" name="discord" maxlength="33" placeholder="o_teu_nome" value="<?= htmlspecialchars($_POST['discord'] ?? $eu['discord'] ?? '') ?>">
+            <p class="ajuda">Só quem recebe o convite o vê.</p>
 
             <button type="submit">Enviar convite</button>
         </form>

@@ -16,6 +16,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $plataformaId = (int) ($_POST['plataforma_id'] ?? 0);
     $esconder = isset($_POST['esconder_valores']) ? 1 : 0;
     $esconderReputacao = isset($_POST['esconder_reputacao']) ? 1 : 0;
+    $discord = limparDiscord($_POST['discord'] ?? '');
+    $mostrarDiscord = isset($_POST['mostrar_discord']) ? 1 : 0;
     $pesquisaJogo = trim($_POST['jogo_pesquisa'] ?? '');
     $rawgId = (int) ($_POST['jogo_rawg_id'] ?? 0);
     $jogoId = $utilizador['jogo_favorito_id'];
@@ -28,6 +30,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $erro = 'Esse nome de utilizador já está a ser usado.';
     } elseif (mb_strlen($bio) > 1000) {
         $erro = 'A biografia não pode ter mais de 1000 caracteres.';
+    } elseif ($discord !== '' && !discordValido($discord)) {
+        $erro = 'O nome do Discord só pode ter letras minúsculas, números, pontos e _ (de 2 a 32).';
     } elseif ($pesquisaJogo !== '' && $rawgId === 0) {
         $erro = 'Escolhe o jogo favorito da lista de sugestões.';
     } elseif ($plataformaId !== 0 && !in_array($plataformaId, array_column($plataformas, 'id'))) {
@@ -72,6 +76,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             'plataforma' => $plataformaId ?: null,
             'esconder' => $esconder,
             'esconder_reputacao' => $esconderReputacao,
+            'discord' => $discord,
+            'mostrar_discord' => $mostrarDiscord,
         ]);
 
         // o nome também está guardado na sessão
@@ -141,6 +147,14 @@ require_once __DIR__ . '/includes/header.php';
                 <option value="<?= $plataforma['id'] ?>" <?= (int) $utilizador['plataforma_preferida_id'] === (int) $plataforma['id'] ? 'selected' : '' ?>><?= htmlspecialchars($plataforma['nome']) ?></option>
             <?php endforeach; ?>
         </select>
+
+        <label for="discord">Discord (opcional)</label>
+        <input type="text" id="discord" name="discord" maxlength="33" placeholder="o_teu_nome" value="<?= htmlspecialchars($_POST['discord'] ?? $utilizador['discord'] ?? '') ?>">
+        <p class="ajuda">Vai já preenchido nos convites e nos anúncios de LFG que fizeres.</p>
+        <label class="opcao">
+            <input type="checkbox" name="mostrar_discord" <?= $utilizador['mostrar_discord'] ? 'checked' : '' ?>>
+            Mostrar o meu Discord no perfil
+        </label>
 
         <label class="opcao">
             <input type="checkbox" name="esconder_valores" <?= $utilizador['esconder_valores'] ? 'checked' : '' ?>>
