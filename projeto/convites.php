@@ -77,6 +77,9 @@ require_once __DIR__ . '/includes/header.php';
                         <?php if ($convite['mensagem']): ?>
                             <p>"<?= htmlspecialchars($convite['mensagem']) ?>"</p>
                         <?php endif; ?>
+                        <?php if ($convite['discord']): ?>
+                            <p class="texto-dim">Discord: <strong><?= htmlspecialchars($convite['discord']) ?></strong></p>
+                        <?php endif; ?>
 
                         <?php if ($convite['estado'] === 'pendente'): ?>
                             <form method="post" class="jogo-acoes">

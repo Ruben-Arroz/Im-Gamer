@@ -171,16 +171,17 @@ class Lfg
         return (int) $stmt->fetchColumn();
     }
 
-    public static function criar(int $utilizadorId, int $jogoId, ?int $plataformaId, string $descricao, int $vagas, string $dataFim): int
+    public static function criar(int $utilizadorId, int $jogoId, ?int $plataformaId, string $descricao, int $vagas, string $dataFim, ?string $discord): int
     {
         $pdo = Database::ligar();
-        $stmt = $pdo->prepare('INSERT INTO LFG_Posts (utilizador_id, jogo_id, plataforma_id, descricao, vagas, data_fim)
-            VALUES (:utilizador, :jogo, :plataforma, :descricao, :vagas, :data_fim)');
+        $stmt = $pdo->prepare('INSERT INTO LFG_Posts (utilizador_id, jogo_id, plataforma_id, descricao, discord, vagas, data_fim)
+            VALUES (:utilizador, :jogo, :plataforma, :descricao, :discord, :vagas, :data_fim)');
         $stmt->execute([
             'utilizador' => $utilizadorId,
             'jogo' => $jogoId,
             'plataforma' => $plataformaId,
             'descricao' => $descricao,
+            'discord' => $discord,
             'vagas' => $vagas,
             'data_fim' => $dataFim,
         ]);

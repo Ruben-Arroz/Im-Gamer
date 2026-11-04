@@ -6,7 +6,7 @@ class Convites
     // para ninguém encher os outros de convites
     const MAX_PENDENTES = 20;
 
-    public static function enviar(int $remetenteId, int $destinatarioId, ?int $jogoId, ?string $mensagem): array
+    public static function enviar(int $remetenteId, int $destinatarioId, ?int $jogoId, ?string $mensagem, ?string $discord): array
     {
         if ($remetenteId === $destinatarioId) {
             return ['sucesso' => false, 'erro' => 'Não te podes convidar a ti próprio.'];
@@ -26,12 +26,13 @@ class Convites
             return ['sucesso' => false, 'erro' => 'Tens demasiados convites à espera de resposta. Espera que respondam ou cancela alguns.'];
         }
 
-        $stmt = $pdo->prepare('INSERT INTO Convites (remetente_id, destinatario_id, jogo_id, mensagem) VALUES (:remetente, :destinatario, :jogo, :mensagem)');
+        $stmt = $pdo->prepare('INSERT INTO Convites (remetente_id, destinatario_id, jogo_id, mensagem, discord) VALUES (:remetente, :destinatario, :jogo, :mensagem, :discord)');
         $stmt->execute([
             'remetente' => $remetenteId,
             'destinatario' => $destinatarioId,
             'jogo' => $jogoId,
             'mensagem' => $mensagem,
+            'discord' => $discord,
         ]);
 
         return ['sucesso' => true];

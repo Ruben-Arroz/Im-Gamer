@@ -12,6 +12,7 @@ $erro = null;
 
 // vindo da página de um jogo (?jogo=id) o jogo já vem escolhido
 $jogoInicial = isset($_GET['jogo']) ? Jogo::buscarPorId((int) $_GET['jogo']) : null;
+$eu = Utilizador::buscarPorId($utilizadorId);
 
 // o anúncio fica no ar até ao dia escolhido, de hoje até 60 dias à frente (14 por defeito)
 $hoje = date('Y-m-d');
@@ -25,6 +26,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !Auth::tokenValido($_POST['token'] 
     $jogoId = Jogo::doFormulario($_POST);
     $plataformaId = (int) ($_POST['plataforma_id'] ?? 0);
     $descricao = trim($_POST['descricao'] ?? '');
+    $discord = limparDiscord($_POST['discord'] ?? '');
     $vagas = (int) ($_POST['vagas'] ?? 0);
     $dataFim = $_POST['data_fim'] ?? '';
 
@@ -40,6 +42,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !Auth::tokenValido($_POST['token'] 
         $erro = 'O anúncio só pode ficar no ar até ' . Lfg::MAX_DIAS . ' dias.';
     } elseif ($vagas < 1 || $vagas > Lfg::MAX_VAGAS) {
         $erro = 'O número de jogadores que procuras tem de ser de 1 a ' . Lfg::MAX_VAGAS . '.';
+    } elseif ($discord !== '' && !discordValido($discord)) {
+        $erro = 'O nome do Discord só pode ter letras minúsculas, números, pontos e _ (de 2 a 32).';
     } elseif ($descricao === '' || mb_strlen($descricao) > Lfg::MAX_DESCRICAO) {
         $erro = 'Escreve uma descrição, até ' . Lfg::MAX_DESCRICAO . ' letras.';
     } elseif (Lfg::abertosDoUtilizador($utilizadorId) >= Lfg::MAX_ABERTOS) {
@@ -47,7 +51,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !Auth::tokenValido($_POST['token'] 
     }
 
     if (!$erro) {
-        $id = Lfg::criar($utilizadorId, $jogoId, $plataformaId ?: null, $descricao, $vagas, $dataFim);
+        $id = Lfg::criar($utilizadorId, $jogoId, $plataformaId ?: null, $descricao, $vagas, $dataFim, $discord === '' ? null : $discord);
         header('Location: ' . BASE_URL . '/projeto/lfg_ver.php?id=' . $id);
         exit;
     }
@@ -102,6 +106,10 @@ require_once __DIR__ . '/includes/header.php';
 
         <label for="descricao">Descrição</label>
         <textarea id="descricao" name="descricao" rows="4" maxlength="<?= Lfg::MAX_DESCRICAO ?>" placeholder="Por exemplo: equipa para jogar Premier à noite, 15k+, com microfone"><?= htmlspecialchars($_POST['descricao'] ?? '') ?></textarea>
+
+        <label for="discord">O teu Discord (opcional)</label>
+        <input type="text" id="discord" name="discord" maxlength="33" placeholder="o_teu_nome" value="<?= htmlspecialchars($_POST['discord'] ?? $eu['discord'] ?? '') ?>">
+        <p class="ajuda">Só quem entrar na equipa o vê.</p>
 
         <button type="submit">Publicar anúncio</button>
     </form>

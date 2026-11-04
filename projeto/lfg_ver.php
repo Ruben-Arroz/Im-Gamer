@@ -137,6 +137,15 @@ require_once __DIR__ . '/includes/header.php';
 
         <p class="jogo-descricao"><?= nl2br(htmlspecialchars($anuncio['descricao'])) ?></p>
 
+        <!-- o discord só aparece ao dono e a quem já entrou na equipa -->
+        <?php if ($anuncio['discord']): ?>
+            <?php if ($dono || $participo): ?>
+                <p>Discord de <?= htmlspecialchars($anuncio['nome_utilizador']) ?>: <strong><?= htmlspecialchars($anuncio['discord']) ?></strong></p>
+            <?php else: ?>
+                <p class="texto-dim">O Discord do dono aparece quando entrares na equipa.</p>
+            <?php endif; ?>
+        <?php endif; ?>
+
         <h2>Equipa</h2>
         <ul class="lista-avaliacoes">
             <li>

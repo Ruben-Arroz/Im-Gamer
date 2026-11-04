@@ -298,7 +298,7 @@ class Jogo
                 $lancamento = null;
             }
 
-            return self::procurar($rawgId, $slug, 0, '') ?? self::guardarDaRawg($rawgId, $nome, $slug, $imagem, $lancamento);
+            return self::procurar($rawgId, $slug, 0, $nome) ?? self::guardarDaRawg($rawgId, $nome, $slug, $imagem, $lancamento);
         }
 
         $jogoId = (int) ($dados['jogo_id'] ?? 0);
