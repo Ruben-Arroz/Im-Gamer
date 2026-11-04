@@ -34,6 +34,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         if (!$resultado['sucesso']) {
             $erro = $resultado['erro'];
         }
+    } elseif ($acao === 'playstation') {
+        // a playstation também não tem perfis públicos, liga-se com o código npsso
+        $resultado = Playstation::ligar($utilizadorId, $_POST['npsso'] ?? '');
+        if (!$resultado['sucesso']) {
+            $erro = $resultado['erro'];
+        }
     } elseif ($acao === 'remover') {
         ContasLigadas::remover((int) ($_POST['conta_id'] ?? 0), $utilizadorId);
     }
@@ -49,9 +55,13 @@ $contas = ContasLigadas::listar($utilizadorId);
 
 // se já houver conta epic o botão diz "Atualizar" em vez de "Ligar"
 $contaEpic = null;
+$contaPlaystation = null;
 foreach ($contas as $conta) {
     if ($conta['servico'] === 'epic') {
         $contaEpic = $conta;
+    }
+    if ($conta['servico'] === 'playstation') {
+        $contaPlaystation = $conta;
     }
 }
 
@@ -61,7 +71,7 @@ require_once __DIR__ . '/includes/header.php';
 
 <section class="formulario">
     <h1>Contas ligadas</h1>
-    <p class="texto-dim">Liga as tuas contas das plataformas de jogos para juntar tudo no teu perfil. Por agora só as contas Steam, Xbox, GOG e Epic são atualizadas, e ainda não é automático.</p>
+    <p class="texto-dim">Liga as tuas contas das plataformas de jogos para juntar tudo no teu perfil. Por agora só as contas Steam, Xbox, GOG, Epic e PlayStation são atualizadas, e ainda não é automático.</p>
 
     <?php if ($erro): ?>
         <p class="aviso aviso-erro"><?= htmlspecialchars($erro) ?></p>
@@ -108,8 +118,8 @@ require_once __DIR__ . '/includes/header.php';
         <label for="servico">Plataforma</label>
         <select id="servico" name="servico">
             <?php foreach (ContasLigadas::SERVICOS as $codigo => $nome): ?>
-                <!-- a epic tem a sua própria secção em baixo -->
-                <?php if ($codigo !== 'epic'): ?>
+                <!-- a epic e a playstation têm a sua própria secção em baixo -->
+                <?php if ($codigo !== 'epic' && $codigo !== 'playstation'): ?>
                     <option value="<?= $codigo ?>"><?= $nome ?></option>
                 <?php endif; ?>
             <?php endforeach; ?>
@@ -141,6 +151,28 @@ require_once __DIR__ . '/includes/header.php';
         <input type="text" id="codigo" name="codigo" autocomplete="off">
 
         <button type="submit"><?= $contaEpic ? 'Atualizar Epic Games' : 'Ligar Epic Games' ?></button>
+    </form>
+
+    <h2>PlayStation</h2>
+    <p class="texto-dim">
+        A PlayStation também não mostra os jogos nos perfis públicos, por isso é preciso entrar na conta pela página da PlayStation. A tua password nunca passa pelo I'm Gamer e o acesso à conta não fica guardado. Só se vê um jogo aqui depois de ele ser jogado (ou ter troféus).
+        <?php if ($contaPlaystation && $contaPlaystation['ultima_sincronizacao']): ?>
+            Para atualizar os jogos, repete estes passos (última atualização a <?= (new DateTime($contaPlaystation['ultima_sincronizacao']))->format('d/m/Y H:i') ?>).
+        <?php endif; ?>
+    </p>
+    <ol class="passos">
+        <li>Entra na tua conta em <a href="https://www.playstation.com" target="_blank" rel="noopener">playstation.com</a>.</li>
+        <li>No mesmo browser, abre <a href="<?= Playstation::LINK_NPSSO ?>" target="_blank" rel="noopener">este endereço</a>. Aparece um texto com "npsso".</li>
+        <li>Copia esse texto todo (ou só o código) e cola aqui em baixo. É como uma chave da conta: não o mostres a ninguém.</li>
+    </ol>
+    <form method="post" novalidate>
+        <input type="hidden" name="token" value="<?= Auth::token() ?>">
+        <input type="hidden" name="acao" value="playstation">
+
+        <label for="npsso">Código da PlayStation</label>
+        <input type="password" id="npsso" name="npsso" autocomplete="off">
+
+        <button type="submit"><?= $contaPlaystation ? 'Atualizar PlayStation' : 'Ligar PlayStation' ?></button>
     </form>
 
     <p class="auth-switch"><a href="<?= BASE_URL ?>/projeto/perfil.php">Voltar ao perfil</a></p>
