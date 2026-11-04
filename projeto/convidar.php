@@ -101,7 +101,7 @@ require_once __DIR__ . '/includes/header.php';
         </form>
 
         <p class="auth-switch"><a href="<?= BASE_URL ?>/projeto/convidar.php">Procurar outro jogador</a></p>
-        <script src="<?= BASE_URL ?>/projeto/assets/js/pesquisa_jogo.js?v=1"></script>
+        <script src="<?= BASE_URL ?>/projeto/assets/js/pesquisa_jogo.js?v=2"></script>
 
     <?php else: ?>
         <h1>Convidar jogadores</h1>
