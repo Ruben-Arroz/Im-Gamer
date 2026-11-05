@@ -3,10 +3,6 @@
 // as horas dos anúncios de LFG são as de Portugal, mesmo que o servidor esteja configurado com outra
 date_default_timezone_set('Europe/Lisbon');
 
-if (session_status() === PHP_SESSION_NONE) {
-    session_start();
-}
-
 if (!defined('BASE_URL')) {
     $hostname = strtolower(explode(':', $_SERVER['HTTP_HOST'] ?? '')[0]);
 
@@ -15,6 +11,27 @@ if (!defined('BASE_URL')) {
     } else {
         define('BASE_URL', '/tesp-ds-g17');
     }
+}
+
+if (session_status() === PHP_SESSION_NONE) {
+    // o servidor tem os sites de todos os grupos no mesmo endereço, por isso o cookie da sessão
+    // tem nome próprio e só vai para a pasta do I'm Gamer. o httponly não deixa o javascript lê-lo
+    session_name('imgamer');
+    session_set_cookie_params([
+        'path' => BASE_URL . '/',
+        'httponly' => true,
+        'secure' => !empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off',
+        'samesite' => 'Lax',
+    ]);
+    // só aceita ids de sessão criados pelo próprio php
+    ini_set('session.use_strict_mode', '1');
+    session_start();
+}
+
+// outros sites não podem abrir o I'm Gamer dentro de um iframe
+if (!headers_sent()) {
+    header('X-Frame-Options: SAMEORIGIN');
+    header('X-Content-Type-Options: nosniff');
 }
 
 // pasta das fotos de perfil, fica na raiz do site e não dentro do projeto
