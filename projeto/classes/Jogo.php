@@ -27,6 +27,34 @@ class Jogo
         return (int) $pdo->lastInsertId();
     }
 
+    // colunas com o id de cada loja, usadas no usarPorNome
+    const COLUNAS_LOJAS = ['steam_app_id', 'xbox_id', 'gog_id', 'epic_id'];
+
+    // se já houver um jogo com o mesmo nome sem o id desta loja (por exemplo vindo da RAWG ou de outra loja),
+    // junta-se-lhe o id e usa-se esse em vez de criar um repetido
+    private static function usarPorNome(string $coluna, string $id, string $nome): ?array
+    {
+        $jogoId = self::procurar(0, '', 0, $nome);
+        if (!$jogoId || !in_array($coluna, self::COLUNAS_LOJAS)) {
+            return null;
+        }
+
+        // o nome da coluna vem da lista COLUNAS_LOJAS, por isso pode ir direto para o sql
+        $pdo = Database::ligar();
+        $stmt = $pdo->prepare('UPDATE Jogos SET ' . $coluna . ' = :valor WHERE id = :id AND ' . $coluna . ' IS NULL');
+        $stmt->execute(['valor' => $id, 'id' => $jogoId]);
+
+        // se esse jogo já tinha outro id desta loja (outra edição com o mesmo nome), cria-se um novo
+        if (!$stmt->rowCount()) {
+            return null;
+        }
+
+        $stmt = $pdo->prepare('SELECT id, imagem_capa FROM Jogos WHERE id = :id');
+        $stmt->execute(['id' => $jogoId]);
+
+        return $stmt->fetch();
+    }
+
     // procura o jogo da steam na nossa bd e, se ainda não existir, vai buscar os dados à loja e guarda-o
     public static function daSteam(int $appid): ?array
     {
@@ -45,6 +73,11 @@ class Jogo
         // se a loja não responder fica para a próxima sincronização
         if (!is_array($info)) {
             return null;
+        }
+
+        $jogo = self::usarPorNome('steam_app_id', (string) $appid, $info['name']);
+        if ($jogo) {
+            return $jogo;
         }
 
         // as "categorias" da steam dizem os modos de jogo, cada uma tem um número
@@ -93,6 +126,11 @@ class Jogo
         $info = $produto['LocalizedProperties'][0] ?? null;
         if (!$info) {
             return null;
+        }
+
+        $jogo = self::usarPorNome('xbox_id', $titleId, $info['ProductTitle']);
+        if ($jogo) {
+            return $jogo;
         }
 
         // as imagens largas são as mais parecidas com as da steam, a quadrada só se não houver outra
@@ -163,6 +201,11 @@ class Jogo
         // o endereço da imagem vem sem o https
         $imagem = isset($produto['images']['logo2x']) ? 'https:' . $produto['images']['logo2x'] : null;
 
+        $jogo = self::usarPorNome('gog_id', $gogId, $produto['title']);
+        if ($jogo) {
+            return $jogo;
+        }
+
         $lancamento = substr($produto['release_date'] ?? '', 0, 10);
 
         $stmt = $pdo->prepare('INSERT INTO Jogos (gog_id, nome, imagem_capa, data_lancamento, descricao)
@@ -192,17 +235,9 @@ class Jogo
             return $jogo;
         }
 
-        // se o jogo já existe com o mesmo nome (por exemplo vindo da RAWG), usa-se esse em vez de criar um repetido
-        $idPorNome = self::procurar(0, '', 0, $produto['title']);
-        if ($idPorNome) {
-            $stmt = $pdo->prepare('UPDATE Jogos SET epic_id = :epic WHERE id = :id AND epic_id IS NULL');
-            $stmt->execute(['epic' => $epicId, 'id' => $idPorNome]);
-
-            if ($stmt->rowCount()) {
-                $stmt = $pdo->prepare('SELECT id, imagem_capa FROM Jogos WHERE id = :id');
-                $stmt->execute(['id' => $idPorNome]);
-                return $stmt->fetch();
-            }
+        $jogo = self::usarPorNome('epic_id', $epicId, $produto['title']);
+        if ($jogo) {
+            return $jogo;
         }
 
         // as imagens largas primeiro, como nas outras plataformas
