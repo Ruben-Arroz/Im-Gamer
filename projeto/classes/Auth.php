@@ -21,7 +21,8 @@ class Auth
         return ['sucesso' => true, 'id' => (int) $pdo->lastInsertId()];
     }
 
-    public static function login(string $email, string $password): array
+    // devolve o utilizador se o email e a password estiverem certos (usado no login do site e no da app)
+    public static function credenciais(string $email, string $password): ?array
     {
         $pdo = Database::ligar();
 
@@ -30,6 +31,17 @@ class Auth
         $utilizador = $stmt->fetch();
 
         if (!$utilizador || !password_verify($password, $utilizador['password_hash'])) {
+            return null;
+        }
+
+        return $utilizador;
+    }
+
+    public static function login(string $email, string $password): array
+    {
+        $utilizador = self::credenciais($email, $password);
+
+        if (!$utilizador) {
             return ['sucesso' => false, 'erro' => 'Email ou password incorretos.'];
         }
 
