@@ -192,6 +192,19 @@ class Jogo
             return $jogo;
         }
 
+        // se o jogo já existe com o mesmo nome (por exemplo vindo da RAWG), usa-se esse em vez de criar um repetido
+        $idPorNome = self::procurar(0, '', 0, $produto['title']);
+        if ($idPorNome) {
+            $stmt = $pdo->prepare('UPDATE Jogos SET epic_id = :epic WHERE id = :id AND epic_id IS NULL');
+            $stmt->execute(['epic' => $epicId, 'id' => $idPorNome]);
+
+            if ($stmt->rowCount()) {
+                $stmt = $pdo->prepare('SELECT id, imagem_capa FROM Jogos WHERE id = :id');
+                $stmt->execute(['id' => $idPorNome]);
+                return $stmt->fetch();
+            }
+        }
+
         // as imagens largas primeiro, como nas outras plataformas
         $imagem = null;
         foreach (['DieselGameBox', 'OfferImageWide', 'Thumbnail', 'DieselGameBoxTall'] as $tipo) {
