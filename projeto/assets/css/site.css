@@ -1836,8 +1836,8 @@ a.lista-acao {
 .lista-admin li {
     display: flex;
     align-items: center;
-    gap: 16px;
-    padding: 12px 0;
+    gap: 20px;
+    padding: 20px 0;
     border-bottom: 1px solid var(--border);
 }
 
@@ -1846,7 +1846,7 @@ a.lista-acao {
     min-width: 0;
     display: flex;
     flex-direction: column;
-    gap: 3px;
+    gap: 8px;
     overflow-wrap: anywhere;
 }
 
@@ -1860,21 +1860,31 @@ a.lista-acao {
     color: var(--text-dim);
     border-left: 2px solid var(--border);
     padding-left: 10px;
-    margin-top: 4px;
     white-space: pre-line;
 }
 
-.admin-acoes {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
-    align-items: center;
-    justify-content: flex-end;
+/* caixa do juntar jogos repetidos */
+.admin-caixa {
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 18px 20px;
+    margin-bottom: 28px;
+}
+
+.admin-caixa h2 {
+    margin: 0 0 10px;
+}
+
+.admin-caixa p {
+    font-size: 0.8rem;
+    line-height: 1.6;
+    margin-bottom: 14px;
 }
 
 .admin-juntar {
     display: flex;
-    gap: 6px;
+    flex-wrap: wrap;
+    gap: 8px;
 }
 
 .lista-admin form {
@@ -1882,27 +1892,30 @@ a.lista-acao {
 }
 
 .lista-admin button,
+.admin-juntar button,
 .admin-juntar input {
     background: transparent;
     color: var(--text-dim);
     border: 1px solid var(--border);
     font-family: inherit;
     font-size: 0.8rem;
-    padding: 6px 10px;
+    padding: 7px 12px;
     border-radius: 4px;
 }
 
-.lista-admin button {
+.lista-admin button,
+.admin-juntar button {
     cursor: pointer;
 }
 
-.lista-admin button:hover {
+.lista-admin button:hover,
+.admin-juntar button:hover {
     color: var(--text);
     border-color: var(--text-dim);
 }
 
 .admin-juntar input {
-    width: 72px;
+    width: 150px;
     color: var(--text);
 }
 
@@ -1912,13 +1925,14 @@ a.lista-acao {
 }
 
 @media (max-width: 640px) {
-    /* no telemóvel os botões passam para baixo dos dados */
+    /* no telemóvel o botão passa para baixo dos dados */
     .lista-admin li {
         flex-wrap: wrap;
     }
 
-    .admin-acoes {
-        width: 100%;
-        justify-content: flex-start;
+    .admin-juntar input {
+        flex: 1;
+        width: auto;
+        min-width: 0;
     }
 }

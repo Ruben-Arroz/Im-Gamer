@@ -50,18 +50,13 @@ class Admin
     public static function resumo(): array
     {
         $pdo = Database::ligar();
-        $hoje = date('Y-m-d');
-        $semanaPassada = date('Y-m-d H:i:s', strtotime('-7 days'));
-
         $stmt = $pdo->prepare("SELECT
             (SELECT COUNT(*) FROM Utilizadores) AS utilizadores,
-            (SELECT COUNT(*) FROM Utilizadores WHERE data_criacao >= :semana) AS novos,
             (SELECT COUNT(*) FROM Contas_Ligadas) AS contas,
             (SELECT COUNT(*) FROM Jogos) AS jogos,
             (SELECT COUNT(*) FROM LFG_Posts WHERE estado = 'aberto' AND data_fim >= :hoje) AS anuncios,
-            (SELECT COUNT(*) FROM Avaliacoes) AS avaliacoes,
-            (SELECT COUNT(*) FROM Convites WHERE estado = 'pendente') AS convites");
-        $stmt->execute(['semana' => $semanaPassada, 'hoje' => $hoje]);
+            (SELECT COUNT(*) FROM Avaliacoes) AS avaliacoes");
+        $stmt->execute(['hoje' => date('Y-m-d')]);
 
         return $stmt->fetch();
     }
@@ -207,7 +202,7 @@ class Admin
         $resto = 'FROM Jogos j';
         $parametros = [];
 
-        // só com algarismos procura pelo número do jogo, senão pelo nome
+        // só com algarismos procura pelo id do jogo, senão pelo nome
         if (ctype_digit($texto)) {
             $resto .= ' WHERE j.id = :id';
             $parametros = ['id' => $texto];
@@ -243,7 +238,7 @@ class Admin
         $repetido = Jogo::buscarPorId($repetidoId);
         $fica = Jogo::buscarPorId($ficaId);
         if (!$repetido || !$fica) {
-            return 'Um dos jogos já não existe. Confirma o número do jogo.';
+            return 'Não há nenhum jogo com um desses ids.';
         }
 
         $pdo = Database::ligar();
