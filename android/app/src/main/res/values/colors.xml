@@ -1,5 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!-- as mesmas cores do site (common/style.css) -->
 <resources>
-    <color name="black">#FF000000</color>
-    <color name="white">#FFFFFFFF</color>
+    <color name="fundo">#0E0F12</color>
+    <color name="borda">#24262B</color>
+    <color name="texto">#F2F2F0</color>
+    <color name="texto_dim">#8F9198</color>
+    <color name="branco">#FFFFFF</color>
+    <color name="preto">#000000</color>
 </resources>

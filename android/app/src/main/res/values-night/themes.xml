@@ -1,7 +1,15 @@
-<resources xmlns:tools="http://schemas.android.com/tools">
-    <!-- Base application theme. -->
-    <style name="Base.Theme.ImGamer" parent="Theme.Material3.DayNight.NoActionBar">
-        <!-- Customize your dark theme here. -->
-        <!-- <item name="colorPrimary">@color/my_dark_primary</item> -->
+<?xml version="1.0" encoding="utf-8"?>
+<!-- a app é sempre escura, por isso o tema da noite é igual ao normal (values/themes.xml) -->
+<resources>
+    <style name="Base.Theme.ImGamer" parent="Theme.Material3.Dark.NoActionBar">
+        <item name="android:windowBackground">@color/fundo</item>
+        <item name="colorPrimary">@color/texto</item>
+        <item name="colorOnPrimary">@color/fundo</item>
+        <item name="colorSecondary">@color/texto</item>
+        <item name="colorAccent">@color/texto</item>
+        <item name="android:textColor">@color/texto</item>
+        <item name="android:textColorHint">@color/texto_dim</item>
+        <item name="android:fontFamily">@font/share_tech_mono</item>
+        <item name="fontFamily">@font/share_tech_mono</item>
     </style>
 </resources>

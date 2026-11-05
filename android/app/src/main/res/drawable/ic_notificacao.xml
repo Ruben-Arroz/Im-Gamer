@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- ícone pequeno das notificações (um comando simples), o android só usa a forma e pinta-o de uma cor -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="24"
+    android:viewportHeight="24">
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M7,7h10a5,5 0,0 1,5 5v1a4,4 0,0 1,-7 2.6l-0.6,-0.6h-4.8l-0.6,0.6a4,4 0,0 1,-7 -2.6v-1a5,5 0,0 1,5 -5zM7,10v1.5h-1.5v1h1.5v1.5h1v-1.5h1.5v-1h-1.5v-1.5zM16,10.5a0.8,0.8 0,1 0,0 1.6a0.8,0.8 0,1 0,0 -1.6zM18,12.5a0.8,0.8 0,1 0,0 1.6a0.8,0.8 0,1 0,0 -1.6z" />
+</vector>

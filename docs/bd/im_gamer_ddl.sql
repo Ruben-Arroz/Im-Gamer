@@ -247,4 +247,15 @@ CREATE TABLE `Taxas_Cambio` (
   PRIMARY KEY (`moeda`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
+CREATE TABLE `Tokens_Api` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `utilizador_id` int(11) NOT NULL,
+  `token_hash` char(64) NOT NULL,
+  `data_criacao` datetime NOT NULL DEFAULT current_timestamp(),
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `token_hash` (`token_hash`),
+  KEY `fk_tokens_utilizador` (`utilizador_id`),
+  CONSTRAINT `fk_tokens_utilizador` FOREIGN KEY (`utilizador_id`) REFERENCES `Utilizadores` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
 SET FOREIGN_KEY_CHECKS = 1;

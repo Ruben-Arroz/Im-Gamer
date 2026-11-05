@@ -30,6 +30,39 @@ function utilizadorDaApp(): int
     return $id;
 }
 
+// as fotos dos utilizadores estão guardadas só com o caminho dentro de uploads, a app precisa do endereço todo
+function enderecoUpload(?string $nome): ?string
+{
+    if (!$nome) {
+        return null;
+    }
+
+    $protocolo = !empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off' ? 'https://' : 'http://';
+    return $protocolo . $_SERVER['HTTP_HOST'] . BASE_URL . '/uploads/' . $nome;
+}
+
+// a moeda de quem está a usar a app, para os valores das contas
+function moedaDe(int $utilizadorId): string
+{
+    $utilizador = Utilizador::buscarPorId($utilizadorId);
+    return $utilizador['moeda'] ?? 'EUR';
+}
+
+// os campos de um anúncio que vão para as listas da app
+function anuncioResumido(array $anuncio): array
+{
+    return [
+        'id' => (int) $anuncio['id'],
+        'jogo' => $anuncio['jogo'],
+        'imagem' => $anuncio['imagem_capa'],
+        'plataforma' => $anuncio['plataforma'] ?? 'Qualquer plataforma',
+        'dono' => $anuncio['nome_utilizador'],
+        'no_ar_ate' => formatarDia($anuncio['data_fim']),
+        'estado' => Lfg::estado($anuncio),
+        'saiu_do_ar' => Lfg::expirado($anuncio),
+    ];
+}
+
 function soPost(): void
 {
     if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
