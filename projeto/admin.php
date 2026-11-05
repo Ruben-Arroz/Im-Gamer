@@ -21,10 +21,6 @@ require_once __DIR__ . '/includes/header.php';
             <span>utilizadores</span>
         </div>
         <div class="numero">
-            <strong><?= $numeros['novos'] ?></strong>
-            <span>registados nos últimos 7 dias</span>
-        </div>
-        <div class="numero">
             <strong><?= $numeros['contas'] ?></strong>
             <span>contas ligadas</span>
         </div>
@@ -39,10 +35,6 @@ require_once __DIR__ . '/includes/header.php';
         <div class="numero">
             <strong><?= $numeros['avaliacoes'] ?></strong>
             <span>avaliações</span>
-        </div>
-        <div class="numero">
-            <strong><?= $numeros['convites'] ?></strong>
-            <span>convites por responder</span>
         </div>
     </div>
 
