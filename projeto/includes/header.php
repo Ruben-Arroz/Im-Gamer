@@ -23,7 +23,7 @@ if (Auth::autenticado()) {
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Share+Tech+Mono&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="<?= BASE_URL ?>/common/style.css?v=2">
-<link rel="stylesheet" href="<?= BASE_URL ?>/projeto/assets/css/site.css?v=30">
+<link rel="stylesheet" href="<?= BASE_URL ?>/projeto/assets/css/site.css?v=31">
 </head>
 <body>
 
@@ -38,6 +38,9 @@ if (Auth::autenticado()) {
                 <span class="contador" title="Convites e avisos por ver"><?= $avisosLfg ?></span>
             <?php endif; ?>
         </a>
+        <?php if (Auth::admin()): ?>
+            <a href="<?= BASE_URL ?>/projeto/admin.php">Admin</a>
+        <?php endif; ?>
         <?php if (Auth::autenticado()): ?>
             <a href="<?= BASE_URL ?>/projeto/perfil.php">Perfil</a>
             <a href="<?= BASE_URL ?>/projeto/logout.php">Sair</a>
