@@ -300,6 +300,18 @@ class Jogo
         return $stmt->fetch() ?: null;
     }
 
+    // jogos já guardados com o texto no nome (pesquisa da app)
+    public static function pesquisarNome(string $texto, int $limite): array
+    {
+        $pdo = Database::ligar();
+        $stmt = $pdo->prepare('SELECT id, nome, imagem_capa FROM Jogos WHERE nome LIKE :nome ORDER BY nome LIMIT :limite');
+        $stmt->bindValue('nome', '%' . $texto . '%');
+        $stmt->bindValue('limite', $limite, PDO::PARAM_INT);
+        $stmt->execute();
+
+        return $stmt->fetchAll();
+    }
+
     public static function generosDoJogo(int $id): array
     {
         $pdo = Database::ligar();
