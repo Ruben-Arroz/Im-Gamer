@@ -60,3 +60,4 @@ require_once __DIR__ . '/../classes/Notificacoes.php';
 require_once __DIR__ . '/../classes/Convites.php';
 require_once __DIR__ . '/../classes/Lfg.php';
 require_once __DIR__ . '/../classes/Admin.php';
+require_once __DIR__ . '/../classes/TokensApi.php';
