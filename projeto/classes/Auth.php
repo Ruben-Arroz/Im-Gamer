@@ -54,6 +54,20 @@ class Auth
         return isset($_SESSION['utilizador_id']);
     }
 
+    // o is_admin é lido sempre da bd e não da sessão, assim se for tirado a alguém deixa logo de entrar no painel
+    public static function admin(): bool
+    {
+        if (!self::autenticado()) {
+            return false;
+        }
+
+        $pdo = Database::ligar();
+        $stmt = $pdo->prepare('SELECT is_admin FROM Utilizadores WHERE id = :id');
+        $stmt->execute(['id' => $_SESSION['utilizador_id']]);
+
+        return (bool) $stmt->fetchColumn();
+    }
+
     // token escondido nos formulários, para outro site não conseguir enviar pedidos em nome do utilizador
     public static function token(): string
     {
