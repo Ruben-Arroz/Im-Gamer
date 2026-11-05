@@ -12,7 +12,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $email = trim($_POST['email'] ?? '');
     $password = $_POST['password'] ?? '';
 
-    if ($email === '' || $password === '') {
+    if (!Auth::tokenValido($_POST['token'] ?? '')) {
+        $erro = 'A sessão expirou. Tenta outra vez.';
+    } elseif ($email === '' || $password === '') {
         $erro = 'Preenche todos os campos.';
     } else {
         $resultado = Auth::login($email, $password);
@@ -37,6 +39,7 @@ require_once __DIR__ . '/includes/header.php';
     <?php endif; ?>
 
     <form method="post" novalidate>
+        <input type="hidden" name="token" value="<?= Auth::token() ?>">
         <label for="email">Email</label>
         <input type="email" id="email" name="email" value="<?= htmlspecialchars($_POST['email'] ?? '') ?>" required>
 

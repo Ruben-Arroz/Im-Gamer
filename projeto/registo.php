@@ -15,7 +15,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $password = $_POST['password'] ?? '';
     $passwordConfirmar = $_POST['password_confirmar'] ?? '';
 
-    if ($nomeUtilizador === '' || $email === '' || $password === '') {
+    if (!Auth::tokenValido($_POST['token'] ?? '')) {
+        $erro = 'A sessão expirou. Tenta outra vez.';
+    } elseif ($nomeUtilizador === '' || $email === '' || $password === '') {
         $erro = 'Preenche todos os campos.';
     } elseif (strlen($nomeUtilizador) < 3 || strlen($nomeUtilizador) > 50) {
         $erro = 'O nome de utilizador deve ter entre 3 e 50 caracteres.';
@@ -50,6 +52,7 @@ require_once __DIR__ . '/includes/header.php';
         <?php endif; ?>
 
         <form method="post" novalidate>
+            <input type="hidden" name="token" value="<?= Auth::token() ?>">
             <label for="nome_utilizador">Nome de utilizador</label>
             <input type="text" id="nome_utilizador" name="nome_utilizador" value="<?= htmlspecialchars($_POST['nome_utilizador'] ?? '') ?>" required>
 

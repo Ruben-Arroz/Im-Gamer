@@ -1936,3 +1936,23 @@ a.lista-acao {
         min-width: 0;
     }
 }
+
+/* página de erro 404 */
+.erro-404 {
+    text-align: center;
+    padding: 60px 0;
+}
+
+.erro-404 h1 {
+    font-size: 3rem;
+    margin-bottom: 24px;
+}
+
+.erro-404 p {
+    color: var(--text-dim);
+    margin-bottom: 32px;
+}
+
+.erro-404 .botao-principal {
+    display: inline-block;
+}
