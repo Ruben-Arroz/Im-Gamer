@@ -10,7 +10,8 @@ function responder(array $resposta): void
     exit;
 }
 
-if (!Auth::autenticado() || $_SERVER['REQUEST_METHOD'] !== 'POST' || !Auth::tokenValido($_POST['token'] ?? '')) {
+// não pede sessão porque a página do jogo também abre a quem não entrou
+if ($_SERVER['REQUEST_METHOD'] !== 'POST' || !Auth::tokenValido($_POST['token'] ?? '')) {
     http_response_code(403);
     responder(['erro' => 'Sem permissão.']);
 }

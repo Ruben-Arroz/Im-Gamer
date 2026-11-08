@@ -1965,3 +1965,8 @@ a.lista-acao {
 .destaque-lancamento {
     margin-top: 44px;
 }
+
+/* caixas com uma explicação ao passar o rato */
+.numero-ajuda {
+    cursor: help;
+}

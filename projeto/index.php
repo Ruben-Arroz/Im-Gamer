@@ -13,7 +13,7 @@ $cincoEmDolares = ceil(5 / $conversao['fator']);
 // nos da rawg o pedido são os dias "de" e "até" a contar de hoje (negativo é para trás)
 $carrosseis = [
     ['Melhores promoções', 'cheapshark', 'sortBy=Deal%20Rating', 'catalogo.php'],
-    ['Maiores descontos em jogos AAA', 'cheapshark', 'sortBy=Savings&AAA=1', 'catalogo.php?ordem=Savings&aaa=on'],
+    ['Maiores descontos em jogos caros', 'cheapshark', 'sortBy=Savings&AAA=1', 'catalogo.php?ordem=Savings&aaa=on'],
     ['Promoções na Steam', 'cheapshark', 'sortBy=Deal%20Rating&storeID=1', 'catalogo.php?loja[]=1'],
     ['Até 5 ' . $simbolo, 'cheapshark', 'sortBy=Deal%20Rating&upperPrice=' . $cincoEmDolares, 'catalogo.php?preco_max=5'],
     ['Mais bem avaliados', 'cheapshark', 'sortBy=Metacritic&metacritic=80', 'catalogo.php?ordem=Metacritic&metacritic=80'],

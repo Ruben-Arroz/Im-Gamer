@@ -1,12 +1,8 @@
 <?php
 require_once __DIR__ . '/includes/bootstrap.php';
 
-if (!Auth::autenticado()) {
-    header('Location: ' . BASE_URL . '/projeto/login.php');
-    exit;
-}
-
-$utilizadorId = (int) $_SESSION['utilizador_id'];
+// esta página também abre a quem não tem sessão, só vê. 0 quer dizer que não entrou
+$utilizadorId = Auth::autenticado() ? (int) $_SESSION['utilizador_id'] : 0;
 $jogo = null;
 $procurar = false;
 $erro = null;
@@ -30,7 +26,7 @@ if (isset($_GET['id'])) {
     $procurar = $slug !== '' || $nome !== '';
 }
 
-if ($jogo && $_SERVER['REQUEST_METHOD'] === 'POST') {
+if ($jogo && $utilizadorId && $_SERVER['REQUEST_METHOD'] === 'POST') {
     $acao = $_POST['acao'] ?? '';
 
     if (!Auth::tokenValido($_POST['token'] ?? '')) {
@@ -66,15 +62,23 @@ if ($jogo) {
     $generos = Jogo::generosDoJogo($jogo['id']);
     $plataformas = Jogo::plataformasDoJogo($jogo['id']);
     $lojas = Jogo::lojas($jogo);
-    $naLista = ListaDesejos::tem($utilizadorId, $jogo['id']);
-
     $media = Avaliacoes::media($jogo['id']);
     $avaliacoes = Avaliacoes::doJogo($jogo['id']);
-    $minhaAvaliacao = Avaliacoes::doUtilizador($utilizadorId, $jogo['id']);
 
-    $progresso = Biblioteca::progressoNoJogo($utilizadorId, $jogo['id'], $jogo['nome']);
-    $quemTem = Biblioteca::quemTem($jogo['id'], $jogo['nome'], 12);
-    $anunciosLfg = Lfg::doJogo($jogo['id'], 5);
+    // quem não entrou só vê os dados do jogo, os preços e as avaliações
+    $naLista = false;
+    $minhaAvaliacao = null;
+    $progresso = [];
+    $quemTem = [];
+    $anunciosLfg = [];
+
+    if ($utilizadorId) {
+        $naLista = ListaDesejos::tem($utilizadorId, $jogo['id']);
+        $minhaAvaliacao = Avaliacoes::doUtilizador($utilizadorId, $jogo['id']);
+        $progresso = Biblioteca::progressoNoJogo($utilizadorId, $jogo['id'], $jogo['nome']);
+        $quemTem = Biblioteca::quemTem($jogo['id'], $jogo['nome'], 12);
+        $anunciosLfg = Lfg::doJogo($jogo['id'], 5);
+    }
 
     $modos = [];
     foreach (Biblioteca::MODOS as $modo => $nomeModo) {
@@ -176,16 +180,20 @@ require_once __DIR__ . '/includes/header.php';
                 </div>
 
                 <div class="jogo-acoes">
-                    <form method="post">
-                        <input type="hidden" name="token" value="<?= Auth::token() ?>">
-                        <?php if ($naLista): ?>
-                            <input type="hidden" name="acao" value="desejo_remover">
-                            <button type="submit" class="botao-contorno">Tirar da lista de desejos</button>
-                        <?php else: ?>
-                            <input type="hidden" name="acao" value="desejo_adicionar">
-                            <button type="submit">Adicionar à lista de desejos</button>
-                        <?php endif; ?>
-                    </form>
+                    <?php if ($utilizadorId): ?>
+                        <form method="post">
+                            <input type="hidden" name="token" value="<?= Auth::token() ?>">
+                            <?php if ($naLista): ?>
+                                <input type="hidden" name="acao" value="desejo_remover">
+                                <button type="submit" class="botao-contorno">Tirar da lista de desejos</button>
+                            <?php else: ?>
+                                <input type="hidden" name="acao" value="desejo_adicionar">
+                                <button type="submit">Adicionar à lista de desejos</button>
+                            <?php endif; ?>
+                        </form>
+                    <?php else: ?>
+                        <a class="botao-contorno" href="<?= BASE_URL ?>/projeto/login.php">Entrar para guardar na lista de desejos</a>
+                    <?php endif; ?>
 
                     <a class="botao-contorno" href="<?= BASE_URL ?>/projeto/lfg_criar.php?jogo=<?= $jogo['id'] ?>">Criar anúncio de LFG</a>
 
@@ -272,27 +280,31 @@ require_once __DIR__ . '/includes/header.php';
 
         <h2 id="avaliacoes">Avaliações</h2>
 
-        <form method="post" class="formulario-avaliacao">
-            <input type="hidden" name="token" value="<?= Auth::token() ?>">
-            <input type="hidden" name="acao" value="avaliar">
+        <?php if ($utilizadorId): ?>
+            <form method="post" class="formulario-avaliacao">
+                <input type="hidden" name="token" value="<?= Auth::token() ?>">
+                <input type="hidden" name="acao" value="avaliar">
 
-            <label for="pontuacao"><?= $minhaAvaliacao ? 'A tua avaliação' : 'Avaliar este jogo' ?></label>
-            <select id="pontuacao" name="pontuacao">
-                <?php for ($i = 5; $i >= 1; $i--): ?>
-                    <option value="<?= $i ?>" <?= ($minhaAvaliacao['pontuacao'] ?? 5) == $i ? 'selected' : '' ?>><?= estrelas($i) ?></option>
-                <?php endfor; ?>
-            </select>
+                <label for="pontuacao"><?= $minhaAvaliacao ? 'A tua avaliação' : 'Avaliar este jogo' ?></label>
+                <select id="pontuacao" name="pontuacao">
+                    <?php for ($i = 5; $i >= 1; $i--): ?>
+                        <option value="<?= $i ?>" <?= ($minhaAvaliacao['pontuacao'] ?? 5) == $i ? 'selected' : '' ?>><?= estrelas($i) ?></option>
+                    <?php endfor; ?>
+                </select>
 
-            <label for="comentario">Comentário (opcional)</label>
-            <textarea id="comentario" name="comentario" rows="3" maxlength="1000"><?= htmlspecialchars($minhaAvaliacao['comentario'] ?? '') ?></textarea>
+                <label for="comentario">Comentário (opcional)</label>
+                <textarea id="comentario" name="comentario" rows="3" maxlength="1000"><?= htmlspecialchars($minhaAvaliacao['comentario'] ?? '') ?></textarea>
 
-            <div class="jogo-acoes">
-                <button type="submit"><?= $minhaAvaliacao ? 'Guardar alterações' : 'Publicar avaliação' ?></button>
-                <?php if ($minhaAvaliacao): ?>
-                    <button type="submit" name="acao" value="apagar_avaliacao" class="botao-contorno" onclick="return confirm('Apagar a tua avaliação?');">Apagar</button>
-                <?php endif; ?>
-            </div>
-        </form>
+                <div class="jogo-acoes">
+                    <button type="submit"><?= $minhaAvaliacao ? 'Guardar alterações' : 'Publicar avaliação' ?></button>
+                    <?php if ($minhaAvaliacao): ?>
+                        <button type="submit" name="acao" value="apagar_avaliacao" class="botao-contorno" onclick="return confirm('Apagar a tua avaliação?');">Apagar</button>
+                    <?php endif; ?>
+                </div>
+            </form>
+        <?php else: ?>
+            <p class="texto-dim"><a href="<?= BASE_URL ?>/projeto/login.php">Entra</a> para avaliar este jogo.</p>
+        <?php endif; ?>
 
         <?php if (!$avaliacoes): ?>
             <p class="texto-dim">Ainda ninguém avaliou este jogo.</p>
@@ -301,7 +313,11 @@ require_once __DIR__ . '/includes/header.php';
         <ul class="lista-avaliacoes">
             <?php foreach ($avaliacoes as $avaliacao): ?>
                 <li>
-                    <a href="<?= BASE_URL ?>/projeto/perfil.php?u=<?= urlencode($avaliacao['nome_utilizador']) ?>"><?= htmlspecialchars($avaliacao['nome_utilizador']) ?></a>
+                    <?php if ($utilizadorId): ?>
+                        <a href="<?= BASE_URL ?>/projeto/perfil.php?u=<?= urlencode($avaliacao['nome_utilizador']) ?>"><?= htmlspecialchars($avaliacao['nome_utilizador']) ?></a>
+                    <?php else: ?>
+                        <?= htmlspecialchars($avaliacao['nome_utilizador']) ?>
+                    <?php endif; ?>
                     <span class="estrelas"><?= estrelas($avaliacao['pontuacao']) ?></span>
                     <span class="texto-dim"><?= (new DateTime($avaliacao['data_criacao']))->format('d/m/Y') ?></span>
                     <?php if ($avaliacao['comentario']): ?>

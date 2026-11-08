@@ -108,7 +108,7 @@ require_once __DIR__ . '/includes/header.php';
 
         <div class="numeros">
             <?php if ($mostrarValores): ?>
-                <div class="numero">
+                <div class="numero numero-ajuda" title="Soma dos preços dos jogos e do inventário. Os jogos sem preço conhecido, como os da PlayStation, não entram na conta.">
                     <strong><?= Moeda::formatar($totalValor, $moeda) ?></strong>
                     <span>valor estimado</span>
                 </div>
