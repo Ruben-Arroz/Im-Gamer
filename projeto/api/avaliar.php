@@ -1,6 +1,5 @@
 <?php
-// avaliar um jogo pela app (1 a 5 e um comentário opcional) ou, com acao=apagar, tirar a avaliação
-// as regras são as mesmas do jogo.php do site
+// avaliar um jogo pela app (com acao=apagar tira a avaliação)
 require_once __DIR__ . '/../includes/api.php';
 
 soPost();

@@ -1,8 +1,7 @@
 <?php
 
-// a xbox não tem api pública, por isso usa-se o openxbl (xbl.io), que é um serviço não oficial
-// dá o perfil, os jogos, as conquistas, o gamerscore e as horas (nem sempre)
-// as imagens, os detalhes e os preços vêm do catálogo da loja da microsoft, que é público
+// a xbox não tem api pública, usa-se o openxbl (xbl.io), que não é oficial
+// as imagens, os detalhes e os preços vêm do catálogo da loja da microsoft
 class Xbox
 {
     private static function pedir(string $caminho, ?array $corpo = null): ?array

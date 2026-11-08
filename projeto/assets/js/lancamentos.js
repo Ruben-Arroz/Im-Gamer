@@ -1,7 +1,4 @@
-// lançamentos de jogos da RAWG, pedidos pelo browser
-// (o servidor da UA não deixa fazer pedidos para fora)
-// os filtros vêm do url, que é o que o formulário envia
-// os cartões e a paginação estão no cartoes.js
+// lançamentos da rawg, pedidos pelo browser porque o servidor da UA não tem internet
 
 const POR_PAGINA = 40;
 

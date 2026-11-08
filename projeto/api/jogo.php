@@ -1,5 +1,4 @@
 <?php
-// um jogo para a app: dados, média e avaliações (com a de quem está a usar a app à parte)
 require_once __DIR__ . '/../includes/api.php';
 
 $eu = utilizadorDaApp();

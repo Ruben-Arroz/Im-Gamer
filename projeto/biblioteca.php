@@ -24,7 +24,7 @@ if ($utilizador) {
     $contas = ContasLigadas::listar($utilizador['id']);
     $generos = Biblioteca::generosDoUtilizador($utilizador['id']);
 
-    // os valores dos filtros vêm do url (?servico[]=steam&horas=1a10...), cada um é validado antes de ir para a pesquisa
+    // os filtros vêm do url e são validados contra as listas
     $filtros = [
         'nome' => trim($_GET['q'] ?? ''),
         'servicos' => array_values(array_intersect((array) ($_GET['servico'] ?? []), array_keys(ContasLigadas::SERVICOS))),
@@ -58,7 +58,7 @@ if ($utilizador) {
     $totalPaginas = max(1, (int) ceil($resultado['total'] / POR_PAGINA));
 }
 
-// devolve o url da página atual só com a página trocada (mantém os filtros)
+// url com outra página, sem perder os filtros
 function urlPagina(int $numero): string
 {
     return '?' . http_build_query(array_merge($_GET, ['pagina' => $numero]));

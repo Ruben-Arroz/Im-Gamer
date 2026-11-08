@@ -1,6 +1,5 @@
 <?php
-// perfil para a app: sem ?u= é o de quem está a usar a app, com ?u=nome é o de outro jogador
-// mostra o mesmo que o perfil.php do site, com as mesmas regras (valores escondidos e discord)
+// perfil para a app, sem ?u= é o próprio
 require_once __DIR__ . '/../includes/api.php';
 
 $eu = utilizadorDaApp();

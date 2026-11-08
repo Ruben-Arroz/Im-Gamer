@@ -2,7 +2,7 @@
 
 class Jogo
 {
-    // guarda um jogo escolhido na pesquisa da rawg (se ainda não existir) e devolve o id dele na nossa bd
+    // guarda um jogo da pesquisa da rawg, se ainda não existir
     public static function guardarDaRawg(int $rawgId, string $nome, string $slug, ?string $imagem, ?string $lancamento): int
     {
         $pdo = Database::ligar();
@@ -27,11 +27,9 @@ class Jogo
         return (int) $pdo->lastInsertId();
     }
 
-    // colunas com o id de cada loja, usadas no usarPorNome
     const COLUNAS_LOJAS = ['steam_app_id', 'xbox_id', 'gog_id', 'epic_id'];
 
-    // se já houver um jogo com o mesmo nome sem o id desta loja (por exemplo vindo da RAWG ou de outra loja),
-    // junta-se-lhe o id e usa-se esse em vez de criar um repetido
+    // se já houver um jogo com o mesmo nome (da rawg ou de outra loja) junta-se-lhe o id, em vez de criar um repetido
     private static function usarPorNome(string $coluna, string $id, string $nome): ?array
     {
         $jogoId = self::procurar(0, '', 0, $nome);
@@ -39,7 +37,7 @@ class Jogo
             return null;
         }
 
-        // o nome da coluna vem da lista COLUNAS_LOJAS, por isso pode ir direto para o sql
+        // a coluna vem da lista COLUNAS_LOJAS, pode ir direta para o sql
         $pdo = Database::ligar();
         $stmt = $pdo->prepare('UPDATE Jogos SET ' . $coluna . ' = :valor WHERE id = :id AND ' . $coluna . ' IS NULL');
         $stmt->execute(['valor' => $id, 'id' => $jogoId]);
@@ -55,7 +53,6 @@ class Jogo
         return $stmt->fetch();
     }
 
-    // procura o jogo da steam na nossa bd e, se ainda não existir, vai buscar os dados à loja e guarda-o
     public static function daSteam(int $appid): ?array
     {
         $pdo = Database::ligar();
@@ -300,7 +297,6 @@ class Jogo
         return $stmt->fetch() ?: null;
     }
 
-    // jogos já guardados com o texto no nome (pesquisa da app)
     public static function pesquisarNome(string $texto, int $limite): array
     {
         $pdo = Database::ligar();
@@ -330,8 +326,7 @@ class Jogo
         return $stmt->fetchAll(PDO::FETCH_COLUMN);
     }
 
-    // o jogo escolhido num formulário (criar anúncio de LFG, convidar): ou já vem da bd (jogo_id, a partir da página do jogo)
-    // ou foi escolhido na pesquisa da rawg feita no browser (pesquisa_jogo.js). devolve o id na tabela Jogos, ou null
+    // o jogo de um formulário: ou já vem da bd (jogo_id) ou foi escolhido na pesquisa da rawg (pesquisa_jogo.js)
     public static function doFormulario(array $dados): ?int
     {
         $pesquisa = trim($dados['jogo_pesquisa'] ?? '');
@@ -469,7 +464,6 @@ class Jogo
         }
     }
 
-    // links para as lojas onde o jogo está, conforme os ids que temos dele
     public static function lojas(array $jogo): array
     {
         $lojas = [];

@@ -1,6 +1,5 @@
 <?php
 
-// avaliações dos jogos feitas pelos utilizadores do site (1 a 5 estrelas e um comentário opcional)
 class Avaliacoes
 {
     public static function doJogo(int $jogoId): array

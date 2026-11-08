@@ -1,5 +1,4 @@
-// galeria da página do jogo: a imagem do jogo e as capturas de ecrã da rawg
-// as capturas não ficam guardadas na bd, o browser pede-as cada vez que a página abre
+// galeria da página do jogo, com as capturas de ecrã da rawg
 
 const galeria = document.querySelector('#galeria');
 const imagemGrande = document.querySelector('#galeria-imagem');

@@ -1,5 +1,4 @@
-// funções partilhadas para criar os cartões de jogos (catálogo, lançamentos e página inicial)
-// cada página chama configurarCartoes() com o elemento que tem os dados que o php lá pôs
+// cartões de jogos, usados no catálogo, nos lançamentos e na página inicial
 
 const CHEAPSHARK = 'https://www.cheapshark.com/api/1.0';
 const RAWG = 'https://api.rawg.io/api/games';
@@ -47,7 +46,6 @@ function configurarCartoes(elemento) {
     }
 }
 
-// os cartões abrem a página do jogo, que vai buscar o resto dos dados
 function linkJogoPromocao(promo) {
     return base + '/projeto/jogo.php?nome=' + encodeURIComponent(promo.title) + (promo.steamAppID ? '&steam=' + promo.steamAppID : '');
 }
@@ -114,7 +112,6 @@ function criarCartaoPromocao(promo) {
         loja.appendChild(etiqueta);
     }
 
-    // nota e avaliações, só se existirem
     const extra = [];
     if (promo.metacriticScore !== '0') {
         extra.push('Metacritic ' + promo.metacriticScore);
@@ -162,14 +159,6 @@ function criarCartaoLancamento(jogo) {
         cartao.appendChild(criarTexto('cartao-sem-imagem', 'sem imagem'));
     }
 
-    const plataformas = (jogo.parent_platforms || []).map(function (p) {
-        return p.platform.name;
-    });
-
-    const generos = (jogo.genres || []).map(function (g) {
-        return generosPt[g.name] || g.name;
-    });
-
     const data = document.createElement('p');
     data.className = 'cartao-precos';
 
@@ -185,8 +174,22 @@ function criarCartaoLancamento(jogo) {
         data.appendChild(nota);
     }
 
-    cartao.append(criarTexto('cartao-titulo', jogo.name), criarTexto('cartao-loja', plataformas.join(' · ')), criarTexto('cartao-loja', generos.join(', ')), data);
+    cartao.append(criarTexto('cartao-titulo', jogo.name), criarTexto('cartao-loja', plataformasRawg(jogo)), criarTexto('cartao-loja', generosRawg(jogo)), data);
     return cartao;
+}
+
+function plataformasRawg(jogo) {
+    const nomes = (jogo.parent_platforms || []).map(function (p) {
+        return p.platform.name;
+    });
+    return nomes.join(' · ');
+}
+
+function generosRawg(jogo) {
+    const nomes = (jogo.genres || []).map(function (g) {
+        return generosPt[g.name] || g.name;
+    });
+    return nomes.join(', ');
 }
 
 // datas no formato que a rawg quer (2026-10-24), a contar a partir de hoje
@@ -196,7 +199,7 @@ function dataDaqui(dias) {
     return data.toISOString().slice(0, 10);
 }
 
-// paginação com os números à volta da página atual (usada no catálogo e nos lançamentos)
+// paginação do catálogo e dos lançamentos
 function mostrarPaginacao(elemento, parametros, atual, totalPaginas) {
     if (totalPaginas <= 1) {
         return;
@@ -243,8 +246,7 @@ function mostrarPaginacao(elemento, parametros, atual, totalPaginas) {
     }
 }
 
-// o preço mais barato agora de cada jogo (lista de {id, nome, steam}), nas lojas que o site usa
-// devolve {id do jogo: promoção no formato das promoções da cheapshark}
+// o preço mais barato de cada jogo agora, nas lojas que o site usa
 async function melhoresPrecos(jogos, lojas) {
     const encontrados = [];
 

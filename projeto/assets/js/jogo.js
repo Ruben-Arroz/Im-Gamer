@@ -1,4 +1,4 @@
-// preços do jogo nas lojas de PC, vindos da cheapshark (as funções de preços e lojas estão no cartoes.js)
+// preços do jogo nas lojas de PC (cheapshark)
 
 const caixaPrecos = document.querySelector('#precos');
 const dadosPrecos = caixaPrecos.dataset;

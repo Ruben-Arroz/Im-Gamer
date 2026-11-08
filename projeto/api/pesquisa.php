@@ -1,5 +1,4 @@
 <?php
-// pesquisa da app: jogadores pelo nome e jogos já guardados no site
 require_once __DIR__ . '/../includes/api.php';
 
 $eu = utilizadorDaApp();

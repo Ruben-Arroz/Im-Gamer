@@ -1,6 +1,5 @@
 <?php
-// um anúncio de LFG para a app. com POST acao=entrar ou acao=sair entra ou sai da equipa
-// as outras ações do dono (fechar, prolongar, apagar, ...) ficam só no site
+// um anúncio para a app, com POST entra ou sai da equipa
 require_once __DIR__ . '/../includes/api.php';
 
 $eu = utilizadorDaApp();
@@ -14,7 +13,6 @@ if (!Lfg::buscar($id)) {
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $acao = $_POST['acao'] ?? '';
 
-    // a classe Lfg confirma se a pessoa pode entrar (vagas, estado, se já está lá)
     if ($acao === 'entrar') {
         $resultado = Lfg::entrar($id, $eu, $nomeEu);
         if (!$resultado['sucesso']) {
@@ -27,11 +25,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 }
 
-// depois de entrar ou sair devolve o anúncio já atualizado
 $anuncio = Lfg::buscar($id);
 $participantes = Lfg::participantes($id);
 $souDono = (int) $anuncio['utilizador_id'] === $eu;
-$participo = in_array($eu, array_map('intval', array_column($participantes, 'utilizador_id')), true);
+$participo = Lfg::participa($id, $eu);
 
 $lista = [];
 foreach ($participantes as $participante) {

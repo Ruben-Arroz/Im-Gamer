@@ -1,6 +1,5 @@
 <?php
-// título, separadores e avisos do painel, usados em todas as páginas admin_*.php
-// precisa do $erro (ou null). o aviso de sucesso vem da sessão e só aparece uma vez
+// precisa do $erro. o aviso de sucesso vem da sessão e só aparece uma vez
 $paginaAtual = basename($_SERVER['SCRIPT_NAME']);
 $avisoAdmin = $_SESSION['aviso_admin'] ?? null;
 unset($_SESSION['aviso_admin']);

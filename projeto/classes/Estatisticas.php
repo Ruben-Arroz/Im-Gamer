@@ -1,6 +1,5 @@
 <?php
 
-// contas para a página de estatísticas, juntando os jogos de todas as contas do utilizador
 class Estatisticas
 {
     const DE = ' FROM Biblioteca_Jogos b
@@ -30,7 +29,6 @@ class Estatisticas
         return $stmt->fetch();
     }
 
-    // géneros com mais jogos, e as horas jogadas em cada um
     public static function generos(int $utilizadorId, int $limite): array
     {
         $pdo = Database::ligar();
@@ -50,7 +48,7 @@ class Estatisticas
         return $stmt->fetchAll();
     }
 
-    // quantos jogos e quantas horas em cada modo (um jogo pode ter vários modos)
+    // um jogo pode ter vários modos
     public static function modos(int $utilizadorId): array
     {
         $pdo = Database::ligar();
@@ -67,7 +65,6 @@ class Estatisticas
         return $stmt->fetch();
     }
 
-    // jogos por década de lançamento (1990, 2000, ...)
     public static function decadas(int $utilizadorId): array
     {
         $pdo = Database::ligar();
@@ -80,7 +77,7 @@ class Estatisticas
         return $stmt->fetchAll();
     }
 
-    // produtoras ou editoras com mais jogos. o nome da coluna não pode ir como parâmetro, por isso só aceita estas duas
+    // o nome da coluna não pode ir como parâmetro, por isso só aceita estas duas
     public static function empresas(int $utilizadorId, string $coluna, int $limite): array
     {
         if (!in_array($coluna, ['produtora', 'editora'])) {

@@ -1,7 +1,6 @@
 <?php
 
-// LFG (looking for group): anúncios para completar equipas e quem entrou em cada um
-// cada anúncio fica no ar até ao dia que o dono escolher (data_fim)
+// LFG (looking for group): anúncios para completar equipas
 class Lfg
 {
     // limites para ninguém encher a lista
@@ -9,7 +8,6 @@ class Lfg
     const MAX_VAGAS = 10;
     const MAX_DESCRICAO = 500;
 
-    // por defeito o anúncio fica 14 dias no ar, no máximo 60
     const DIAS_NO_AR = 14;
     const MAX_DIAS = 60;
 
@@ -24,7 +22,6 @@ class Lfg
         'fim' => ['A sair do ar em breve', 'p.data_fim ASC, p.data_criacao DESC'],
     ];
 
-    // campos de todas as listas (com o jogo, a plataforma, o dono e quantos entraram)
     const CAMPOS = 'SELECT p.*, j.nome AS jogo, j.imagem_capa, pl.nome AS plataforma, u.nome_utilizador,
         (SELECT COUNT(*) FROM LFG_Participantes lp WHERE lp.post_id = p.id) AS participantes';
 
@@ -92,7 +89,6 @@ class Lfg
         return ['anuncios' => $stmt->fetchAll(), 'total' => $total];
     }
 
-    // nomes dos jogos com anúncios no ar, para as sugestões da pesquisa
     public static function jogosComAnuncios(): array
     {
         $pdo = Database::ligar();
@@ -112,7 +108,6 @@ class Lfg
         return $stmt->fetch() ?: null;
     }
 
-    // anúncios no ar de um jogo, para a página do jogo
     public static function doJogo(int $jogoId, int $limite): array
     {
         $pdo = Database::ligar();
@@ -126,7 +121,6 @@ class Lfg
         return $stmt->fetchAll();
     }
 
-    // anúncios no ar do utilizador (os dele e onde entrou), para o perfil
     public static function doUtilizador(int $utilizadorId, int $limite): array
     {
         $pdo = Database::ligar();
@@ -194,7 +188,6 @@ class Lfg
         return $anuncio['data_fim'] < self::hoje();
     }
 
-    // texto do estado que aparece nos cartões
     public static function estado(array $anuncio): string
     {
         if (self::expirado($anuncio)) {
@@ -277,7 +270,6 @@ class Lfg
         }
     }
 
-    // fechar ou reabrir, só o dono
     public static function mudarEstado(int $postId, int $donoId, string $estado): void
     {
         if (!in_array($estado, ['aberto', 'fechado'])) {

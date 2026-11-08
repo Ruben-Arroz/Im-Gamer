@@ -1,5 +1,4 @@
 // sugestões de jogos da rawg enquanto se escreve
-// é o browser que faz o pedido porque o servidor da UA não tem acesso à internet
 
 const campoPesquisa = document.querySelector('#jogo_pesquisa');
 const listaSugestoes = document.querySelector('#jogo_sugestoes');

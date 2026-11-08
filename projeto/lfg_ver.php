@@ -14,7 +14,6 @@ $erro = null;
 if ($anuncio && $_SERVER['REQUEST_METHOD'] === 'POST') {
     $acao = $_POST['acao'] ?? '';
 
-    // a classe Lfg confirma se quem pede pode fazer aquilo
     if (!Auth::tokenValido($_POST['token'] ?? '')) {
         $erro = 'A sessão expirou. Tenta outra vez.';
     } elseif ($acao === 'entrar') {
@@ -48,7 +47,7 @@ if ($anuncio && $_SERVER['REQUEST_METHOD'] === 'POST') {
 if ($anuncio) {
     $dono = (int) $anuncio['utilizador_id'] === $utilizadorId;
     $participantes = Lfg::participantes($id);
-    $participo = in_array($utilizadorId, array_map('intval', array_column($participantes, 'utilizador_id')), true);
+    $participo = Lfg::participa($id, $utilizadorId);
     $estado = Lfg::estado($anuncio);
     $terminado = Lfg::expirado($anuncio);
     $podeEntrar = !$dono && !$participo && $anuncio['estado'] === 'aberto' && !$terminado && $anuncio['participantes'] < $anuncio['vagas'];

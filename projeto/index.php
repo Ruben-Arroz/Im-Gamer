@@ -9,7 +9,7 @@ $simbolo = Moeda::SIMBOLOS[$moeda];
 // "até 5" na moeda do user, a cheapshark precisa do valor em dólares
 $cincoEmDolares = ceil(5 / $conversao['fator']);
 
-// cada carrossel: título, de onde vêm os jogos, o que se pede à api, link do "Ver todos"
+// cada carrossel: título, de onde vêm os jogos, o que se pede à api, link do "Ver todos" e se tem faixa por cima
 // nos da rawg o pedido são os dias "de" e "até" a contar de hoje (negativo é para trás)
 $carrosseis = [
     ['Melhores promoções', 'cheapshark', 'sortBy=Deal%20Rating', 'catalogo.php'],
@@ -17,7 +17,7 @@ $carrosseis = [
     ['Promoções na Steam', 'cheapshark', 'sortBy=Deal%20Rating&storeID=1', 'catalogo.php?loja[]=1'],
     ['Até 5 ' . $simbolo, 'cheapshark', 'sortBy=Deal%20Rating&upperPrice=' . $cincoEmDolares, 'catalogo.php?preco_max=5'],
     ['Mais bem avaliados', 'cheapshark', 'sortBy=Metacritic&metacritic=80', 'catalogo.php?ordem=Metacritic&metacritic=80'],
-    ['Acabados de sair', 'rawg', '-30,0', 'lancamentos.php?aba=recentes&periodo=30'],
+    ['Acabados de sair', 'rawg', '-30,0', 'lancamentos.php?aba=recentes&periodo=30', true],
     ['Em breve', 'rawg', '1,90', 'lancamentos.php?aba=breve&periodo=90'],
 ];
 
@@ -61,7 +61,11 @@ require_once __DIR__ . '/includes/header.php';
     <?php endif; ?>
 
     <?php foreach ($carrosseis as $carrossel): ?>
-        <section class="carrossel" data-fonte="<?= $carrossel[1] ?>" data-pedido="<?= htmlspecialchars($carrossel[2]) ?>">
+        <?php if (isset($carrossel[4])): ?>
+            <div id="destaque-lancamento" class="destaque destaque-lancamento"></div>
+        <?php endif; ?>
+
+        <section class="carrossel" data-fonte="<?= $carrossel[1] ?>" data-pedido="<?= htmlspecialchars($carrossel[2]) ?>" <?= isset($carrossel[4]) ? 'data-destaque="1"' : '' ?>>
             <div class="carrossel-topo">
                 <h2><?= htmlspecialchars($carrossel[0]) ?></h2>
                 <a href="<?= BASE_URL ?>/projeto/<?= htmlspecialchars($carrossel[3]) ?>">Ver todos</a>
@@ -82,7 +86,7 @@ require_once __DIR__ . '/includes/header.php';
     </p>
 </section>
 
-<script src="<?= BASE_URL ?>/projeto/assets/js/cartoes.js?v=3"></script>
-<script src="<?= BASE_URL ?>/projeto/assets/js/inicio.js?v=4"></script>
+<script src="<?= BASE_URL ?>/projeto/assets/js/cartoes.js?v=4"></script>
+<script src="<?= BASE_URL ?>/projeto/assets/js/inicio.js?v=5"></script>
 
 <?php require_once __DIR__ . '/includes/footer.php'; ?>

@@ -1,6 +1,6 @@
 <?php
-// a app pergunta isto de tempos a tempos para saber se há convites ou avisos novos e mostrar uma notificação
-// não marca nada como lido: isso só acontece quando se abrem os convites
+// a app pergunta isto de 30 em 30 s para as notificações
+// não marca nada como lido, isso só acontece ao abrir os convites
 require_once __DIR__ . '/../includes/api.php';
 
 $eu = utilizadorDaApp();

@@ -1,5 +1,4 @@
-// quando o jogo ainda não está na bd: procura-o na rawg, manda os dados ao servidor para ficar guardado e abre a página dele
-// é o browser que fala com a rawg porque o servidor da UA não tem acesso à internet
+// o jogo ainda não está na bd: procura-o na rawg, manda-o ao servidor para guardar e abre a página dele
 
 const caixa = document.querySelector('#procurar-jogo');
 const dados = caixa.dataset;
@@ -14,7 +13,6 @@ function simplificar(nome) {
     return nome.toLowerCase().replace(/[^a-z0-9]/g, '');
 }
 
-// manda os dados para o servidor guardar e abre a página do jogo
 async function guardar(formulario) {
     formulario.append('token', dados.token);
     formulario.append('steam', dados.steam);

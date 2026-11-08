@@ -1,7 +1,6 @@
 <?php
 
-// a app não usa a sessão do site: no login recebe um token e manda-o em todos os pedidos
-// na bd fica só o hash do token, assim quem vir a tabela não consegue entrar na conta de ninguém
+// na bd fica só o hash do token, assim quem vir a tabela não entra na conta de ninguém
 class TokensApi
 {
     // depois deste tempo é preciso entrar outra vez na app
@@ -27,7 +26,6 @@ class TokensApi
         return $token;
     }
 
-    // devolve o id do dono do token, ou null se o token não existir ou já tiver passado do prazo
     public static function utilizador(string $token): ?int
     {
         if (!preg_match('/^[a-f0-9]{64}$/', $token)) {

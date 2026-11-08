@@ -1,6 +1,5 @@
 <?php
-// recebe os dados de um jogo que o browser foi buscar à rawg, guarda-o na tabela Jogos e devolve o id
-// é o browser que fala com a rawg porque o servidor da UA não tem acesso à internet
+// guarda um jogo que o browser foi buscar à rawg (o servidor da UA não tem internet) e devolve o id
 require_once __DIR__ . '/../includes/bootstrap.php';
 
 header('Content-Type: application/json');
@@ -16,14 +15,13 @@ if (!Auth::autenticado() || $_SERVER['REQUEST_METHOD'] !== 'POST' || !Auth::toke
     responder(['erro' => 'Sem permissão.']);
 }
 
-// os dados vêm do browser, por isso cada um é validado antes de ir para a bd
 function texto(string $campo, int $maximo): ?string
 {
     $valor = trim($_POST[$campo] ?? '');
     return $valor === '' ? null : mb_substr($valor, 0, $maximo);
 }
 
-// jogos que a rawg não tem: ficam só com o nome, a imagem e o id da steam (se houver), que vêm da cheapshark
+// jogos que a rawg não tem, ficam só com o que a cheapshark dá
 if (($_POST['fonte'] ?? '') === 'cheapshark') {
     $nome = texto('nome', 255);
     $steam = (int) ($_POST['steam'] ?? 0);
@@ -33,7 +31,7 @@ if (($_POST['fonte'] ?? '') === 'cheapshark') {
         responder(['erro' => 'Dados do jogo inválidos.']);
     }
 
-    // só imagens por https, as da cheapshark vêm de várias lojas
+    // só imagens por https
     $imagem = texto('imagem', 255);
     if ($imagem && !str_starts_with($imagem, 'https://')) {
         $imagem = null;

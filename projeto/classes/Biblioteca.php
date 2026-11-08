@@ -33,7 +33,7 @@ class Biblioteca
         'metacritic' => ['Nota Metacritic', 'j.nota_metacritic DESC'],
     ];
 
-    // monta a pesquisa com os filtros escolhidos, cada filtro junta uma condição ao WHERE
+    // cada filtro junta uma condição ao WHERE
     public static function pesquisar(int $utilizadorId, array $filtros, int $pagina, int $porPagina): array
     {
         $condicoes = ['c.utilizador_id = :utilizador'];
@@ -63,7 +63,7 @@ class Biblioteca
             $condicoes[] = 'b.jogo_id IN (SELECT jogo_id FROM Jogos_Generos WHERE genero_id IN (' . implode(', ', $nomes) . '))';
         }
 
-        // os nomes dos modos vêm da lista MODOS, por isso podem ir diretos para o sql
+        // os modos vêm da lista MODOS, podem ir diretos para o sql
         foreach ($filtros['modos'] as $modo) {
             $condicoes[] = 'j.modo_' . $modo . ' = 1';
         }
@@ -130,7 +130,6 @@ class Biblioteca
         return ['jogos' => $stmt->fetchAll(), 'total' => $total];
     }
 
-    // géneros dos jogos que o utilizador tem, para mostrar no filtro
     public static function generosDoUtilizador(int $utilizadorId): array
     {
         $pdo = Database::ligar();
@@ -146,7 +145,6 @@ class Biblioteca
         return $stmt->fetchAll();
     }
 
-    // link para a página oficial do jogo na loja de cada plataforma
     public static function linkLoja(array $jogo): ?string
     {
         if ($jogo['servico'] === 'steam' && $jogo['id_externo']) {
@@ -169,7 +167,7 @@ class Biblioteca
         return null;
     }
 
-    // quem tem o jogo nas contas ligadas. o mesmo jogo em plataformas diferentes pode ser outra linha de Jogos, por isso também conta o nome igual
+    // o mesmo jogo noutra plataforma pode ser outra linha de Jogos, por isso também conta o nome igual
     public static function quemTem(int $jogoId, string $nome, int $limite): array
     {
         $pdo = Database::ligar();
@@ -187,7 +185,6 @@ class Biblioteca
         return $stmt->fetchAll();
     }
 
-    // o progresso do utilizador num jogo, uma linha por cada conta onde o tem
     public static function progressoNoJogo(int $utilizadorId, int $jogoId, string $nome): array
     {
         $pdo = Database::ligar();
@@ -211,7 +208,7 @@ class Biblioteca
         return $stmt->fetchAll();
     }
 
-    // jogos sem horas (nunca jogados ou a plataforma não diz), pela última vez que foram jogados e depois pelo nome
+    // os sem horas (nunca jogados ou a plataforma não diz)
     public static function semHoras(int $contaId, int $limite): array
     {
         $pdo = Database::ligar();
@@ -235,7 +232,6 @@ class Biblioteca
         return $stmt->fetchAll();
     }
 
-    // mais jogados juntando todas as contas do utilizador
     public static function maisJogadosDeTodas(int $utilizadorId, int $limite): array
     {
         $pdo = Database::ligar();

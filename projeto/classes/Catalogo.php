@@ -1,10 +1,9 @@
 <?php
 
-// listas fixas usadas no catálogo, nos lançamentos e na página inicial
 class Catalogo
 {
-    // lojas ativas na cheapshark: id => [nome, se é a loja oficial da plataforma]
-    // as que não são oficiais vendem chaves para ativar noutra plataforma (steam, epic, ...)
+    // lojas da cheapshark: id => [nome, se é a loja oficial]
+    // as outras vendem chaves para ativar na steam, epic, ...
     const LOJAS = [
         1 => ['Steam', true],
         7 => ['GOG', true],
@@ -67,7 +66,7 @@ class Catalogo
         34 => 'Educativos',
     ];
 
-    // a rawg dá os géneros em inglês, isto é para os mostrar em português nos cartões
+    // a rawg dá os géneros em inglês
     const GENEROS_INGLES = [
         'Action' => 'Ação', 'Adventure' => 'Aventura', 'RPG' => 'RPG', 'Shooter' => 'Tiros',
         'Strategy' => 'Estratégia', 'Simulation' => 'Simulação', 'Racing' => 'Corrida', 'Sports' => 'Desporto',
@@ -91,7 +90,7 @@ class Catalogo
         return $oficiais;
     }
 
-    // os preços da cheapshark vêm em dólares: devolve a moeda a mostrar e quanto vale 1 dólar nessa moeda
+    // a cheapshark dá dólares, isto devolve a moeda e quanto vale 1 dólar nela
     public static function conversaoDolar(string $moeda): array
     {
         $taxaDolar = Moeda::taxa('USD');

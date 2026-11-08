@@ -73,7 +73,6 @@ require_once __DIR__ . '/includes/header.php';
 
         <label for="jogo_pesquisa">Jogo</label>
         <div class="pesquisa-jogo">
-            <!-- a chave da rawg tem de ir para o browser porque é ele que faz a pesquisa -->
             <input type="text" id="jogo_pesquisa" name="jogo_pesquisa" autocomplete="off" placeholder="Escreve o nome do jogo"
                 data-chave="<?= htmlspecialchars(RAWG_API_KEY) ?>"
                 value="<?= htmlspecialchars($_POST['jogo_pesquisa'] ?? $jogoInicial['nome'] ?? '') ?>">

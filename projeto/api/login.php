@@ -1,5 +1,5 @@
 <?php
-// login da app: recebe o email e a password e devolve um token
+// login da app, devolve um token
 require_once __DIR__ . '/../includes/api.php';
 
 soPost();

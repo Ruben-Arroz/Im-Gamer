@@ -44,7 +44,6 @@ class Moeda
         return self::$taxas[$moeda] ?? null;
     }
 
-    // os valores estão guardados em euros, aqui passam para a moeda do utilizador
     public static function formatar(float $valorEuros, string $moeda): string
     {
         $taxa = self::taxa($moeda);

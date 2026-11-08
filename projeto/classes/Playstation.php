@@ -1,7 +1,6 @@
 <?php
 
-// a playstation não tem api oficial para jogadores, por isso usa-se a mesma que a app da playstation usa (não oficial)
-// o utilizador entra na conta no browser e cola o código npsso no site, que vai logo buscar os jogos (nada fica guardado)
+// a playstation não tem api para jogadores, usa-se a da app da playstation (não oficial)
 class Playstation
 {
     // dados públicos da app da playstation, são os mesmos que as bibliotecas não oficiais usam
@@ -144,7 +143,6 @@ class Playstation
         return $dados['profile']['onlineId'] ?? 'Conta PlayStation';
     }
 
-    // troca o npsso por um acesso, liga a conta ao utilizador e vai logo buscar os jogos
     public static function ligar(int $utilizadorId, string $texto): array
     {
         $npsso = self::extrairNpsso($texto);
@@ -194,7 +192,6 @@ class Playstation
         $minutosTotal = 0;
         $conquistasTotal = 0;
 
-        // os troféus por nome do jogo, para juntar aos jogos da lista
         $trofeusPorNome = [];
         foreach ($trofeus as $titulo) {
             $trofeusPorNome[self::simplificar($titulo['trophyTitleName'])] = $titulo;
@@ -268,7 +265,6 @@ class Playstation
         return ['sucesso' => true, 'jogos' => count($linhas)];
     }
 
-    // uma linha da biblioteca, já com os troféus (conquistas) se o jogo os tiver
     private static function linha(string $nome, ?string $imagem, ?int $minutos, ?string $ultimaVez, ?array $titulo, string $id): array
     {
         $feitos = 0;

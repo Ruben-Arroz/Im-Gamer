@@ -1,5 +1,5 @@
 <?php
-// convites e avisos para a app. com POST acao=aceitar ou acao=recusar e convite_id responde a um convite
+// convites da app, com POST aceita ou recusa
 require_once __DIR__ . '/../includes/api.php';
 
 $eu = utilizadorDaApp();
@@ -11,7 +11,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         erro('Ação desconhecida.');
     }
 
-    // a classe Convites só deixa responder a quem recebeu e enquanto está pendente
     $nomeEu = Utilizador::buscarPorId($eu)['nome_utilizador'];
     Convites::responder((int) ($_POST['convite_id'] ?? 0), $eu, $nomeEu, $acao === 'aceitar');
 }
@@ -26,7 +25,6 @@ foreach (Convites::recebidos($eu) as $convite) {
         'jogo' => $convite['jogo'],
         'jogo_id' => $convite['jogo_id'] ? (int) $convite['jogo_id'] : null,
         'mensagem' => $convite['mensagem'],
-        // o discord do convite só o vê quem o recebe
         'discord' => $convite['discord'],
         'pendente' => $convite['estado'] === 'pendente',
         'estado' => $estados[$convite['estado']],

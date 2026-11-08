@@ -1,7 +1,4 @@
-// catálogo de promoções da CheapShark, pedido pelo browser
-// (o servidor da UA não deixa fazer pedidos para fora)
-// os filtros vêm do url (?q=...&ordem=...), que é o que o formulário envia
-// os cartões e a paginação estão no cartoes.js
+// catálogo da cheapshark, pedido pelo browser porque o servidor da UA não tem internet
 
 const POR_PAGINA = 60;
 

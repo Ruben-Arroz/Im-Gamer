@@ -1,11 +1,10 @@
 <?php
-// o que é igual em todos os endereços que a app usa (projeto/api/)
+// coisas comuns aos endereços da app
 require_once __DIR__ . '/bootstrap.php';
 
 header('Content-Type: application/json; charset=utf-8');
 
-// a resposta vai sempre com o código 200 e os erros vão no campo "erro",
-// porque o IIS troca as respostas de erro (404, 403, ...) pelas páginas de erro dele, que não são json
+// vai sempre com o código 200 e os erros no campo "erro", porque o IIS troca as respostas de erro pelas páginas dele
 function responder(array $dados): void
 {
     echo json_encode($dados, JSON_UNESCAPED_UNICODE);
@@ -17,7 +16,7 @@ function erro(string $mensagem): void
     responder(['erro' => $mensagem]);
 }
 
-// a app manda o token no cabeçalho X-Token. devolve o id de quem fez o pedido
+// a app manda o token no cabeçalho X-Token
 function utilizadorDaApp(): int
 {
     $id = TokensApi::utilizador($_SERVER['HTTP_X_TOKEN'] ?? '');
@@ -30,7 +29,7 @@ function utilizadorDaApp(): int
     return $id;
 }
 
-// as fotos dos utilizadores estão guardadas só com o caminho dentro de uploads, a app precisa do endereço todo
+// a app precisa do endereço todo da foto
 function enderecoUpload(?string $nome): ?string
 {
     if (!$nome) {
@@ -41,14 +40,12 @@ function enderecoUpload(?string $nome): ?string
     return $protocolo . $_SERVER['HTTP_HOST'] . BASE_URL . '/uploads/' . $nome;
 }
 
-// a moeda de quem está a usar a app, para os valores das contas
 function moedaDe(int $utilizadorId): string
 {
     $utilizador = Utilizador::buscarPorId($utilizadorId);
     return $utilizador['moeda'] ?? 'EUR';
 }
 
-// os campos de um anúncio que vão para as listas da app
 function anuncioResumido(array $anuncio): array
 {
     return [

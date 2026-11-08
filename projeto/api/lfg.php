@@ -1,6 +1,5 @@
 <?php
-// lista de anúncios de LFG para a app, com os mesmos filtros do lfg.php do site
-// ?aba=proximos (os que estão no ar) ou meus, ?jogo=texto, ?vagas=0 para ver também os completos, ?pagina=
+// lista do LFG para a app, com os mesmos filtros do site
 require_once __DIR__ . '/../includes/api.php';
 
 const POR_PAGINA = 20;

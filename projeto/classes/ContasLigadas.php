@@ -18,7 +18,7 @@ class ContasLigadas
     // da plataforma mais famosa para a menos famosa, usado para ordenar as contas no perfil
     const FAMA = ['steam', 'playstation', 'xbox', 'epic', 'nintendo', 'battlenet', 'gog'];
 
-    // as contas com jogos vêm primeiro, e entre essas ficam pela fama da plataforma
+    // as contas com jogos primeiro
     public static function ordenarPorFama(array $contas): array
     {
         usort($contas, function ($a, $b) {
@@ -62,7 +62,7 @@ class ContasLigadas
         return ['sucesso' => true];
     }
 
-    // o utilizador_id no WHERE impede que alguém apague contas de outra pessoa
+    // com o utilizador_id ninguém apaga contas dos outros
     public static function remover(int $contaId, int $utilizadorId): void
     {
         $pdo = Database::ligar();

@@ -1,7 +1,6 @@
 <?php
 
-// a epic não tem perfis públicos, por isso usa-se o mesmo login que o launcher da epic usa (api não oficial)
-// o utilizador entra na página da epic e cola o código no site, que vai logo buscar os jogos (o acesso não fica guardado)
+// a epic não tem perfis públicos, usa-se o login do launcher (api não oficial)
 class Epic
 {
     // dados públicos do launcher, são os mesmos que as ferramentas não oficiais (como o legendary) usam
@@ -62,8 +61,7 @@ class Epic
         return json_decode($resposta, true);
     }
 
-    // troca o código do login por um acesso à conta, liga-a ao utilizador e vai logo buscar os jogos
-    // o acesso não fica guardado, para atualizar outra vez é preciso fazer o login de novo
+    // o acesso não fica guardado, para atualizar faz-se o login outra vez
     public static function ligar(int $utilizadorId, string $texto): array
     {
         $codigo = self::extrairCodigo($texto);
@@ -140,8 +138,8 @@ class Epic
         return $minutos;
     }
 
-    // a loja da epic não tem api pública de preços, mas a cheapshark acompanha a loja da epic (loja 25)
-    // usa o preço normal (sem promoção), como na steam. 0 é grátis, null é porque a cheapshark não tem o jogo
+    // a epic não tem api de preços, mas a cheapshark tem a loja dela (a 25)
+    // preço normal, sem promoção. 0 é grátis, null é porque a cheapshark não tem o jogo
     private static function preco(string $nome): ?float
     {
         $dados = Api::pedir('https://www.cheapshark.com/api/1.0/deals?storeID=25&exact=1&title=' . urlencode($nome));
@@ -163,7 +161,7 @@ class Epic
 
     private static function atualizar(int $contaId, array $resposta): array
     {
-        // com muitos jogos pode demorar, cada jogo é um pedido ao catálogo e outro à cheapshark
+        // com muitos jogos demora, são dois pedidos por jogo
         set_time_limit(300);
         $acesso = $resposta['access_token'];
 

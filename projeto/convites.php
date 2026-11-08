@@ -13,7 +13,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $acao = $_POST['acao'] ?? '';
     $conviteId = (int) ($_POST['convite_id'] ?? 0);
 
-    // a classe Convites confirma quem pode responder e cancelar
     if (!Auth::tokenValido($_POST['token'] ?? '')) {
         $erro = 'A sessão expirou. Tenta outra vez.';
     } elseif ($acao === 'aceitar' || $acao === 'recusar') {

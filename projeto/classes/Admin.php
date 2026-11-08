@@ -1,11 +1,9 @@
 <?php
 
-// painel de administração: números do site e apagar utilizadores, anúncios, avaliações e jogos
 class Admin
 {
     const POR_PAGINA = 30;
 
-    // separadores do painel, a chave é o ficheiro da página
     const ABAS = [
         'admin.php' => 'Resumo',
         'admin_utilizadores.php' => 'Utilizadores',
@@ -14,10 +12,9 @@ class Admin
         'admin_jogos.php' => 'Jogos',
     ];
 
-    // ids de outras plataformas que passam para o jogo que fica quando se juntam dois jogos
+    // ids que passam para o jogo que fica ao juntar dois jogos
     const IDS_JOGO = ['rawg_id', 'slug', 'steam_app_id', 'xbox_id', 'gog_id', 'epic_id'];
 
-    // quem não é administrador volta à página inicial
     public static function verificar(): void
     {
         if (!Auth::admin()) {
@@ -26,7 +23,6 @@ class Admin
         }
     }
 
-    // faz a contagem e vai buscar só a página pedida
     private static function paginar(string $campos, string $resto, string $ordem, array $parametros, int $pagina): array
     {
         $pdo = Database::ligar();
@@ -46,7 +42,6 @@ class Admin
         return ['linhas' => $stmt->fetchAll(), 'total' => $total];
     }
 
-    // números para o resumo
     public static function resumo(): array
     {
         $pdo = Database::ligar();
@@ -79,7 +74,6 @@ class Admin
         return $stmt->fetchAll();
     }
 
-    // utilizadores com as plataformas ligadas e quantos anúncios e avaliações têm
     public static function utilizadores(string $texto, int $pagina): array
     {
         $campos = 'SELECT u.id, u.nome_utilizador, u.email, u.is_admin, u.data_criacao,
@@ -97,7 +91,7 @@ class Admin
         return self::paginar($campos, $resto, 'u.data_criacao DESC, u.id DESC', $parametros, $pagina);
     }
 
-    // devolve um erro, ou null se o utilizador foi apagado
+    // devolve o erro, ou null se correu bem
     public static function apagarUtilizador(int $id, int $adminId): ?string
     {
         if ($id === $adminId) {
@@ -113,7 +107,7 @@ class Admin
             return 'Não dá para apagar outro administrador.';
         }
 
-        // as fotos ficam na pasta uploads, o resto (contas, anúncios, avaliações, ...) vai com o ON DELETE CASCADE
+        // as fotos estão na pasta uploads, o resto vai com o ON DELETE CASCADE
         Utilizador::apagarFoto($utilizador['foto_perfil']);
         Utilizador::apagarFoto($utilizador['foto_capa']);
         Utilizador::apagar($id);
@@ -121,7 +115,6 @@ class Admin
         return null;
     }
 
-    // todos os anúncios, também os fechados e os que já saíram do ar
     public static function anuncios(string $texto, int $pagina): array
     {
         $resto = Lfg::DE;
@@ -142,7 +135,7 @@ class Admin
             return 'Esse anúncio já não existe.';
         }
 
-        // o Lfg::apagar só deixa o dono apagar, por isso vai o id do dono. os participantes recebem o aviso de lá
+        // o Lfg::apagar só deixa o dono apagar, por isso vai o id dele
         Lfg::apagar($id, (int) $anuncio['utilizador_id']);
         Notificacoes::criar($anuncio['utilizador_id'], 'admin', 'O teu anúncio de ' . $anuncio['jogo'] . ' foi apagado por um administrador.');
 
@@ -191,7 +184,6 @@ class Admin
         return null;
     }
 
-    // jogos guardados na bd e onde são usados, para encontrar os repetidos
     public static function jogos(string $texto, int $pagina): array
     {
         $campos = 'SELECT j.id, j.nome, j.imagem_capa, j.data_lancamento, j.rawg_id, j.steam_app_id, j.xbox_id, j.gog_id, j.epic_id,
@@ -202,7 +194,6 @@ class Admin
         $resto = 'FROM Jogos j';
         $parametros = [];
 
-        // só com algarismos procura pelo id do jogo, senão pelo nome
         if (ctype_digit($texto)) {
             $resto .= ' WHERE j.id = :id';
             $parametros = ['id' => $texto];
@@ -214,7 +205,7 @@ class Admin
         return self::paginar($campos, $resto, 'j.nome ASC, j.id ASC', $parametros, $pagina);
     }
 
-    // apaga o jogo e, por causa do ON DELETE CASCADE, também os anúncios, desejos e avaliações dele
+    // cuidado: com o ON DELETE CASCADE vão também os anúncios, desejos e avaliações do jogo
     public static function apagarJogo(int $id): ?string
     {
         if (!Jogo::buscarPorId($id)) {
@@ -228,7 +219,6 @@ class Admin
         return null;
     }
 
-    // passa tudo o que aponta para o jogo repetido para o outro e depois apaga o repetido
     public static function juntarJogos(int $repetidoId, int $ficaId): ?string
     {
         if ($repetidoId === $ficaId) {
@@ -247,21 +237,18 @@ class Admin
         try {
             $ids = ['velho' => $repetidoId, 'novo' => $ficaId];
 
-            // estas tabelas não têm limite de uma linha por jogo, passam todas
             $pdo->prepare('UPDATE Biblioteca_Jogos SET jogo_id = :novo WHERE jogo_id = :velho')->execute($ids);
             $pdo->prepare('UPDATE LFG_Posts SET jogo_id = :novo WHERE jogo_id = :velho')->execute($ids);
             $pdo->prepare('UPDATE Convites SET jogo_id = :novo WHERE jogo_id = :velho')->execute($ids);
             $pdo->prepare('UPDATE Utilizadores SET jogo_favorito_id = :novo WHERE jogo_favorito_id = :velho')->execute($ids);
 
-            // aqui cada utilizador só pode ter o jogo uma vez. o IGNORE salta quem já tinha os dois,
-            // e essas linhas que ficam no repetido são apagadas com ele
+            // cada um só pode ter o jogo uma vez, o IGNORE salta esses (são apagados com o repetido)
             $pdo->prepare('UPDATE IGNORE Lista_Desejos SET jogo_id = :novo WHERE jogo_id = :velho')->execute($ids);
             $pdo->prepare('UPDATE IGNORE Avaliacoes SET jogo_id = :novo WHERE jogo_id = :velho')->execute($ids);
 
             $pdo->prepare('DELETE FROM Jogos WHERE id = :id')->execute(['id' => $repetidoId]);
 
-            // os ids das plataformas que o repetido tinha e o outro não passam para o que fica,
-            // para a sincronização não voltar a criar o repetido. os nomes das colunas vêm da lista IDS_JOGO
+            // os ids das lojas que faltam passam para o que fica, senão a sincronização voltava a criar o repetido
             foreach (self::IDS_JOGO as $coluna) {
                 if ($repetido[$coluna] !== null && $fica[$coluna] === null) {
                     $stmt = $pdo->prepare('UPDATE Jogos SET ' . $coluna . ' = :valor WHERE id = :id');

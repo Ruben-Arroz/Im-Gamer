@@ -35,7 +35,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 $resultado = Admin::jogos($texto, $pagina);
 $totalPaginas = max(1, (int) ceil($resultado['total'] / Admin::POR_PAGINA));
 
-// de onde veio cada jogo (as colunas com o id de cada plataforma)
 $origens = ['rawg_id' => 'RAWG', 'steam_app_id' => 'Steam', 'xbox_id' => 'Xbox', 'gog_id' => 'GOG', 'epic_id' => 'Epic'];
 
 $tituloPagina = 'Administração';
@@ -72,7 +71,6 @@ require_once __DIR__ . '/includes/header.php';
     <ul class="lista-admin">
         <?php foreach ($resultado['linhas'] as $jogo): ?>
             <?php
-            // o aviso do apagar diz o que vai junto com o jogo
             $vaiJunto = $jogo['anuncios'] . ' anúncios, ' . $jogo['desejos'] . ' desejos e ' . $jogo['avaliacoes'] . ' avaliações';
             ?>
             <li>

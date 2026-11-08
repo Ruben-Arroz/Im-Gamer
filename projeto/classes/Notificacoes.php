@@ -1,6 +1,5 @@
 <?php
 
-// avisos do LFG (alguém entrou, saiu, respondeu ao convite, ...)
 // os convites recebidos não criam aviso porque já aparecem na lista deles
 class Notificacoes
 {

@@ -158,7 +158,6 @@ class Steam
         return ['sucesso' => true, 'jogos' => count($jogos), 'itens' => count($itens)];
     }
 
-    // apaga o que havia e volta a guardar tudo, assim jogos e itens que já não existem desaparecem
     // bans da conta (vac, de jogos, da comunidade e de trocas) num texto curto, null se a steam não responder
     private static function reputacao(string $steamId): ?string
     {

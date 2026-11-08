@@ -14,8 +14,8 @@ if (!defined('BASE_URL')) {
 }
 
 if (session_status() === PHP_SESSION_NONE) {
-    // o servidor tem os sites de todos os grupos no mesmo endereço, por isso o cookie da sessão
-    // tem nome próprio e só vai para a pasta do I'm Gamer. o httponly não deixa o javascript lê-lo
+    // o servidor tem os sites dos grupos todos no mesmo endereço, por isso o cookie tem nome próprio
+    // e só vai para a nossa pasta. o httponly não deixa o javascript lê-lo
     session_name('imgamer');
     session_set_cookie_params([
         'path' => BASE_URL . '/',

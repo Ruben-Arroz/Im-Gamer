@@ -1,7 +1,7 @@
 <?php
-// a epic  atualiza se no site com o login da epic (contas.php)
+// a epic atualiza-se no site, com o login da epic (contas.php)
 // vai buscar os dados das contas steam, xbox e gog e as taxas de câmbio e guarda tudo na bd
-// por agora corre no pc (o servidor da UA não tem acesso à internet) php projeto/sincronizar.php
+// corre no pc porque o servidor da UA não tem internet: php projeto/sincronizar.php
 
 if (php_sapi_name() !== 'cli') {
     exit('Este script só corre na linha de comandos.');

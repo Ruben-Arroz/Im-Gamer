@@ -1,5 +1,3 @@
-// página inicial: um jogo em destaque e vários carrosséis de promoções e lançamentos
-// os cartões estão no cartoes.js
 
 const inicio = document.querySelector('#inicio');
 const todasLojas = inicio.dataset.todas;
@@ -62,6 +60,31 @@ async function carregarDestaque() {
     }
 }
 
+// faixa por cima dos lançamentos, igual à do destaque
+function mostrarDestaqueLancamento(jogo) {
+    const destaque = document.querySelector('#destaque-lancamento');
+    destaque.style.backgroundImage = 'url(' + jogo.background_image + ')';
+
+    const caixa = document.createElement('a');
+    caixa.className = 'destaque-caixa';
+    caixa.href = base + '/projeto/jogo.php?rawg=' + encodeURIComponent(jogo.slug);
+
+    const data = document.createElement('p');
+    data.className = 'cartao-precos';
+    const dataForte = document.createElement('strong');
+    dataForte.textContent = 'Saiu a ' + formatarData(jogo.released);
+    data.appendChild(dataForte);
+
+    caixa.append(
+        criarTexto('destaque-etiqueta', 'Acabado de sair'),
+        criarTexto('destaque-titulo', jogo.name),
+        criarTexto('cartao-loja', plataformasRawg(jogo)),
+        criarTexto('cartao-loja', generosRawg(jogo)),
+        data
+    );
+    destaque.appendChild(caixa);
+}
+
 function urlDoCarrossel(carrossel) {
     if (carrossel.dataset.fonte === 'rawg') {
         // o pedido tem os dias "de" e "até" a contar de hoje, por exemplo "-30,0"
@@ -90,7 +113,25 @@ async function carregarCarrossel(carrossel) {
 
         // a rawg devolve os jogos dentro de "results", a cheapshark devolve logo a lista
         if (carrossel.dataset.fonte === 'rawg') {
-            for (const jogo of dados.results || []) {
+            let jogos = dados.results || [];
+
+            // vêm do mais popular para o menos, o primeiro com imagem vai para a faixa
+            if (carrossel.dataset.destaque) {
+                const escolhido = jogos.find(function (jogo) {
+                    return jogo.background_image && jogo.released;
+                });
+
+                if (escolhido) {
+                    mostrarDestaqueLancamento(escolhido);
+                    jogos = jogos.filter(function (jogo) {
+                        return jogo !== escolhido;
+                    });
+                } else {
+                    tirarDestaqueLancamento();
+                }
+            }
+
+            for (const jogo of jogos) {
                 faixa.appendChild(criarCartaoLancamento(jogo));
             }
         } else {
@@ -113,6 +154,18 @@ async function carregarCarrossel(carrossel) {
     } catch (erro) {
         faixa.innerHTML = '';
         faixa.appendChild(criarTexto('texto-dim', 'Não foi possível carregar. Tenta mais tarde.'));
+
+        if (carrossel.dataset.destaque) {
+            tirarDestaqueLancamento();
+        }
+    }
+}
+
+// se a rawg falhar a faixa sai, para não ficar uma caixa vazia
+function tirarDestaqueLancamento() {
+    const destaque = document.querySelector('#destaque-lancamento');
+    if (destaque) {
+        destaque.remove();
     }
 }
 

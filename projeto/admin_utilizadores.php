@@ -15,7 +15,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $erro = Admin::apagarUtilizador((int) ($_POST['id'] ?? 0), $utilizadorId);
     }
 
-    // volta à mesma página e pesquisa, para o F5 não apagar outra vez
+    // para o F5 não apagar outra vez
     if (!$erro) {
         $_SESSION['aviso_admin'] = 'Utilizador apagado.';
         header('Location: ' . BASE_URL . '/projeto/admin_utilizadores.php?' . http_build_query($_GET));
@@ -33,7 +33,7 @@ require_once __DIR__ . '/includes/header.php';
 <section class="admin">
     <?php require __DIR__ . '/includes/abas_admin.php'; ?>
 
-    <!-- usa o mesmo estilo da pesquisa do LFG -->
+    <!-- mesmo estilo da pesquisa do LFG -->
     <form method="get" class="filtros-lfg">
         <div class="pesquisa-lfg">
             <input type="search" name="q" value="<?= htmlspecialchars($texto) ?>" placeholder="Nome ou email" aria-label="Procurar utilizador">
@@ -60,7 +60,7 @@ require_once __DIR__ . '/includes/header.php';
                     <span class="texto-dim">
                         <?php if ($utilizador['contas']): ?>
                             <?php
-                            // o GROUP_CONCAT dá os códigos separados por vírgulas, aqui passam para os nomes
+                            // vem tipo "steam,xbox", aqui passa para os nomes
                             $nomes = [];
                             foreach (explode(',', $utilizador['contas']) as $servico) {
                                 $nomes[] = ContasLigadas::SERVICOS[$servico] ?? $servico;

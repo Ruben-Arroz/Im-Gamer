@@ -21,7 +21,7 @@ class Auth
         return ['sucesso' => true, 'id' => (int) $pdo->lastInsertId()];
     }
 
-    // devolve o utilizador se o email e a password estiverem certos (usado no login do site e no da app)
+    // usado no login do site e no da app
     public static function credenciais(string $email, string $password): ?array
     {
         $pdo = Database::ligar();
@@ -66,7 +66,7 @@ class Auth
         return isset($_SESSION['utilizador_id']);
     }
 
-    // o is_admin é lido sempre da bd e não da sessão, assim se for tirado a alguém deixa logo de entrar no painel
+    // lido sempre da bd, assim quem perde o admin deixa logo de entrar no painel
     public static function admin(): bool
     {
         if (!self::autenticado()) {
@@ -80,7 +80,7 @@ class Auth
         return (bool) $stmt->fetchColumn();
     }
 
-    // token escondido nos formulários, para outro site não conseguir enviar pedidos em nome do utilizador
+    // token dos formulários, para outros sites não enviarem pedidos em nome do utilizador
     public static function token(): string
     {
         if (!isset($_SESSION['token'])) {

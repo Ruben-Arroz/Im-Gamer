@@ -1,6 +1,5 @@
 <?php
 
-// convites diretos para jogar, de um utilizador para outro
 class Convites
 {
     // para ninguém encher os outros de convites
@@ -66,7 +65,6 @@ class Convites
         return $stmt->fetchAll();
     }
 
-    // convites recebidos ainda sem resposta
     public static function pendentes(int $utilizadorId): int
     {
         $pdo = Database::ligar();
@@ -99,7 +97,6 @@ class Convites
         Notificacoes::criar($convite['remetente_id'], 'convite', $texto . '.');
     }
 
-    // quem enviou pode cancelar enquanto não há resposta
     public static function cancelar(int $conviteId, int $remetenteId): void
     {
         $pdo = Database::ligar();

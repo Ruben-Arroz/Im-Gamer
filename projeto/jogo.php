@@ -335,7 +335,7 @@ require_once __DIR__ . '/includes/header.php';
         </p>
     </section>
 
-    <script src="<?= BASE_URL ?>/projeto/assets/js/cartoes.js?v=3"></script>
+    <script src="<?= BASE_URL ?>/projeto/assets/js/cartoes.js?v=4"></script>
     <script src="<?= BASE_URL ?>/projeto/assets/js/jogo.js?v=2"></script>
     <script src="<?= BASE_URL ?>/projeto/assets/js/galeria.js?v=2"></script>
 <?php endif; ?>

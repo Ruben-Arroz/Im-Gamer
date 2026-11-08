@@ -7,7 +7,6 @@ class JogosManuais
     // 100000 horas já é mais do que alguém consegue jogar
     const MAX_HORAS = 100000;
 
-    // só devolve a conta se for do utilizador e de uma plataforma sem api
     public static function conta(int $contaId, int $utilizadorId): ?array
     {
         $pdo = Database::ligar();
@@ -77,7 +76,6 @@ class JogosManuais
         self::atualizarTotais($contaId);
     }
 
-    // os números da conta (jogos e horas) que aparecem no perfil
     private static function atualizarTotais(int $contaId): void
     {
         $pdo = Database::ligar();

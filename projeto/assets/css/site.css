@@ -405,7 +405,7 @@ main:has(.pagina-larga) {
     flex-direction: column;
 }
 
-/* no computador os filtros acompanham a página ao fazer scroll e têm scroll próprio se forem maiores que o ecrã */
+/* os filtros acompanham o scroll da página */
 @media (min-width: 761px) {
     .filtros-biblioteca {
         position: sticky;
@@ -1066,9 +1066,13 @@ main:has(.pagina-larga) {
     text-decoration: none;
 }
 
-.destaque-caixa .cartao-loja,
-.destaque-caixa .cartao-precos {
+/* com o .inicio à frente, senão as regras dos cartões ganham */
+.inicio .destaque-caixa .cartao-loja {
     padding: 0;
+}
+
+.inicio .destaque-caixa .cartao-precos {
+    padding: 8px 0 0;
 }
 
 .destaque-etiqueta {
@@ -1505,7 +1509,7 @@ a.barra-nome:hover {
     gap: 16px;
 }
 
-/* lista de desejos: o cartão tem o link e o botão "Tirar" separados, por isso a imagem fica dentro do link */
+/* lista de desejos */
 .desejos .cartao-jogo > a {
     color: var(--text);
     text-decoration: none;
@@ -1955,4 +1959,9 @@ a.lista-acao {
 
 .erro-404 .botao-principal {
     display: inline-block;
+}
+
+/* faixa dos lançamentos na página inicial */
+.destaque-lancamento {
+    margin-top: 44px;
 }

@@ -1,7 +1,6 @@
 <?php
 
-// a gog não tem api oficial para jogadores, mas o perfil público (tem de estar visível para todos) dá a lista de jogos
-// os detalhes e os preços vêm da api da loja, que também é pública
+// a gog não tem api para jogadores, mas o perfil público dá a lista de jogos (tem de estar visível para todos)
 class Gog
 {
     private static function progresso(string $texto): void

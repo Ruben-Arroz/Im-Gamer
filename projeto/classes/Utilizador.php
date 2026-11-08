@@ -9,7 +9,7 @@ class Utilizador
         'BRL' => 'Real brasileiro (R$)',
     ];
 
-    // campos usados nas duas pesquisas de utilizador, já com o nome do jogo favorito e da plataforma preferida
+    // campos das duas pesquisas de utilizador
     const SELECT = 'SELECT u.id, u.nome_utilizador, u.email, u.bio, u.foto_perfil, u.foto_capa, u.moeda, u.esconder_valores, u.esconder_reputacao, u.discord, u.mostrar_discord,
         u.is_admin, u.data_criacao, u.jogo_favorito_id, j.rawg_id AS jogo_favorito_rawg_id, j.nome AS jogo_favorito,
         u.plataforma_preferida_id, p.nome AS plataforma_preferida
@@ -173,7 +173,6 @@ class Utilizador
         // na bd fica guardado o caminho dentro de uploads, por exemplo "capas/3_1792816377.jpg"
         $nome = $pasta . '/' . $id . '_' . time() . '.' . $tipos[$info['mime']];
 
-        // a subpasta é criada na primeira vez que é precisa
         if (!is_dir(PASTA_UPLOADS . $pasta)) {
             mkdir(PASTA_UPLOADS . $pasta, 0755, true);
         }
