@@ -141,7 +141,7 @@ require_once __DIR__ . '/includes/header.php';
 
         <label for="plataforma_id">Dispositivo preferido</label>
         <select id="plataforma_id" name="plataforma_id">
-            <option value="0">Nenhuma</option>
+            <option value="0">Nenhum</option>
             <?php foreach ($plataformas as $plataforma): ?>
                 <option value="<?= $plataforma['id'] ?>" <?= (int) $utilizador['plataforma_preferida_id'] === (int) $plataforma['id'] ? 'selected' : '' ?>><?= htmlspecialchars($plataforma['nome']) ?></option>
             <?php endforeach; ?>

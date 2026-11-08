@@ -67,17 +67,17 @@ class Epic
         $codigo = self::extrairCodigo($texto);
 
         if (!$codigo) {
-            return ['sucesso' => false, 'erro' => 'Não foi encontrado nenhum código. Cole o texto apresentado pela Epic depois do login.'];
+            return ['sucesso' => false, 'erro' => 'Não foi encontrado nenhum código. Cola o texto que a Epic mostra depois do login.'];
         }
 
         $resposta = self::pedirToken(['grant_type' => 'authorization_code', 'code' => $codigo]);
 
         if ($resposta === null) {
-            return ['sucesso' => false, 'erro' => 'Não foi possível comunicar com a Epic. Tente novamente mais tarde.'];
+            return ['sucesso' => false, 'erro' => 'Não foi possível comunicar com a Epic. Tenta outra vez mais tarde.'];
         }
 
         if (!isset($resposta['access_token'])) {
-            return ['sucesso' => false, 'erro' => 'O código não é válido ou já expirou. Faça o login novamente e cole o código novo.'];
+            return ['sucesso' => false, 'erro' => 'O código não é válido ou já expirou. Faz o login outra vez e cola o código novo.'];
         }
 
         $nome = $resposta['displayName'] ?? $resposta['account_id'];
@@ -167,7 +167,7 @@ class Epic
 
         $itens = self::biblioteca($acesso);
         if ($itens === null) {
-            return ['sucesso' => false, 'erro' => 'Não foi possível ler a biblioteca da Epic. Tente novamente mais tarde.'];
+            return ['sucesso' => false, 'erro' => 'Não foi possível ler a biblioteca da Epic. Tenta outra vez mais tarde.'];
         }
 
         $minutos = self::minutosJogados($resposta['account_id'], $acesso);
@@ -246,7 +246,7 @@ class Epic
             // se alguma coisa falhar, desfaz tudo e a conta fica como estava
             $pdo->rollBack();
             error_log($erro->getMessage());
-            return ['sucesso' => false, 'erro' => 'Não foi possível guardar os dados da Epic. Tente novamente mais tarde.'];
+            return ['sucesso' => false, 'erro' => 'Não foi possível guardar os dados da Epic. Tenta outra vez mais tarde.'];
         }
 
         return ['sucesso' => true, 'jogos' => count($linhas)];

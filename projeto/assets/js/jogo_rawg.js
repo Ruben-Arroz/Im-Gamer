@@ -5,7 +5,7 @@ const dados = caixa.dataset;
 const estado = document.querySelector('#procurar-estado');
 
 function falhar() {
-    estado.textContent = 'Não foi possível encontrar este jogo. Tente novamente mais tarde.';
+    estado.textContent = 'Não foi possível encontrar este jogo. Tenta outra vez mais tarde.';
 }
 
 // para comparar nomes sem ligar a maiúsculas, espaços e símbolos ("MAFIA HOTEL" e "Mafia Hotel" são iguais)
@@ -115,7 +115,12 @@ async function procurarNaRawg() {
 
         await guardar(formulario);
     } catch (erro) {
-        falhar();
+        // se a rawg estiver em baixo tenta com o que a cheapshark sabe do jogo
+        try {
+            await guardarDaCheapshark();
+        } catch (erro2) {
+            falhar();
+        }
     }
 }
 

@@ -21,7 +21,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         if (!isset(ContasLigadas::SERVICOS[$servico])) {
             $erro = 'Escolhe uma plataforma.';
         } elseif ($identificador === '' || mb_strlen($identificador) > 255) {
-            $erro = 'Escreve o teu username, ID ou link do perfil.';
+            $erro = 'Escreve o teu nome, ID ou link do perfil.';
         } else {
             $resultado = ContasLigadas::adicionar($utilizadorId, $servico, $identificador);
             if (!$resultado['sucesso']) {
@@ -128,7 +128,7 @@ require_once __DIR__ . '/includes/header.php';
             <?php endforeach; ?>
         </select>
 
-        <label for="identificador">Username, ID ou link do perfil</label>
+        <label for="identificador">Nome, ID ou link do perfil</label>
         <input type="text" id="identificador" name="identificador" value="<?= htmlspecialchars($_POST['identificador'] ?? '') ?>">
 
         <button type="submit">Ligar conta</button>

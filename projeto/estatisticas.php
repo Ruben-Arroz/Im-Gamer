@@ -178,6 +178,10 @@ require_once __DIR__ . '/includes/header.php';
                         </div>
                     <?php endforeach; ?>
                 </div>
+                <?php $semData = $resumo['jogos'] - array_sum(array_column($decadas, 'jogos')); ?>
+                <?php if ($semData > 0): ?>
+                    <p class="texto-dim">Fora as décadas: <?= contarJogos($semData) ?> sem data de lançamento.</p>
+                <?php endif; ?>
             <?php endif; ?>
 
             <?php if ($resumo['com_conquistas'] > 0): ?>

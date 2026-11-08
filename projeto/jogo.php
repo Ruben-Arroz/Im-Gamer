@@ -107,7 +107,7 @@ require_once __DIR__ . '/includes/header.php';
         data-base="<?= BASE_URL ?>">
         <p class="texto-dim" id="procurar-estado">A procurar o jogo...</p>
     </section>
-    <script src="<?= BASE_URL ?>/projeto/assets/js/jogo_rawg.js?v=2"></script>
+    <script src="<?= BASE_URL ?>/projeto/assets/js/jogo_rawg.js?v=3"></script>
 
 <?php elseif (!$jogo): ?>
     <section class="jogo">
@@ -187,7 +187,7 @@ require_once __DIR__ . '/includes/header.php';
                         <?php endif; ?>
                     </form>
 
-                    <a class="botao-contorno" href="<?= BASE_URL ?>/projeto/lfg_criar.php?jogo=<?= $jogo['id'] ?>">Procurar equipa</a>
+                    <a class="botao-contorno" href="<?= BASE_URL ?>/projeto/lfg_criar.php?jogo=<?= $jogo['id'] ?>">Criar anúncio de LFG</a>
 
                     <?php foreach ($lojas as $loja => $link): ?>
                         <a class="botao-contorno" href="<?= htmlspecialchars($link) ?>" target="_blank" rel="noopener">Ver na <?= $loja ?></a>
@@ -335,8 +335,8 @@ require_once __DIR__ . '/includes/header.php';
         </p>
     </section>
 
-    <script src="<?= BASE_URL ?>/projeto/assets/js/cartoes.js?v=4"></script>
-    <script src="<?= BASE_URL ?>/projeto/assets/js/jogo.js?v=2"></script>
+    <script src="<?= BASE_URL ?>/projeto/assets/js/cartoes.js?v=5"></script>
+    <script src="<?= BASE_URL ?>/projeto/assets/js/jogo.js?v=3"></script>
     <script src="<?= BASE_URL ?>/projeto/assets/js/galeria.js?v=2"></script>
 <?php endif; ?>
 

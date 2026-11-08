@@ -148,13 +148,13 @@ class Playstation
         $npsso = self::extrairNpsso($texto);
 
         if (!$npsso) {
-            return ['sucesso' => false, 'erro' => 'Não foi encontrado nenhum código. Cole o texto apresentado pela PlayStation depois do login.'];
+            return ['sucesso' => false, 'erro' => 'Não foi encontrado nenhum código. Cola o texto que a PlayStation mostra depois do login.'];
         }
 
         $acesso = self::pedirAcesso($npsso);
 
         if (!$acesso) {
-            return ['sucesso' => false, 'erro' => 'O código não é válido ou já expirou. Faça o login novamente e copie o código outra vez.'];
+            return ['sucesso' => false, 'erro' => 'O código não é válido ou já expirou. Faz o login outra vez e copia o código novo.'];
         }
 
         // com muitos jogos pode demorar
@@ -162,7 +162,7 @@ class Playstation
 
         $jogos = self::jogos($acesso);
         if ($jogos === null) {
-            return ['sucesso' => false, 'erro' => 'Não foi possível ler a biblioteca da PlayStation. Tente novamente mais tarde.'];
+            return ['sucesso' => false, 'erro' => 'Não foi possível ler a biblioteca da PlayStation. Tenta outra vez mais tarde.'];
         }
 
         $nome = self::nomeDaConta($acesso);
@@ -259,7 +259,7 @@ class Playstation
             // se alguma coisa falhar, desfaz tudo e a conta fica como estava
             $pdo->rollBack();
             error_log($erro->getMessage());
-            return ['sucesso' => false, 'erro' => 'Não foi possível guardar os dados da PlayStation. Tente novamente mais tarde.'];
+            return ['sucesso' => false, 'erro' => 'Não foi possível guardar os dados da PlayStation. Tenta outra vez mais tarde.'];
         }
 
         return ['sucesso' => true, 'jogos' => count($linhas)];

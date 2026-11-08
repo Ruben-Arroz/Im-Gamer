@@ -60,7 +60,7 @@ async function carregarPrecos() {
         const lista = await (await fetch(url)).json();
 
         if (!lista.length) {
-            mensagemPrecos('Este jogo não está à venda nas lojas de PC que acompanhamos.');
+            mensagemPrecos('Não encontrámos preços nas lojas de PC que acompanhamos. Se o jogo for grátis, não aparece aqui.');
             return;
         }
 
@@ -75,7 +75,7 @@ async function carregarPrecos() {
         });
 
         if (!promocoes.length) {
-            mensagemPrecos('Este jogo não está à venda nas lojas de PC que acompanhamos.');
+            mensagemPrecos('Não encontrámos preços nas lojas de PC que acompanhamos. Se o jogo for grátis, não aparece aqui.');
             return;
         }
 
@@ -97,7 +97,7 @@ async function carregarPrecos() {
             caixaPrecos.appendChild(criarTexto('texto-dim preco-minimo', 'Preço mais baixo de sempre: ' + formatarPreco(jogo.cheapestPriceEver.price)));
         }
     } catch (erro) {
-        mensagemPrecos('Não foi possível carregar os preços. Tente novamente mais tarde.');
+        mensagemPrecos('Não foi possível carregar os preços. Tenta outra vez mais tarde.');
     }
 }
 

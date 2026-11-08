@@ -196,7 +196,14 @@ require_once __DIR__ . '/includes/header.php';
             </aside>
 
             <div class="biblioteca-resultados">
-                <?php if (!$resultado['jogos']): ?>
+                <?php if (!$resultado['jogos'] && !$contas): ?>
+                    <p class="texto-dim">
+                        Ainda não há contas ligadas.
+                        <?php if ($proprio): ?>
+                            <a href="<?= BASE_URL ?>/projeto/contas.php">Ligar uma conta</a>
+                        <?php endif; ?>
+                    </p>
+                <?php elseif (!$resultado['jogos']): ?>
                     <p class="texto-dim">Nenhum jogo encontrado com estes filtros.</p>
                 <?php endif; ?>
 

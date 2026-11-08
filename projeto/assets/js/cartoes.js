@@ -199,6 +199,14 @@ function dataDaqui(dias) {
     return data.toISOString().slice(0, 10);
 }
 
+// "..." entre números de página que não estão seguidos
+function reticencias(elemento) {
+    const span = document.createElement('span');
+    span.className = 'texto-dim';
+    span.textContent = '...';
+    elemento.appendChild(span);
+}
+
 // paginação do catálogo e dos lançamentos
 function mostrarPaginacao(elemento, parametros, atual, totalPaginas) {
     if (totalPaginas <= 1) {
@@ -225,6 +233,9 @@ function mostrarPaginacao(elemento, parametros, atual, totalPaginas) {
     if (inicio > 1) {
         link('1', 1);
     }
+    if (inicio > 2) {
+        reticencias(elemento);
+    }
 
     for (let numero = inicio; numero <= fim; numero++) {
         if (numero === atual) {
@@ -237,6 +248,9 @@ function mostrarPaginacao(elemento, parametros, atual, totalPaginas) {
         }
     }
 
+    if (fim < totalPaginas - 1) {
+        reticencias(elemento);
+    }
     if (fim < totalPaginas) {
         link(totalPaginas, totalPaginas);
     }
