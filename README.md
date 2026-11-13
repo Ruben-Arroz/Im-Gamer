@@ -1,4 +1,4 @@
-# I'm Gamer 🎮
+# I'm Gamer
 
 **Link para o projeto em direto:** [Aceder ao I'm Gamer](https://esan-tesp-ds-paw.web.ua.pt/tesp-ds-g17/)
 

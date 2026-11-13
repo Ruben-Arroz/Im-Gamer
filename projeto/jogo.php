@@ -96,6 +96,10 @@ function estrelas(int $quantas): string
     return str_repeat('★', $quantas) . str_repeat('☆', 5 - $quantas);
 }
 
+if (!$jogo && !$procurar) {
+    http_response_code(404);
+}
+
 $tituloPagina = $jogo ? $jogo['nome'] : 'Jogo';
 require_once __DIR__ . '/includes/header.php';
 ?>

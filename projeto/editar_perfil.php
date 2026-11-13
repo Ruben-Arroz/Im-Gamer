@@ -19,8 +19,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $discord = limparDiscord($_POST['discord'] ?? '');
     $mostrarDiscord = isset($_POST['mostrar_discord']) ? 1 : 0;
     $pesquisaJogo = trim($_POST['jogo_pesquisa'] ?? '');
-    $rawgId = (int) ($_POST['jogo_rawg_id'] ?? 0);
-    $jogoId = $utilizador['jogo_favorito_id'];
+    $jogoId = null;
 
     if (!Auth::tokenValido($_POST['token'] ?? '')) {
         $erro = 'A sessão expirou. Tenta outra vez.';
@@ -32,23 +31,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $erro = 'A biografia não pode ter mais de 1000 caracteres.';
     } elseif ($discord !== '' && !discordValido($discord)) {
         $erro = 'O nome do Discord só pode ter letras minúsculas, números, pontos e _ (de 2 a 32).';
-    } elseif ($pesquisaJogo !== '' && $rawgId === 0) {
-        $erro = 'Escolhe o jogo favorito da lista de sugestões.';
     } elseif ($plataformaId !== 0 && !in_array($plataformaId, array_column($plataformas, 'id'))) {
         $erro = 'Escolhe um dispositivo da lista.';
     }
 
-    // o jogo vem da pesquisa da rawg feita no browser, se for novo fica guardado na tabela Jogos
-    if (!$erro) {
-        if ($pesquisaJogo === '') {
-            $jogoId = null;
-        } elseif ($rawgId !== (int) $utilizador['jogo_favorito_rawg_id']) {
-            $nomeJogo = trim($_POST['jogo_nome'] ?? '');
-            if ($nomeJogo === '') {
-                $nomeJogo = $pesquisaJogo;
-            }
-
-            $jogoId = Jogo::guardarDaRawg($rawgId, $nomeJogo, $_POST['jogo_slug'] ?? '', $_POST['jogo_imagem'] ?? null, $_POST['jogo_lancamento'] ?? null);
+    // o jogo favorito é opcional, mas se foi escrito tem de ter sido escolhido da lista (como nos outros formulários)
+    if (!$erro && $pesquisaJogo !== '') {
+        $jogoId = Jogo::doFormulario($_POST);
+        if (!$jogoId) {
+            $erro = 'Escolhe o jogo favorito da lista de sugestões.';
         }
     }
 
@@ -129,10 +120,12 @@ require_once __DIR__ . '/includes/header.php';
         <div class="pesquisa-jogo">
             <input type="text" id="jogo_pesquisa" name="jogo_pesquisa" autocomplete="off" placeholder="Escreve o nome do jogo"
                 data-chave="<?= htmlspecialchars(RAWG_API_KEY) ?>"
+                data-base="<?= BASE_URL ?>"
                 value="<?= htmlspecialchars($_POST['jogo_pesquisa'] ?? $utilizador['jogo_favorito'] ?? '') ?>">
             <ul id="jogo_sugestoes" class="sugestoes"></ul>
         </div>
-        <input type="hidden" id="jogo_rawg_id" name="jogo_rawg_id" value="<?= htmlspecialchars($_POST['jogo_rawg_id'] ?? $utilizador['jogo_favorito_rawg_id'] ?? '') ?>">
+        <input type="hidden" name="jogo_id" value="<?= (int) ($_POST['jogo_id'] ?? $utilizador['jogo_favorito_id'] ?? 0) ?>">
+        <input type="hidden" id="jogo_rawg_id" name="jogo_rawg_id" value="<?= htmlspecialchars($_POST['jogo_rawg_id'] ?? '') ?>">
         <input type="hidden" id="jogo_nome" name="jogo_nome" value="<?= htmlspecialchars($_POST['jogo_nome'] ?? '') ?>">
         <input type="hidden" id="jogo_slug" name="jogo_slug" value="<?= htmlspecialchars($_POST['jogo_slug'] ?? '') ?>">
         <input type="hidden" id="jogo_imagem" name="jogo_imagem" value="<?= htmlspecialchars($_POST['jogo_imagem'] ?? '') ?>">
@@ -171,7 +164,7 @@ require_once __DIR__ . '/includes/header.php';
     <p class="auth-switch"><a href="<?= BASE_URL ?>/projeto/perfil.php">Voltar ao perfil</a></p>
 </section>
 
-<script src="<?= BASE_URL ?>/projeto/assets/js/pesquisa_jogo.js?v=2"></script>
+<script src="<?= BASE_URL ?>/projeto/assets/js/pesquisa_jogo.js?v=3"></script>
 <script src="<?= BASE_URL ?>/projeto/assets/js/previsao_imagem.js?v=1"></script>
 
 <?php require_once __DIR__ . '/includes/footer.php'; ?>

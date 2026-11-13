@@ -94,6 +94,6 @@ require_once __DIR__ . '/includes/header.php';
 
 <script src="<?= BASE_URL ?>/projeto/assets/js/biblioteca.js?v=1"></script>
 <script src="<?= BASE_URL ?>/projeto/assets/js/cartoes.js?v=5"></script>
-<script src="<?= BASE_URL ?>/projeto/assets/js/lancamentos.js?v=3"></script>
+<script src="<?= BASE_URL ?>/projeto/assets/js/lancamentos.js?v=4"></script>
 
 <?php require_once __DIR__ . '/includes/footer.php'; ?>

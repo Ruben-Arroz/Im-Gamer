@@ -153,7 +153,11 @@ async function carregarCarrossel(carrossel) {
         }
     } catch (erro) {
         faixa.innerHTML = '';
-        faixa.appendChild(criarTexto('texto-dim', 'Não foi possível carregar. Tenta mais tarde.'));
+        if (carrossel.dataset.fonte === 'rawg') {
+            faixa.appendChild(criarTexto('texto-dim', 'Os lançamentos vêm da RAWG, que não está a responder. Tenta mais tarde.'));
+        } else {
+            faixa.appendChild(criarTexto('texto-dim', 'Não foi possível carregar. Tenta mais tarde.'));
+        }
 
         if (carrossel.dataset.destaque) {
             tirarDestaqueLancamento();

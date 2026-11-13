@@ -68,7 +68,7 @@ async function carregarLancamentos() {
 
         mostrarPaginacao(document.querySelector('#paginacao'), parametros, pagina, Math.ceil(dados.count / POR_PAGINA));
     } catch (erro) {
-        aviso.textContent = 'Não foi possível carregar os lançamentos. Tenta mais tarde.';
+        aviso.textContent = 'Os lançamentos vêm da RAWG, que não está a responder. Tenta mais tarde.';
     }
 }
 

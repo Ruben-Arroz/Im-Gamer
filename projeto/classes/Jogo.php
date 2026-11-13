@@ -300,7 +300,7 @@ class Jogo
     public static function pesquisarNome(string $texto, int $limite): array
     {
         $pdo = Database::ligar();
-        $stmt = $pdo->prepare('SELECT id, nome, imagem_capa FROM Jogos WHERE nome LIKE :nome ORDER BY nome LIMIT :limite');
+        $stmt = $pdo->prepare('SELECT id, nome, imagem_capa, data_lancamento FROM Jogos WHERE nome LIKE :nome ORDER BY nome LIMIT :limite');
         $stmt->bindValue('nome', '%' . $texto . '%');
         $stmt->bindValue('limite', $limite, PDO::PARAM_INT);
         $stmt->execute();

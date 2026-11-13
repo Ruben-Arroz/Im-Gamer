@@ -3,6 +3,7 @@
 const campoPesquisa = document.querySelector('#jogo_pesquisa');
 const listaSugestoes = document.querySelector('#jogo_sugestoes');
 const chave = campoPesquisa.dataset.chave;
+const base = campoPesquisa.dataset.base;
 
 let temporizador = null;
 
@@ -30,10 +31,35 @@ async function pesquisar(texto) {
         const dados = await resposta.json();
         mostrarSugestoes(dados.results || []);
     } catch (erro) {
-        // se a rawg estiver em baixo a resposta não é json, por isso avisa em vez de ficar tudo vazio
+        // se a rawg estiver em baixo procura nos jogos que já estão guardados no site
+        pesquisarGuardados(texto);
+    }
+}
+
+async function pesquisarGuardados(texto) {
+    listaSugestoes.innerHTML = '';
+
+    try {
+        const resposta = await fetch(base + '/projeto/api/pesquisar_jogos.php?q=' + encodeURIComponent(texto));
+        const dados = await resposta.json();
+
+        for (const jogo of dados.jogos) {
+            const item = document.createElement('li');
+            item.textContent = jogo.nome + (jogo.ano ? ' (' + jogo.ano + ')' : '');
+
+            item.addEventListener('click', function () {
+                escolherGuardado(jogo);
+            });
+
+            listaSugestoes.appendChild(item);
+        }
+    } catch (erro) {
         listaSugestoes.innerHTML = '';
+    }
+
+    if (!listaSugestoes.children.length) {
         const aviso = document.createElement('li');
-        aviso.textContent = 'A RAWG não está a responder. Tenta mais tarde.';
+        aviso.textContent = 'A RAWG não está a responder e não há jogos guardados com esse nome.';
         listaSugestoes.appendChild(aviso);
     }
 }
@@ -61,6 +87,14 @@ function escolher(jogo) {
     document.querySelector('#jogo_slug').value = jogo.slug;
     document.querySelector('#jogo_imagem').value = jogo.background_image || '';
     document.querySelector('#jogo_lancamento').value = jogo.released || '';
+    listaSugestoes.innerHTML = '';
+}
+
+// jogo que já está na bd: vai o id dele e não o da rawg
+function escolherGuardado(jogo) {
+    campoPesquisa.value = jogo.nome;
+    document.querySelector('#jogo_rawg_id').value = '';
+    document.querySelector('input[name="jogo_id"]').value = jogo.id;
     listaSugestoes.innerHTML = '';
 }
 

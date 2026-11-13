@@ -71,6 +71,7 @@ require_once __DIR__ . '/includes/header.php';
         <div class="pesquisa-jogo">
             <input type="text" id="jogo_pesquisa" name="jogo_pesquisa" autocomplete="off" placeholder="Escreve o nome do jogo"
                 data-chave="<?= htmlspecialchars(RAWG_API_KEY) ?>"
+                data-base="<?= BASE_URL ?>"
                 value="<?= htmlspecialchars($_POST['jogo_pesquisa'] ?? '') ?>">
             <ul id="jogo_sugestoes" class="sugestoes"></ul>
         </div>
@@ -121,6 +122,6 @@ require_once __DIR__ . '/includes/header.php';
     <p class="auth-switch"><a href="<?= BASE_URL ?>/projeto/contas.php">Voltar às contas</a></p>
 </section>
 
-<script src="<?= BASE_URL ?>/projeto/assets/js/pesquisa_jogo.js?v=2"></script>
+<script src="<?= BASE_URL ?>/projeto/assets/js/pesquisa_jogo.js?v=3"></script>
 
 <?php require_once __DIR__ . '/includes/footer.php'; ?>
