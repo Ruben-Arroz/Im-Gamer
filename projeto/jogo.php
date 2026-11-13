@@ -130,7 +130,8 @@ require_once __DIR__ . '/includes/header.php';
             <div class="galeria" id="galeria"
                 data-chave="<?= htmlspecialchars(RAWG_API_KEY) ?>"
                 data-slug="<?= htmlspecialchars($jogo['slug'] ?? '') ?>"
-                data-nome="<?= htmlspecialchars($jogo['nome']) ?>">
+                data-nome="<?= htmlspecialchars($jogo['nome']) ?>"
+                data-capturas='<?= htmlspecialchars(json_encode(Jogo::capturas($jogo['id'])), ENT_QUOTES) ?>'>
                 <div class="galeria-principal">
                     <img class="jogo-capa <?= $jogo['imagem_capa'] ? '' : 'escondido' ?>" id="galeria-imagem" src="<?= htmlspecialchars($jogo['imagem_capa'] ?? '') ?>" alt="">
                     <button type="button" class="galeria-seta escondido" data-direcao="-1" aria-label="Imagem anterior">&lsaquo;</button>
@@ -351,13 +352,16 @@ require_once __DIR__ . '/includes/header.php';
 
         <p class="fonte">
             Preços da <a href="https://www.cheapshark.com" target="_blank" rel="noopener">CheapShark</a><?php if ($jogo['slug']): ?>
-                e dados do jogo da <a href="https://rawg.io/games/<?= htmlspecialchars($jogo['slug']) ?>" target="_blank" rel="noopener">RAWG</a><?php endif; ?>.
+                e dados do jogo da <a href="https://rawg.io/games/<?= htmlspecialchars($jogo['slug']) ?>" target="_blank" rel="noopener">RAWG</a><?php elseif ($jogo['steam_app_id']): ?>
+                e dados do jogo da <a href="https://store.steampowered.com/app/<?= $jogo['steam_app_id'] ?>" target="_blank" rel="noopener">Steam</a><?php endif; ?>.
+            <!-- a página mostra o que ficou guardado na bd, não o que a api tem agora -->
+            Dados do jogo guardados a <?= (new DateTime($jogo['data_cache']))->format('d/m/Y') ?>, podem estar desatualizados.
         </p>
     </section>
 
-    <script src="<?= BASE_URL ?>/projeto/assets/js/cartoes.js?v=5"></script>
+    <script src="<?= BASE_URL ?>/projeto/assets/js/cartoes.js?v=6"></script>
     <script src="<?= BASE_URL ?>/projeto/assets/js/jogo.js?v=3"></script>
-    <script src="<?= BASE_URL ?>/projeto/assets/js/galeria.js?v=2"></script>
+    <script src="<?= BASE_URL ?>/projeto/assets/js/galeria.js?v=3"></script>
 <?php endif; ?>
 
 <?php require_once __DIR__ . '/includes/footer.php'; ?>

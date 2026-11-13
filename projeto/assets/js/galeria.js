@@ -1,4 +1,4 @@
-// galeria da página do jogo, com as capturas de ecrã da rawg
+// galeria da página do jogo, com as capturas de ecrã da rawg (ou as da steam guardadas, se a rawg falhar)
 
 const galeria = document.querySelector('#galeria');
 const imagemGrande = document.querySelector('#galeria-imagem');
@@ -37,41 +37,50 @@ async function descobrirSlug() {
 }
 
 async function carregarGaleria() {
+    let capturas = [];
+
     try {
         const slug = await descobrirSlug();
-        if (!slug) {
-            return;
-        }
 
-        const resposta = await fetch('https://api.rawg.io/api/games/' + slug + '/screenshots?key=' + galeria.dataset.chave);
-        const dados = await resposta.json();
+        if (slug) {
+            const resposta = await fetch('https://api.rawg.io/api/games/' + slug + '/screenshots?key=' + galeria.dataset.chave);
+            const dados = await resposta.json();
 
-        // a imagem que já estava fica em primeiro, sem repetir se a rawg tiver a mesma
-        if (imagemGrande.getAttribute('src')) {
-            imagens.push(imagemGrande.getAttribute('src'));
-        }
-        for (const captura of dados.results || []) {
-            if (!imagens.includes(captura.image)) {
-                imagens.push(captura.image);
+            for (const captura of dados.results || []) {
+                capturas.push(captura.image);
             }
         }
-
-        // com uma imagem só não vale a pena mostrar as setas
-        if (imagens.length < 2) {
-            return;
-        }
-
-        for (const seta of setas) {
-            seta.classList.remove('escondido');
-            seta.addEventListener('click', function () {
-                mostrarImagem(atual + parseInt(seta.dataset.direcao));
-            });
-        }
-
-        mostrarImagem(0);
     } catch (erro) {
-        // se a rawg falhar fica só a imagem que já lá estava
+        // a rawg falhou, ficam as capturas guardadas da steam (em baixo)
     }
+
+    if (!capturas.length) {
+        capturas = JSON.parse(galeria.dataset.capturas || '[]');
+    }
+
+    // a imagem que já estava fica em primeiro, sem repetir
+    if (imagemGrande.getAttribute('src')) {
+        imagens.push(imagemGrande.getAttribute('src'));
+    }
+    for (const captura of capturas) {
+        if (!imagens.includes(captura)) {
+            imagens.push(captura);
+        }
+    }
+
+    // com uma imagem só não vale a pena mostrar as setas
+    if (imagens.length < 2) {
+        return;
+    }
+
+    for (const seta of setas) {
+        seta.classList.remove('escondido');
+        seta.addEventListener('click', function () {
+            mostrarImagem(atual + parseInt(seta.dataset.direcao));
+        });
+    }
+
+    mostrarImagem(0);
 }
 
 carregarGaleria();

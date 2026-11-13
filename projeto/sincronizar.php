@@ -13,6 +13,17 @@ Steam::$mostrarProgresso = true;
 
 echo 'Taxas de câmbio: ' . (Moeda::atualizarTaxas() ? 'atualizadas' : 'falhou') . "\n";
 
+// listas de lançamentos da steam, para quando a rawg não responde
+echo "\nLançamentos da Steam (a primeira vez demora, cada jogo novo é um pedido à loja)\n";
+try {
+    $lancamentos = Lancamentos::sincronizar();
+    foreach (['recentes' => 'Acabados de sair', 'breve' => 'Em breve'] as $tipo => $nome) {
+        echo '  ' . $nome . ': ' . ($lancamentos[$tipo] === null ? 'a loja não respondeu' : $lancamentos[$tipo] . ' jogos') . "\n";
+    }
+} catch (Exception $erro) {
+    echo '  ERRO: ' . $erro->getMessage() . "\n";
+}
+
 $pdo = Database::ligar();
 $contas = $pdo->query("SELECT * FROM Contas_Ligadas WHERE servico IN ('steam', 'xbox', 'gog') ORDER BY servico, id")->fetchAll();
 

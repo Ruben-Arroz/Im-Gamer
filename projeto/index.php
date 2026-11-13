@@ -86,7 +86,7 @@ require_once __DIR__ . '/includes/header.php';
     </p>
 </section>
 
-<script src="<?= BASE_URL ?>/projeto/assets/js/cartoes.js?v=5"></script>
-<script src="<?= BASE_URL ?>/projeto/assets/js/inicio.js?v=6"></script>
+<script src="<?= BASE_URL ?>/projeto/assets/js/cartoes.js?v=6"></script>
+<script src="<?= BASE_URL ?>/projeto/assets/js/inicio.js?v=7"></script>
 
 <?php require_once __DIR__ . '/includes/footer.php'; ?>

@@ -146,7 +146,12 @@ function criarCartaoPromocao(promo) {
 function criarCartaoLancamento(jogo) {
     const cartao = document.createElement('a');
     cartao.className = 'cartao-jogo';
-    cartao.href = base + '/projeto/jogo.php?rawg=' + encodeURIComponent(jogo.slug);
+    // os lançamentos guardados da steam já estão na bd, abrem pelo id
+    if (jogo.id_site) {
+        cartao.href = base + '/projeto/jogo.php?id=' + jogo.id_site;
+    } else {
+        cartao.href = base + '/projeto/jogo.php?rawg=' + encodeURIComponent(jogo.slug);
+    }
 
     if (jogo.background_image) {
         const imagem = document.createElement('img');
@@ -190,6 +195,17 @@ function generosRawg(jogo) {
         return generosPt[g.name] || g.name;
     });
     return nomes.join(', ');
+}
+
+// plano B quando a rawg não responde: a última lista de lançamentos da steam guardada no site
+// tipo é "recentes" ou "breve"
+async function lancamentosGuardados(tipo) {
+    const resposta = await fetch(base + '/projeto/api/lancamentos.php?tipo=' + tipo);
+    return await resposta.json();
+}
+
+function avisoGuardados(atualizado) {
+    return 'A RAWG não está a responder, por isso esta é a lista de jogos de PC da Steam guardada a ' + atualizado + '. Pode estar desatualizada.';
 }
 
 // datas no formato que a rawg quer (2026-10-24), a contar a partir de hoje

@@ -106,7 +106,7 @@ require_once __DIR__ . '/includes/header.php';
 </section>
 
 <?php if ($utilizador && $desejos): ?>
-    <script src="<?= BASE_URL ?>/projeto/assets/js/cartoes.js?v=5"></script>
+    <script src="<?= BASE_URL ?>/projeto/assets/js/cartoes.js?v=6"></script>
     <script src="<?= BASE_URL ?>/projeto/assets/js/desejos.js?v=1"></script>
 <?php endif; ?>
 

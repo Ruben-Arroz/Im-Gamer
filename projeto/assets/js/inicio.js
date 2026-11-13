@@ -65,9 +65,22 @@ function mostrarDestaqueLancamento(jogo) {
     const destaque = document.querySelector('#destaque-lancamento');
     destaque.style.backgroundImage = 'url(' + jogo.background_image + ')';
 
+    // nos jogos guardados da steam a imagem é pequena, por isso tenta a imagem larga da steam como no destaque
+    if (jogo.steam) {
+        const imagem = new Image();
+        imagem.onload = function () {
+            destaque.style.backgroundImage = 'url(' + imagem.src + ')';
+        };
+        imagem.src = 'https://cdn.akamai.steamstatic.com/steam/apps/' + jogo.steam + '/library_hero.jpg';
+    }
+
     const caixa = document.createElement('a');
     caixa.className = 'destaque-caixa';
-    caixa.href = base + '/projeto/jogo.php?rawg=' + encodeURIComponent(jogo.slug);
+    if (jogo.id_site) {
+        caixa.href = base + '/projeto/jogo.php?id=' + jogo.id_site;
+    } else {
+        caixa.href = base + '/projeto/jogo.php?rawg=' + encodeURIComponent(jogo.slug);
+    }
 
     const data = document.createElement('p');
     data.className = 'cartao-precos';
@@ -113,27 +126,7 @@ async function carregarCarrossel(carrossel) {
 
         // a rawg devolve os jogos dentro de "results", a cheapshark devolve logo a lista
         if (carrossel.dataset.fonte === 'rawg') {
-            let jogos = dados.results || [];
-
-            // vêm do mais popular para o menos, o primeiro com imagem vai para a faixa
-            if (carrossel.dataset.destaque) {
-                const escolhido = jogos.find(function (jogo) {
-                    return jogo.background_image && jogo.released;
-                });
-
-                if (escolhido) {
-                    mostrarDestaqueLancamento(escolhido);
-                    jogos = jogos.filter(function (jogo) {
-                        return jogo !== escolhido;
-                    });
-                } else {
-                    tirarDestaqueLancamento();
-                }
-            }
-
-            for (const jogo of jogos) {
-                faixa.appendChild(criarCartaoLancamento(jogo));
-            }
+            mostrarLancamentos(carrossel, dados.results || []);
         } else {
             // cada jogo só aparece uma vez (fica a primeira loja, que é a que a ordenação pôs à frente)
             const jaMostrados = [];
@@ -154,10 +147,54 @@ async function carregarCarrossel(carrossel) {
     } catch (erro) {
         faixa.innerHTML = '';
         if (carrossel.dataset.fonte === 'rawg') {
-            faixa.appendChild(criarTexto('texto-dim', 'Os lançamentos vêm da RAWG, que não está a responder. Tenta mais tarde.'));
+            carregarGuardados(carrossel);
         } else {
             faixa.appendChild(criarTexto('texto-dim', 'Não foi possível carregar. Tenta mais tarde.'));
         }
+    }
+}
+
+// vêm do mais popular para o menos, o primeiro com imagem vai para a faixa (se o carrossel a tiver)
+function mostrarLancamentos(carrossel, jogos) {
+    const faixa = carrossel.querySelector('.carrossel-faixa');
+
+    if (carrossel.dataset.destaque) {
+        const escolhido = jogos.find(function (jogo) {
+            return jogo.background_image && jogo.released;
+        });
+
+        if (escolhido) {
+            mostrarDestaqueLancamento(escolhido);
+            jogos = jogos.filter(function (jogo) {
+                return jogo !== escolhido;
+            });
+        } else {
+            tirarDestaqueLancamento();
+        }
+    }
+
+    for (const jogo of jogos.slice(0, POR_CARROSSEL)) {
+        faixa.appendChild(criarCartaoLancamento(jogo));
+    }
+}
+
+// a rawg não respondeu, usa a última lista da steam guardada no site
+async function carregarGuardados(carrossel) {
+    const faixa = carrossel.querySelector('.carrossel-faixa');
+    // os carrosséis da rawg com dias para trás ("-30,0") são os acabados de sair
+    const tipo = carrossel.dataset.pedido.startsWith('-') ? 'recentes' : 'breve';
+
+    try {
+        const dados = await lancamentosGuardados(tipo);
+
+        if (!dados.jogos.length) {
+            throw new Error('lista vazia');
+        }
+
+        carrossel.insertBefore(criarTexto('texto-dim aviso-guardados', avisoGuardados(dados.atualizado)), faixa);
+        mostrarLancamentos(carrossel, dados.jogos);
+    } catch (erro) {
+        faixa.appendChild(criarTexto('texto-dim', 'Os lançamentos vêm da RAWG, que não está a responder. Tenta mais tarde.'));
 
         if (carrossel.dataset.destaque) {
             tirarDestaqueLancamento();

@@ -241,6 +241,8 @@ class Admin
             $pdo->prepare('UPDATE LFG_Posts SET jogo_id = :novo WHERE jogo_id = :velho')->execute($ids);
             $pdo->prepare('UPDATE Convites SET jogo_id = :novo WHERE jogo_id = :velho')->execute($ids);
             $pdo->prepare('UPDATE Utilizadores SET jogo_favorito_id = :novo WHERE jogo_favorito_id = :velho')->execute($ids);
+            $pdo->prepare('UPDATE Lancamentos SET jogo_id = :novo WHERE jogo_id = :velho')->execute($ids);
+            $pdo->prepare('UPDATE Capturas SET jogo_id = :novo WHERE jogo_id = :velho')->execute($ids);
 
             // cada um só pode ter o jogo uma vez, o IGNORE salta esses (são apagados com o repetido)
             $pdo->prepare('UPDATE IGNORE Lista_Desejos SET jogo_id = :novo WHERE jogo_id = :velho')->execute($ids);

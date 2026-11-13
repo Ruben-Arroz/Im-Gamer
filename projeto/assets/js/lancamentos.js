@@ -68,6 +68,27 @@ async function carregarLancamentos() {
 
         mostrarPaginacao(document.querySelector('#paginacao'), parametros, pagina, Math.ceil(dados.count / POR_PAGINA));
     } catch (erro) {
+        mostrarGuardados();
+    }
+}
+
+// a rawg não respondeu, mostra a última lista da steam que ficou guardada (sem filtros)
+async function mostrarGuardados() {
+    try {
+        const dados = await lancamentosGuardados(aba);
+
+        if (!dados.jogos.length) {
+            aviso.textContent = 'Os lançamentos vêm da RAWG, que não está a responder, e ainda não há nenhuma lista guardada. Tenta mais tarde.';
+            return;
+        }
+
+        aviso.textContent = avisoGuardados(dados.atualizado) + ' Os filtros não se aplicam a esta lista.';
+        resumo.textContent = dados.jogos.length + ' jogos de PC' + (aba === 'breve' ? ' a sair em breve' : ' lançados recentemente');
+
+        for (const jogo of dados.jogos) {
+            grelha.appendChild(criarCartaoLancamento(jogo));
+        }
+    } catch (erro) {
         aviso.textContent = 'Os lançamentos vêm da RAWG, que não está a responder. Tenta mais tarde.';
     }
 }

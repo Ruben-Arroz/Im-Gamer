@@ -105,7 +105,24 @@ class Jogo
             self::ligarGenero($id, $genero['description']);
         }
 
+        // capturas de ecrã para a galeria da página do jogo, quando a rawg não responde
+        $stmt = $pdo->prepare('INSERT INTO Capturas (jogo_id, url) VALUES (:jogo, :url)');
+        foreach (array_slice($info['screenshots'] ?? [], 0, 6) as $captura) {
+            if (strlen($captura['path_thumbnail']) <= 255) {
+                $stmt->execute(['jogo' => $id, 'url' => $captura['path_thumbnail']]);
+            }
+        }
+
         return ['id' => $id, 'imagem_capa' => $info['header_image'] ?? null];
+    }
+
+    public static function capturas(int $id): array
+    {
+        $pdo = Database::ligar();
+        $stmt = $pdo->prepare('SELECT url FROM Capturas WHERE jogo_id = :id ORDER BY id');
+        $stmt->execute(['id' => $id]);
+
+        return $stmt->fetchAll(PDO::FETCH_COLUMN);
     }
 
     // igual ao daSteam mas com o produto da loja da microsoft (vem da classe Xbox)
