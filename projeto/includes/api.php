@@ -52,11 +52,16 @@ function anuncioResumido(array $anuncio): array
         'id' => (int) $anuncio['id'],
         'jogo' => $anuncio['jogo'],
         'imagem' => $anuncio['imagem_capa'],
-        'plataforma' => $anuncio['plataforma'] ?? 'Qualquer plataforma',
+        // null quando é qualquer plataforma, a app escreve o texto na língua do telemóvel
+        'plataforma' => $anuncio['plataforma'],
         'dono' => $anuncio['nome_utilizador'],
         'no_ar_ate' => formatarDia($anuncio['data_fim']),
+        // a data como vem da bd (2026-11-20), para a app a escrever na língua do telemóvel
+        'data_fim' => $anuncio['data_fim'],
         'estado' => Lfg::estado($anuncio),
         'saiu_do_ar' => Lfg::expirado($anuncio),
+        'fechado' => $anuncio['estado'] === 'fechado',
+        'vagas_livres' => max(0, $anuncio['vagas'] - $anuncio['participantes']),
     ];
 }
 

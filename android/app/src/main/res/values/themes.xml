@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- tema escuro, só preto e branco como o site -->
+    <style name="Base.Theme.ImGamer" parent="Theme.Material3.Dark.NoActionBar">
+        <item name="android:windowBackground">@color/fundo</item>
+        <item name="colorPrimary">@color/texto</item>
+        <item name="colorOnPrimary">@color/fundo</item>
+        <item name="colorSecondary">@color/texto</item>
+        <item name="colorAccent">@color/texto</item>
+        <item name="android:textColor">@color/texto</item>
+        <item name="android:textColorHint">@color/texto_dim</item>
+        <item name="android:fontFamily">@font/share_tech_mono</item>
+        <item name="fontFamily">@font/share_tech_mono</item>
+    </style>
+
+    <style name="Theme.ImGamer" parent="Base.Theme.ImGamer" />
+
+    <!-- títulos com a letra do logo -->
+    <style name="Titulo">
+        <!-- os dois fontFamily, senão fica a letra do tema -->
+        <item name="android:fontFamily">@font/press_start_2p</item>
+        <item name="fontFamily">@font/press_start_2p</item>
+        <item name="android:textSize">15sp</item>
+        <item name="android:textColor">@color/texto</item>
+        <item name="android:lineSpacingExtra">6dp</item>
+    </style>
+
+    <style name="Subtitulo">
+        <item name="android:fontFamily">@font/press_start_2p</item>
+        <item name="fontFamily">@font/press_start_2p</item>
+        <item name="android:textSize">10sp</item>
+        <item name="android:textColor">@color/texto</item>
+        <item name="android:layout_marginTop">28dp</item>
+        <item name="android:layout_marginBottom">12dp</item>
+    </style>
+
+    <style name="TextoDim">
+        <item name="android:textColor">@color/texto_dim</item>
+        <item name="android:textSize">13sp</item>
+    </style>
+
+    <style name="Campo">
+        <item name="android:background">@drawable/caixa</item>
+        <item name="android:padding">12dp</item>
+        <item name="android:textColor">@color/texto</item>
+        <item name="android:textSize">15sp</item>
+    </style>
+
+
+    <style name="Botao" parent="Widget.Material3.Button">
+        <item name="backgroundTint">@color/texto</item>
+        <item name="android:textColor">@color/fundo</item>
+        <item name="cornerRadius">4dp</item>
+        <item name="android:fontFamily">@font/share_tech_mono</item>
+        <item name="android:textSize">15sp</item>
+    </style>
+
+    <style name="BotaoContorno" parent="Widget.Material3.Button.OutlinedButton">
+        <item name="android:textColor">@color/texto</item>
+        <item name="strokeColor">@color/borda</item>
+        <item name="cornerRadius">4dp</item>
+        <item name="android:fontFamily">@font/share_tech_mono</item>
+        <item name="android:textSize">15sp</item>
+    </style>
+</resources>

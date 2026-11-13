@@ -547,8 +547,9 @@ $botaoLocal.Add_Click({
     } catch {
     }
 
+    # 127.0.0.1 e não localhost, senão o php fica só em ipv6 e o emulador (10.0.2.2) não chega lá
     if (-not $ligado) {
-        $script:siteLocal = Start-Process -FilePath $php -ArgumentList "-S localhost:8124 -t `"$pastaProjeto`"" -WindowStyle Hidden -PassThru
+        $script:siteLocal = Start-Process -FilePath $php -ArgumentList "-S 127.0.0.1:8124 -t `"$pastaProjeto`"" -WindowStyle Hidden -PassThru
         Start-Sleep -Milliseconds 800
     }
 

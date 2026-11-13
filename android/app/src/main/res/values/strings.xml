@@ -1,0 +1,51 @@
+<resources>
+    <string name="app_name" translatable="false">I\'m Gamer</string>
+
+    <!-- login -->
+    <string name="entrar">Entrar</string>
+    <string name="email">Email</string>
+    <string name="password">Password</string>
+    <string name="sem_conta">Ainda não tens conta? Cria-a no site do I\'m Gamer.</string>
+    <string name="campos_vazios">Preenche o email e a password.</string>
+    <string name="login_errado">Email ou password incorretos.</string>
+    <string name="sem_ligacao">Não foi possível ligar ao servidor. Confirma a internet e a VPN.</string>
+
+    <!-- menu -->
+    <string name="menu_atualizar">Atualizar</string>
+    <string name="menu_sair">Terminar sessão</string>
+    <string name="sair_pergunta">Terminar a sessão nesta app?</string>
+    <string name="sair">Sair</string>
+    <string name="cancelar">Cancelar</string>
+
+    <!-- lista de anúncios -->
+    <string name="anuncios_titulo">Procura de equipa</string>
+    <string name="sem_anuncios">Não há anúncios no ar com vagas.</string>
+    <plurals name="total_anuncios">
+        <item quantity="one">%d anúncio no ar com vagas</item>
+        <item quantity="many">%d anúncios no ar com vagas</item>
+        <item quantity="other">%d anúncios no ar com vagas</item>
+    </plurals>
+    <string name="ver_mais">Ver mais</string>
+    <string name="capa_jogo">Capa do jogo</string>
+
+    <!-- anúncio -->
+    <string name="anuncio">Anúncio</string>
+    <string name="anuncio_nao_existe">Este anúncio não existe ou já foi apagado.</string>
+    <string name="qualquer_plataforma">Qualquer plataforma</string>
+    <string name="plataforma_dono">%1$s · de %2$s</string>
+    <string name="publicado_por">Publicado por %s</string>
+    <string name="no_ar_ate">No ar até %s</string>
+    <string name="saiu_do_ar_a">Saiu do ar a %s</string>
+    <string name="equipa">Equipa</string>
+    <string name="ninguem_na_equipa">Ainda ninguém entrou.</string>
+
+    <!-- estado do anúncio, como no site -->
+    <plurals name="faltam_jogadores">
+        <item quantity="one">Falta %d jogador</item>
+        <item quantity="many">Faltam %d jogadores</item>
+        <item quantity="other">Faltam %d jogadores</item>
+    </plurals>
+    <string name="equipa_completa">Equipa completa</string>
+    <string name="fechado">Fechado</string>
+    <string name="ja_saiu_do_ar">Já saiu do ar</string>
+</resources>

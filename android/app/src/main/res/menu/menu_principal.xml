@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- menu dos três pontos na barra de cima -->
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <item
+        android:id="@+id/menu_atualizar"
+        android:title="@string/menu_atualizar"
+        app:showAsAction="never" />
+
+    <item
+        android:id="@+id/menu_sair"
+        android:title="@string/menu_sair"
+        app:showAsAction="never" />
+</menu>

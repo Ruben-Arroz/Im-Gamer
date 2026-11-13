@@ -1,0 +1,47 @@
+<resources>
+    <!-- login -->
+    <string name="entrar">Log in</string>
+    <string name="email">Email</string>
+    <string name="password">Password</string>
+    <string name="sem_conta">No account yet? Create one on the I\'m Gamer website.</string>
+    <string name="campos_vazios">Fill in the email and the password.</string>
+    <string name="login_errado">Wrong email or password.</string>
+    <string name="sem_ligacao">Could not connect to the server. Check the internet and the VPN.</string>
+
+    <!-- menu -->
+    <string name="menu_atualizar">Refresh</string>
+    <string name="menu_sair">Log out</string>
+    <string name="sair_pergunta">Log out of this app?</string>
+    <string name="sair">Log out</string>
+    <string name="cancelar">Cancel</string>
+
+    <!-- lista de anúncios -->
+    <string name="anuncios_titulo">Looking for group</string>
+    <string name="sem_anuncios">There are no open posts with free spots.</string>
+    <plurals name="total_anuncios">
+        <item quantity="one">%d open post with free spots</item>
+        <item quantity="other">%d open posts with free spots</item>
+    </plurals>
+    <string name="ver_mais">Show more</string>
+    <string name="capa_jogo">Game cover</string>
+
+    <!-- anúncio -->
+    <string name="anuncio">Post</string>
+    <string name="anuncio_nao_existe">This post does not exist or was deleted.</string>
+    <string name="qualquer_plataforma">Any platform</string>
+    <string name="plataforma_dono">%1$s · by %2$s</string>
+    <string name="publicado_por">Posted by %s</string>
+    <string name="no_ar_ate">Open until %s</string>
+    <string name="saiu_do_ar_a">Closed on %s</string>
+    <string name="equipa">Team</string>
+    <string name="ninguem_na_equipa">Nobody has joined yet.</string>
+
+    <!-- estado do anúncio -->
+    <plurals name="faltam_jogadores">
+        <item quantity="one">%d player missing</item>
+        <item quantity="other">%d players missing</item>
+    </plurals>
+    <string name="equipa_completa">Team is full</string>
+    <string name="fechado">Closed</string>
+    <string name="ja_saiu_do_ar">No longer open</string>
+</resources>
