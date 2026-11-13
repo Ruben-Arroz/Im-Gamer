@@ -1970,3 +1970,9 @@ a.lista-acao {
 .numero-ajuda {
     cursor: help;
 }
+
+/* aviso da lista de lançamentos guardada, quando a rawg não responde */
+#lancamentos-aviso,
+.aviso-guardados {
+    margin-bottom: 14px;
+}

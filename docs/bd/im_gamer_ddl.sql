@@ -258,4 +258,24 @@ CREATE TABLE `Tokens_Api` (
   CONSTRAINT `fk_tokens_utilizador` FOREIGN KEY (`utilizador_id`) REFERENCES `Utilizadores` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
+CREATE TABLE `Lancamentos` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `jogo_id` int(11) NOT NULL,
+  `tipo` enum('recentes','breve') NOT NULL,
+  `posicao` int(11) NOT NULL,
+  `data_sincronizacao` datetime NOT NULL DEFAULT current_timestamp(),
+  PRIMARY KEY (`id`),
+  KEY `fk_lancamentos_jogo` (`jogo_id`),
+  CONSTRAINT `fk_lancamentos_jogo` FOREIGN KEY (`jogo_id`) REFERENCES `Jogos` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+CREATE TABLE `Capturas` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `jogo_id` int(11) NOT NULL,
+  `url` varchar(255) NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `fk_capturas_jogo` (`jogo_id`),
+  CONSTRAINT `fk_capturas_jogo` FOREIGN KEY (`jogo_id`) REFERENCES `Jogos` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
 SET FOREIGN_KEY_CHECKS = 1;
