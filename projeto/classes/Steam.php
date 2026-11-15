@@ -79,6 +79,9 @@ class Steam
 
         $itens = self::inventario($steamId, array_column($jogos, 'appid'));
 
+        // o inventário demora tanto que a bd fecha a ligação ent abre-se outra antes de usar o Jogo::daSteam
+        Database::religar();
+
         $minutosTotal = 0;
         $conquistasTotal = 0;
         $valorJogos = 0;
