@@ -6,18 +6,18 @@ import java.net.HttpURLConnection
 import java.net.URL
 import java.net.URLEncoder
 
-// tem de ser chamado numa Thread, o android não deixa usar a internet na thread principal
+// tem de ser chamado numa Thread pq o android não deixa usar a internet na thread principal
 object Api {
 
-    // no emulador o 10.0.2.2 é o pc, com o site a correr no php -S (porta 8124)
-    // para usar o servidor da UA (com a VPN) troca pela linha de baixo
-    const val ENDERECO = "http://10.0.2.2:8124/projeto/api/"
-    // const val ENDERECO = "https://esan-tesp-ds-paw.web.ua.pt/tesp-ds-g17/projeto/api/"
+    // servidor da UA, só funciona com a VPN ligada
+    const val ENDERECO = "https://esan-tesp-ds-paw.web.ua.pt/tesp-ds-g17/projeto/api/"
+    // para testar com o site a correr no pc (botão Site local)
+    // const val ENDERECO = "http://10.0.2.2:8124/projeto/api/"
 
-    // se correr mal devolve um json com o campo "erro", como o site
+    // se der erro devolve um json com "erro" igual ao site
     fun pedir(context: Context, ficheiro: String, parametros: Map<String, String> = mapOf(), post: Boolean = false): JSONObject {
         try {
-            // os parâmetros vão como num formulário: nome=valor&nome2=valor2
+            // fica nome=valor&nome2=valor2 como num formulário
             var dados = ""
             for (parametro in parametros) {
                 if (dados != "") {
@@ -34,7 +34,7 @@ object Api {
             val ligacao = URL(endereco).openConnection() as HttpURLConnection
             ligacao.connectTimeout = 15000
             ligacao.readTimeout = 15000
-            // é com o token que o site sabe quem está a usar a app
+            // o site sabe quem é pelo token
             ligacao.setRequestProperty("X-Token", Sessao.token(context))
 
             if (post) {

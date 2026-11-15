@@ -10,12 +10,12 @@ import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import org.json.JSONObject
 
-// liga a lista de anúncios que veio do site aos cartões da RecyclerView
+// adapter da lista de anúncios
 class AnunciosAdapter(private val activity: Activity) : RecyclerView.Adapter<AnunciosAdapter.Cartao>() {
 
     private val anuncios = ArrayList<JSONObject>()
 
-    // guarda as views de um cartão, para não as procurar outra vez de cada vez que o cartão é reutilizado
+    // views de cada cartão, a RecyclerView reutiliza os cartões ent guardam-se aqui
     class Cartao(view: View) : RecyclerView.ViewHolder(view) {
         val imagem: ImageView = view.findViewById(R.id.imagem)
         val jogo: TextView = view.findViewById(R.id.jogo)
@@ -55,7 +55,7 @@ class AnunciosAdapter(private val activity: Activity) : RecyclerView.Adapter<Anu
         notifyItemRangeRemoved(0, quantos)
     }
 
-    // a página seguinte vai para o fim da lista
+    // os da página seguinte vão para o fim
     fun juntar(novos: List<JSONObject>) {
         val inicio = anuncios.size
         anuncios.addAll(novos)

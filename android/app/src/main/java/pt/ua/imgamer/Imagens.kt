@@ -7,7 +7,7 @@ import android.view.View
 import android.widget.ImageView
 import java.net.URL
 
-// as imagens que já vieram ficam guardadas, para não as pedir outra vez
+// as imagens que já vieram ficam guardadas pq assim não se pedem outra vez
 object Imagens {
 
     private val guardadas = HashMap<String, Bitmap>()
@@ -35,7 +35,7 @@ object Imagens {
                     }
                 }
             } catch (e: Exception) {
-                // se a imagem não vier fica o espaço vazio
+                // se falhar fica sem imagem
             }
         }.start()
     }

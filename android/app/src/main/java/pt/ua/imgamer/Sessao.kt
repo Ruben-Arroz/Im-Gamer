@@ -2,7 +2,7 @@ package pt.ua.imgamer
 
 import android.content.Context
 
-// guarda o token e o nome de quem entrou, ficam guardados mesmo depois de fechar a app
+// token e nome de quem entrou, ficam guardados mesmo depois de fechar a app
 object Sessao {
 
     private fun preferencias(context: Context) = context.getSharedPreferences("sessao", Context.MODE_PRIVATE)

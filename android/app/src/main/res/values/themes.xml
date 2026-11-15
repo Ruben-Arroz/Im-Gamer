@@ -17,7 +17,7 @@
 
     <!-- títulos com a letra do logo -->
     <style name="Titulo">
-        <!-- os dois fontFamily, senão fica a letra do tema -->
+        <!-- tem de ter os dois fontFamily senão fica a letra do tema -->
         <item name="android:fontFamily">@font/press_start_2p</item>
         <item name="fontFamily">@font/press_start_2p</item>
         <item name="android:textSize">15sp</item>

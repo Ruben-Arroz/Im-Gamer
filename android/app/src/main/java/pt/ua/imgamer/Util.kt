@@ -13,7 +13,7 @@ import java.util.Locale
 
 // funções usadas em vários ecrãs
 
-// a app ocupa o ecrã todo, isto dá margem para não ficar por baixo das barras e do teclado
+// a app ocupa o ecrã todo ent isto dá margem para não ficar por baixo das barras e do teclado
 fun ajustarAoEcra(view: View) {
     ViewCompat.setOnApplyWindowInsetsListener(view) { v, insets ->
         val barras = insets.getInsets(WindowInsetsCompat.Type.systemBars() or WindowInsetsCompat.Type.ime())
@@ -22,7 +22,7 @@ fun ajustarAoEcra(view: View) {
     }
 }
 
-// se o site disser que o token já não vale, apaga a sessão e volta ao login. devolve true nesse caso
+// se o token já não vale volta ao login (e devolve true)
 fun semSessao(activity: Activity, resposta: JSONObject): Boolean {
     if (!resposta.optBoolean("sem_sessao")) {
         return false
@@ -39,7 +39,7 @@ fun voltarAoLogin(activity: Activity) {
     activity.startActivity(intent)
 }
 
-// o optString do json devolve o texto "null" quando o valor é null, isto devolve mesmo null
+// o optString devolve o texto "null" em vez de null ent usa-se esta
 fun texto(json: JSONObject, nome: String): String? {
     if (!json.has(nome) || json.isNull(nome)) {
         return null
@@ -47,7 +47,7 @@ fun texto(json: JSONObject, nome: String): String? {
     return json.getString(nome)
 }
 
-// o site manda os números e a app escreve o estado na língua do telemóvel
+// o estado é feito aqui e não no site pq tem de ficar na língua do telemóvel
 fun estadoAnuncio(context: Context, anuncio: JSONObject): String {
     if (anuncio.getBoolean("saiu_do_ar")) {
         return context.getString(R.string.ja_saiu_do_ar)
@@ -63,12 +63,12 @@ fun estadoAnuncio(context: Context, anuncio: JSONObject): String {
     return context.resources.getQuantityString(R.plurals.faltam_jogadores, livres, livres)
 }
 
-// quando o anúncio não tem plataforma o site manda null
+// null é qualquer plataforma
 fun plataformaAnuncio(context: Context, anuncio: JSONObject): String {
     return texto(anuncio, "plataforma") ?: context.getString(R.string.qualquer_plataforma)
 }
 
-// "sex, 20/11" em português e "Fri, 20/11" em inglês, como no site
+// fica "sex, 20/11" ou "Fri, 20/11" conforme a língua
 fun dataAnuncio(anuncio: JSONObject): String {
     val data = LocalDate.parse(anuncio.getString("data_fim"))
     return data.format(DateTimeFormatter.ofPattern("EEE, dd/MM", Locale.getDefault()))

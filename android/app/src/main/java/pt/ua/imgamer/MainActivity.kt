@@ -17,7 +17,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import org.json.JSONObject
 
-// ecrã principal: os anúncios de LFG que estão no ar e ainda têm vagas
+// ecrã principal com os anúncios de LFG que ainda têm vagas
 class MainActivity : AppCompatActivity() {
 
     private var pagina = 1
@@ -34,7 +34,7 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
         ajustarAoEcra(findViewById(R.id.main))
 
-        // a barra de cima faz de action bar, para ter o menu
+        // a toolbar faz de action bar senão o menu não aparece
         setSupportActionBar(findViewById<Toolbar>(R.id.barra))
         supportActionBar?.setDisplayShowTitleEnabled(false)
 
@@ -130,7 +130,7 @@ class MainActivity : AppCompatActivity() {
             .show()
     }
 
-    // avisa o site para apagar o token e depois apaga a sessão guardada no telemóvel
+    // apaga o token no site e tbm no telemóvel
     private fun sair() {
         Thread {
             Api.pedir(this, "logout.php", mapOf(), true)

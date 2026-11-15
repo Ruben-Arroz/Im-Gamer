@@ -16,7 +16,7 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.ImGamer">
 
-        <!-- a app abre sempre no login, que passa logo para a MainActivity se já houver sessão -->
+        <!-- abre sempre no login, se já tiver sessão passa logo para a lista -->
         <activity
             android:name=".LoginActivity"
             android:exported="true"

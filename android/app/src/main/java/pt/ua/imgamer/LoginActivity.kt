@@ -23,7 +23,7 @@ class LoginActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        // se já entrou antes, vai direto para a app
+        // se já tem sessão vai logo para a lista
         if (Sessao.entrou(this)) {
             abrirApp()
             return
@@ -64,7 +64,7 @@ class LoginActivity : AppCompatActivity() {
                 if (resposta.optBoolean("sem_ligacao")) {
                     mostrarErro(resposta.getString("erro"))
                 } else if (resposta.has("erro")) {
-                    // o site só dá erro aqui quando o email ou a password estão mal
+                    // aqui o site só dá erro se o email ou a password estiverem mal
                     mostrarErro(getString(R.string.login_errado))
                 } else {
                     Sessao.guardar(this, resposta.getString("token"), resposta.getString("nome"))

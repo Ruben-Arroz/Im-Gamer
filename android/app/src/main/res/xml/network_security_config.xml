@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- o android só deixa ligações https. a exceção é o 10.0.2.2, que no emulador é o pc,
-     para testar com o site a correr no pc (php -S, sem https) -->
+<!-- o android só deixa https. o 10.0.2.2 (o pc no emulador) fica com http para testar com o site local -->
 <network-security-config>
     <domain-config cleartextTrafficPermitted="true">
         <domain includeSubdomains="false">10.0.2.2</domain>

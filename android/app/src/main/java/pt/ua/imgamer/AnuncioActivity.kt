@@ -13,7 +13,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
 import org.json.JSONObject
 
-// detalhe de um anúncio de LFG, aberto ao carregar num cartão da lista
+// abre quando se carrega num anúncio da lista
 class AnuncioActivity : AppCompatActivity() {
 
     private lateinit var carregar: ProgressBar
@@ -26,7 +26,7 @@ class AnuncioActivity : AppCompatActivity() {
         setContentView(R.layout.activity_anuncio)
         ajustarAoEcra(findViewById(R.id.main))
 
-        // seta na barra de cima para voltar à lista
+        // seta para voltar à lista
         setSupportActionBar(findViewById<Toolbar>(R.id.barra))
         supportActionBar?.title = getString(R.string.anuncio)
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
@@ -56,7 +56,7 @@ class AnuncioActivity : AppCompatActivity() {
         }
 
         if (resposta.has("erro")) {
-            // o único erro do site aqui é o anúncio já não existir
+            // se não é falta de ligação é pq o anúncio já não existe
             erro.text = if (resposta.optBoolean("sem_ligacao")) resposta.getString("erro") else getString(R.string.anuncio_nao_existe)
             erro.visibility = View.VISIBLE
             return
@@ -79,7 +79,6 @@ class AnuncioActivity : AppCompatActivity() {
         findViewById<TextView>(R.id.estado).text = estadoAnuncio(this, resposta)
         findViewById<TextView>(R.id.descricao).text = resposta.getString("descricao")
 
-        // os nomes de quem já entrou, um por linha
         val participantes = resposta.getJSONArray("participantes")
         var nomes = ""
         for (i in 0 until participantes.length()) {

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- a app é sempre escura, por isso o tema da noite é igual ao normal (values/themes.xml) -->
+<!-- a app é sempre escura ent o tema da noite é igual ao normal -->
 <resources>
     <style name="Base.Theme.ImGamer" parent="Theme.Material3.Dark.NoActionBar">
         <item name="android:windowBackground">@color/fundo</item>

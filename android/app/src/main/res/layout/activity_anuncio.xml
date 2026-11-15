@@ -6,7 +6,6 @@
     android:layout_height="match_parent"
     android:orientation="vertical">
 
-    <!-- barra de cima com a seta para voltar à lista -->
     <androidx.appcompat.widget.Toolbar
         android:id="@+id/barra"
         android:layout_width="match_parent"
@@ -108,7 +107,6 @@
                     android:layout_height="wrap_content"
                     android:text="@string/equipa" />
 
-                <!-- nomes de quem já entrou, um por linha -->
                 <TextView
                     android:id="@+id/participantes"
                     android:layout_width="wrap_content"
