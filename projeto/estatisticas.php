@@ -7,8 +7,9 @@ if (!Auth::autenticado()) {
 }
 
 // como no perfil, com ?u=nome mostra as estatísticas de outra pessoa
-if (isset($_GET['u'])) {
-    $utilizador = Utilizador::buscarPorNome($_GET['u']);
+$nomeUrl = filter_input(INPUT_GET, 'u', FILTER_UNSAFE_RAW);
+if ($nomeUrl !== null) {
+    $utilizador = Utilizador::buscarPorNome($nomeUrl);
 } else {
     $utilizador = Utilizador::buscarPorId($_SESSION['utilizador_id']);
 }

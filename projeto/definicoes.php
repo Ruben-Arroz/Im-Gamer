@@ -13,13 +13,13 @@ $mensagem = null;
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // a página tem vários formulários, o campo "acao" diz qual foi enviado
-    $acao = $_POST['acao'] ?? '';
-    $passwordAtual = $_POST['password_atual'] ?? '';
+    $acao = filter_input(INPUT_POST, 'acao', FILTER_UNSAFE_RAW) ?? '';
+    $passwordAtual = filter_input(INPUT_POST, 'password_atual', FILTER_UNSAFE_RAW) ?? '';
 
-    if (!Auth::tokenValido($_POST['token'] ?? '')) {
+    if (!Auth::tokenValido(filter_input(INPUT_POST, 'token', FILTER_UNSAFE_RAW) ?? '')) {
         $erro = 'A sessão expirou. Tenta outra vez.';
     } elseif ($acao === 'moeda') {
-        $moeda = $_POST['moeda'] ?? '';
+        $moeda = filter_input(INPUT_POST, 'moeda', FILTER_UNSAFE_RAW) ?? '';
 
         if (!isset(Utilizador::MOEDAS[$moeda])) {
             $erro = 'Escolhe uma moeda da lista.';
@@ -29,7 +29,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $mensagem = 'Moeda atualizada.';
         }
     } elseif ($acao === 'email') {
-        $email = trim($_POST['email'] ?? '');
+        $email = trim(filter_input(INPUT_POST, 'email', FILTER_UNSAFE_RAW) ?? '');
 
         if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
             $erro = 'Introduz um email válido.';
@@ -44,8 +44,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             }
         }
     } elseif ($acao === 'password') {
-        $passwordNova = $_POST['password_nova'] ?? '';
-        $passwordConfirmar = $_POST['password_confirmar'] ?? '';
+        $passwordNova = filter_input(INPUT_POST, 'password_nova', FILTER_UNSAFE_RAW) ?? '';
+        $passwordConfirmar = filter_input(INPUT_POST, 'password_confirmar', FILTER_UNSAFE_RAW) ?? '';
 
         if (!Utilizador::passwordCorreta($id, $passwordAtual)) {
             $erro = 'A password atual está errada.';

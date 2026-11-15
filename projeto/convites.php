@@ -10,10 +10,10 @@ $utilizadorId = (int) $_SESSION['utilizador_id'];
 $erro = null;
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $acao = $_POST['acao'] ?? '';
-    $conviteId = (int) ($_POST['convite_id'] ?? 0);
+    $acao = filter_input(INPUT_POST, 'acao', FILTER_UNSAFE_RAW) ?? '';
+    $conviteId = (int) filter_input(INPUT_POST, 'convite_id', FILTER_VALIDATE_INT);
 
-    if (!Auth::tokenValido($_POST['token'] ?? '')) {
+    if (!Auth::tokenValido(filter_input(INPUT_POST, 'token', FILTER_UNSAFE_RAW) ?? '')) {
         $erro = 'A sessão expirou. Tenta outra vez.';
     } elseif ($acao === 'aceitar' || $acao === 'recusar') {
         Convites::responder($conviteId, $utilizadorId, $_SESSION['nome_utilizador'], $acao === 'aceitar');

@@ -7,14 +7,14 @@ if (!Auth::autenticado()) {
 }
 
 $utilizadorId = (int) $_SESSION['utilizador_id'];
-$id = (int) ($_GET['id'] ?? 0);
+$id = (int) filter_input(INPUT_GET, 'id', FILTER_VALIDATE_INT);
 $anuncio = Lfg::buscar($id);
 $erro = null;
 
 if ($anuncio && $_SERVER['REQUEST_METHOD'] === 'POST') {
-    $acao = $_POST['acao'] ?? '';
+    $acao = filter_input(INPUT_POST, 'acao', FILTER_UNSAFE_RAW) ?? '';
 
-    if (!Auth::tokenValido($_POST['token'] ?? '')) {
+    if (!Auth::tokenValido(filter_input(INPUT_POST, 'token', FILTER_UNSAFE_RAW) ?? '')) {
         $erro = 'A sessão expirou. Tenta outra vez.';
     } elseif ($acao === 'entrar') {
         $resultado = Lfg::entrar($id, $utilizadorId, $_SESSION['nome_utilizador']);
@@ -30,7 +30,7 @@ if ($anuncio && $_SERVER['REQUEST_METHOD'] === 'POST') {
     } elseif ($acao === 'prolongar') {
         Lfg::prolongar($id, $utilizadorId);
     } elseif ($acao === 'remover') {
-        Lfg::removerParticipante($id, $utilizadorId, (int) ($_POST['participante_id'] ?? 0));
+        Lfg::removerParticipante($id, $utilizadorId, (int) filter_input(INPUT_POST, 'participante_id', FILTER_VALIDATE_INT));
     } elseif ($acao === 'apagar') {
         Lfg::apagar($id, $utilizadorId);
         header('Location: ' . BASE_URL . '/projeto/lfg.php?aba=meus');

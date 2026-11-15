@@ -7,8 +7,9 @@ if (!Auth::autenticado()) {
 }
 
 // tal como no perfil, com ?u=nome mostra a biblioteca de outra pessoa
-if (isset($_GET['u'])) {
-    $utilizador = Utilizador::buscarPorNome($_GET['u']);
+$nomeUrl = filter_input(INPUT_GET, 'u', FILTER_UNSAFE_RAW);
+if ($nomeUrl !== null) {
+    $utilizador = Utilizador::buscarPorNome($nomeUrl);
 } else {
     $utilizador = Utilizador::buscarPorId($_SESSION['utilizador_id']);
 }
@@ -25,35 +26,40 @@ if ($utilizador) {
     $generos = Biblioteca::generosDoUtilizador($utilizador['id']);
 
     // os filtros vêm do url e são validados contra as listas
+    $metacritic = filter_input(INPUT_GET, 'metacritic', FILTER_VALIDATE_INT);
+    $anoMin = filter_input(INPUT_GET, 'ano_min', FILTER_VALIDATE_INT);
+    $anoMax = filter_input(INPUT_GET, 'ano_max', FILTER_VALIDATE_INT);
     $filtros = [
-        'nome' => trim($_GET['q'] ?? ''),
-        'servicos' => array_values(array_intersect((array) ($_GET['servico'] ?? []), array_keys(ContasLigadas::SERVICOS))),
-        'generos' => array_values(array_intersect(array_map('intval', (array) ($_GET['genero'] ?? [])), array_column($generos, 'id'))),
-        'modos' => array_values(array_intersect((array) ($_GET['modo'] ?? []), array_keys(Biblioteca::MODOS))),
-        'horas' => isset(Biblioteca::HORAS[$_GET['horas'] ?? '']) ? $_GET['horas'] : '',
-        'conquistas' => isset(Biblioteca::CONQUISTAS[$_GET['conquistas'] ?? '']) ? $_GET['conquistas'] : '',
+        'nome' => trim(filter_input(INPUT_GET, 'q', FILTER_UNSAFE_RAW) ?? ''),
+        'servicos' => array_values(array_intersect((filter_input(INPUT_GET, 'servico', FILTER_UNSAFE_RAW, FILTER_REQUIRE_ARRAY) ?: []), array_keys(ContasLigadas::SERVICOS))),
+        'generos' => array_values(array_intersect(array_map('intval', (filter_input(INPUT_GET, 'genero', FILTER_UNSAFE_RAW, FILTER_REQUIRE_ARRAY) ?: [])), array_column($generos, 'id'))),
+        'modos' => array_values(array_intersect((filter_input(INPUT_GET, 'modo', FILTER_UNSAFE_RAW, FILTER_REQUIRE_ARRAY) ?: []), array_keys(Biblioteca::MODOS))),
+        'horas' => escolhaGet('horas', Biblioteca::HORAS, ''),
+        'conquistas' => escolhaGet('conquistas', Biblioteca::CONQUISTAS, ''),
         'recentes' => isset($_GET['recentes']),
         'preco_min' => null,
         'preco_max' => null,
-        'metacritic' => is_numeric($_GET['metacritic'] ?? '') ? (int) $_GET['metacritic'] : null,
-        'ano_min' => is_numeric($_GET['ano_min'] ?? '') ? (int) $_GET['ano_min'] : null,
-        'ano_max' => is_numeric($_GET['ano_max'] ?? '') ? (int) $_GET['ano_max'] : null,
-        'ordem' => isset(Biblioteca::ORDENS[$_GET['ordem'] ?? '']) ? $_GET['ordem'] : 'horas',
+        'metacritic' => is_int($metacritic) ? $metacritic : null,
+        'ano_min' => is_int($anoMin) ? $anoMin : null,
+        'ano_max' => is_int($anoMax) ? $anoMax : null,
+        'ordem' => escolhaGet('ordem', Biblioteca::ORDENS, 'horas'),
     ];
 
     // o preço é escrito na moeda de quem está a ver mas na bd está em euros
     if ($mostrarValores) {
-        if (is_numeric($_GET['preco_min'] ?? '')) {
-            $filtros['preco_min'] = $_GET['preco_min'] / $taxa;
+        $precoMin = filter_input(INPUT_GET, 'preco_min', FILTER_VALIDATE_FLOAT);
+        $precoMax = filter_input(INPUT_GET, 'preco_max', FILTER_VALIDATE_FLOAT);
+        if (is_float($precoMin)) {
+            $filtros['preco_min'] = $precoMin / $taxa;
         }
-        if (is_numeric($_GET['preco_max'] ?? '')) {
-            $filtros['preco_max'] = $_GET['preco_max'] / $taxa;
+        if (is_float($precoMax)) {
+            $filtros['preco_max'] = $precoMax / $taxa;
         }
     } elseif ($filtros['ordem'] === 'preco') {
         $filtros['ordem'] = 'horas';
     }
 
-    $pagina = max(1, (int) ($_GET['pagina'] ?? 1));
+    $pagina = max(1, (int) (filter_input(INPUT_GET, 'pagina', FILTER_VALIDATE_INT) ?? 1));
     $resultado = Biblioteca::pesquisar($utilizador['id'], $filtros, $pagina, POR_PAGINA);
     $totalPaginas = max(1, (int) ceil($resultado['total'] / POR_PAGINA));
 }

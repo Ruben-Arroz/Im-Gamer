@@ -7,8 +7,9 @@ if (!Auth::autenticado()) {
 }
 
 // como no perfil, com ?u=nome mostra a lista de outra pessoa
-if (isset($_GET['u'])) {
-    $utilizador = Utilizador::buscarPorNome($_GET['u']);
+$nomeUrl = filter_input(INPUT_GET, 'u', FILTER_UNSAFE_RAW);
+if ($nomeUrl !== null) {
+    $utilizador = Utilizador::buscarPorNome($nomeUrl);
 } else {
     $utilizador = Utilizador::buscarPorId($_SESSION['utilizador_id']);
 }
@@ -17,13 +18,13 @@ if ($utilizador) {
     $proprio = (int) $utilizador['id'] === (int) $_SESSION['utilizador_id'];
 
     // só o dono pode tirar jogos da lista
-    if ($proprio && $_SERVER['REQUEST_METHOD'] === 'POST' && Auth::tokenValido($_POST['token'] ?? '')) {
-        ListaDesejos::remover($utilizador['id'], (int) ($_POST['jogo_id'] ?? 0));
+    if ($proprio && $_SERVER['REQUEST_METHOD'] === 'POST' && Auth::tokenValido(filter_input(INPUT_POST, 'token', FILTER_UNSAFE_RAW) ?? '')) {
+        ListaDesejos::remover($utilizador['id'], (int) filter_input(INPUT_POST, 'jogo_id', FILTER_VALIDATE_INT));
         header('Location: ' . BASE_URL . '/projeto/desejos.php?u=' . urlencode($utilizador['nome_utilizador']));
         exit;
     }
 
-    $ordem = isset(ListaDesejos::ORDENS[$_GET['ordem'] ?? '']) ? $_GET['ordem'] : 'data';
+    $ordem = escolhaGet('ordem', ListaDesejos::ORDENS, 'data');
     $desejos = ListaDesejos::listar($utilizador['id'], $ordem);
     $conversao = Catalogo::conversaoDolar($_SESSION['moeda'] ?? 'EUR');
 }

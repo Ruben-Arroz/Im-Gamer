@@ -4,18 +4,18 @@ require_once __DIR__ . '/includes/bootstrap.php';
 Admin::verificar();
 
 $erro = null;
-$texto = mb_substr(trim($_GET['q'] ?? ''), 0, 100);
-$pagina = max(1, (int) ($_GET['pagina'] ?? 1));
+$texto = mb_substr(trim(filter_input(INPUT_GET, 'q', FILTER_UNSAFE_RAW) ?? ''), 0, 100);
+$pagina = max(1, (int) (filter_input(INPUT_GET, 'pagina', FILTER_VALIDATE_INT) ?? 1));
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $acao = $_POST['acao'] ?? '';
-    $id = (int) ($_POST['id'] ?? 0);
+    $acao = filter_input(INPUT_POST, 'acao', FILTER_UNSAFE_RAW) ?? '';
+    $id = (int) filter_input(INPUT_POST, 'id', FILTER_VALIDATE_INT);
     $aviso = '';
 
-    if (!Auth::tokenValido($_POST['token'] ?? '')) {
+    if (!Auth::tokenValido(filter_input(INPUT_POST, 'token', FILTER_UNSAFE_RAW) ?? '')) {
         $erro = 'A sessão expirou. Tenta outra vez.';
     } elseif ($acao === 'juntar') {
-        $ficaId = (int) ($_POST['fica_id'] ?? 0);
+        $ficaId = (int) filter_input(INPUT_POST, 'fica_id', FILTER_VALIDATE_INT);
         $erro = Admin::juntarJogos($id, $ficaId);
         $aviso = 'O jogo com o id ' . $id . ' foi apagado e o que tinha passou para o id ' . $ficaId . '.';
     } elseif ($acao === 'apagar') {

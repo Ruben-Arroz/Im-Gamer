@@ -7,7 +7,7 @@ if (!Auth::autenticado()) {
 }
 
 $utilizadorId = (int) $_SESSION['utilizador_id'];
-$contaId = (int) ($_GET['conta'] ?? 0);
+$contaId = (int) filter_input(INPUT_GET, 'conta', FILTER_VALIDATE_INT);
 
 // só o dono da conta pode mexer, e só nas contas sem api (nintendo e battle.net)
 $conta = JogosManuais::conta($contaId, $utilizadorId);
@@ -19,12 +19,12 @@ if (!$conta) {
 $erro = null;
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $acao = $_POST['acao'] ?? '';
+    $acao = filter_input(INPUT_POST, 'acao', FILTER_UNSAFE_RAW) ?? '';
 
-    if (!Auth::tokenValido($_POST['token'] ?? '')) {
+    if (!Auth::tokenValido(filter_input(INPUT_POST, 'token', FILTER_UNSAFE_RAW) ?? '')) {
         $erro = 'A sessão expirou. Tenta outra vez.';
     } elseif ($acao === 'adicionar') {
-        $horas = trim($_POST['horas'] ?? '');
+        $horas = trim(filter_input(INPUT_POST, 'horas', FILTER_UNSAFE_RAW) ?? '');
 
         // as horas são opcionais, vazio quer dizer que não se sabe
         if ($horas !== '' && (!ctype_digit($horas) || (int) $horas > JogosManuais::MAX_HORAS)) {
@@ -39,7 +39,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             }
         }
     } elseif ($acao === 'tirar') {
-        JogosManuais::tirar($contaId, (int) ($_POST['linha_id'] ?? 0));
+        JogosManuais::tirar($contaId, (int) filter_input(INPUT_POST, 'linha_id', FILTER_VALIDATE_INT));
     }
 
     if (!$erro) {

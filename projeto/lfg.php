@@ -12,20 +12,20 @@ $utilizadorId = (int) $_SESSION['utilizador_id'];
 $plataformas = Jogo::plataformas();
 
 // filtros do url, validados contra as listas
-$abaAtual = isset(Lfg::ABAS[$_GET['aba'] ?? '']) ? $_GET['aba'] : 'proximos';
-$plataformaId = (int) ($_GET['plataforma'] ?? 0);
+$abaAtual = escolhaGet('aba', Lfg::ABAS, 'proximos');
+$plataformaId = (int) filter_input(INPUT_GET, 'plataforma', FILTER_VALIDATE_INT);
 
 $filtros = [
-    'jogo' => mb_substr(trim($_GET['jogo'] ?? ''), 0, 100),
+    'jogo' => mb_substr(trim(filter_input(INPUT_GET, 'jogo', FILTER_UNSAFE_RAW) ?? ''), 0, 100),
     'plataforma' => in_array($plataformaId, array_column($plataformas, 'id')) ? $plataformaId : 0,
-    'ordem' => isset(Lfg::ORDENS[$_GET['ordem'] ?? '']) ? $_GET['ordem'] : 'recentes',
+    'ordem' => escolhaGet('ordem', Lfg::ORDENS, 'recentes'),
     // o "só com vagas" vem ligado por defeito, o campo escondido "filtrado" diz se o formulário já foi usado
     'vagas' => isset($_GET['filtrado']) ? isset($_GET['vagas']) : true,
 ];
 $comFiltros = $filtros['jogo'] !== '' || $filtros['plataforma'] || $filtros['ordem'] !== 'recentes' || !$filtros['vagas'];
 $sugestoes = Lfg::jogosComAnuncios();
 
-$pagina = max(1, (int) ($_GET['pagina'] ?? 1));
+$pagina = max(1, (int) (filter_input(INPUT_GET, 'pagina', FILTER_VALIDATE_INT) ?? 1));
 $resultado = Lfg::pesquisar($abaAtual, $filtros, $utilizadorId, $pagina, POR_PAGINA);
 $totalPaginas = max(1, (int) ceil($resultado['total'] / POR_PAGINA));
 

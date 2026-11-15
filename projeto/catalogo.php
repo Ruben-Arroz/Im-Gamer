@@ -5,9 +5,9 @@ require_once __DIR__ . '/includes/bootstrap.php';
 $conversao = Catalogo::conversaoDolar($_SESSION['moeda'] ?? 'EUR');
 $moeda = $conversao['moeda'];
 
-$lojasEscolhidas = array_map('intval', (array) ($_GET['loja'] ?? []));
-$tipoLoja = $_GET['tipo'] ?? 'todas';
-$ordem = isset(Catalogo::ORDENS[$_GET['ordem'] ?? '']) ? $_GET['ordem'] : 'Deal Rating';
+$lojasEscolhidas = array_map('intval', (filter_input(INPUT_GET, 'loja', FILTER_UNSAFE_RAW, FILTER_REQUIRE_ARRAY) ?: []));
+$tipoLoja = filter_input(INPUT_GET, 'tipo', FILTER_UNSAFE_RAW) ?? 'todas';
+$ordem = escolhaGet('ordem', Catalogo::ORDENS, 'Deal Rating');
 
 $tituloPagina = 'Catálogo';
 require_once __DIR__ . '/includes/header.php';

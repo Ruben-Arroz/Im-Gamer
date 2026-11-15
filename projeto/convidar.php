@@ -10,22 +10,24 @@ $utilizadorId = (int) $_SESSION['utilizador_id'];
 $erro = null;
 
 // sem ?u= mostra a pesquisa, com ?u=nome mostra o convite para essa pessoa
-$destino = isset($_GET['u']) ? Utilizador::buscarPorNome($_GET['u']) : null;
+$nomeDestino = filter_input(INPUT_GET, 'u', FILTER_UNSAFE_RAW);
+$destino = $nomeDestino !== null ? Utilizador::buscarPorNome($nomeDestino) : null;
 $eu = Utilizador::buscarPorId($utilizadorId);
-$jogoInicial = isset($_GET['jogo']) ? Jogo::buscarPorId((int) $_GET['jogo']) : null;
+$jogoGet = filter_input(INPUT_GET, 'jogo', FILTER_VALIDATE_INT);
+$jogoInicial = $jogoGet !== null ? Jogo::buscarPorId((int) $jogoGet) : null;
 
-$pesquisa = mb_substr(trim($_GET['q'] ?? ''), 0, 50);
+$pesquisa = mb_substr(trim(filter_input(INPUT_GET, 'q', FILTER_UNSAFE_RAW) ?? ''), 0, 50);
 $encontrados = [];
 if (!$destino && mb_strlen($pesquisa) >= 2) {
     $encontrados = Utilizador::pesquisar($pesquisa, $utilizadorId, 20);
 }
 
 if ($destino && $_SERVER['REQUEST_METHOD'] === 'POST') {
-    $mensagem = trim($_POST['mensagem'] ?? '');
-    $discord = limparDiscord($_POST['discord'] ?? '');
-    $textoJogo = trim($_POST['jogo_pesquisa'] ?? '');
+    $mensagem = trim(filter_input(INPUT_POST, 'mensagem', FILTER_UNSAFE_RAW) ?? '');
+    $discord = limparDiscord(filter_input(INPUT_POST, 'discord', FILTER_UNSAFE_RAW) ?? '');
+    $textoJogo = trim(filter_input(INPUT_POST, 'jogo_pesquisa', FILTER_UNSAFE_RAW) ?? '');
 
-    if (!Auth::tokenValido($_POST['token'] ?? '')) {
+    if (!Auth::tokenValido(filter_input(INPUT_POST, 'token', FILTER_UNSAFE_RAW) ?? '')) {
         $erro = 'A sessão expirou. Tenta outra vez.';
     } elseif (mb_strlen($mensagem) > 255) {
         $erro = 'A mensagem só pode ter até 255 letras.';
@@ -54,7 +56,7 @@ require_once __DIR__ . '/includes/header.php';
 ?>
 
 <section class="formulario">
-    <?php if (isset($_GET['u']) && !$destino): ?>
+    <?php if ($nomeDestino !== null && !$destino): ?>
         <h1>Convidar jogadores</h1>
         <p>Este utilizador não existe.</p>
         <p class="auth-switch"><a href="<?= BASE_URL ?>/projeto/convidar.php">Procurar outro jogador</a></p>

@@ -4,14 +4,14 @@ require_once __DIR__ . '/includes/bootstrap.php';
 Admin::verificar();
 
 $erro = null;
-$texto = mb_substr(trim($_GET['q'] ?? ''), 0, 100);
-$pagina = max(1, (int) ($_GET['pagina'] ?? 1));
+$texto = mb_substr(trim(filter_input(INPUT_GET, 'q', FILTER_UNSAFE_RAW) ?? ''), 0, 100);
+$pagina = max(1, (int) (filter_input(INPUT_GET, 'pagina', FILTER_VALIDATE_INT) ?? 1));
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    if (!Auth::tokenValido($_POST['token'] ?? '')) {
+    if (!Auth::tokenValido(filter_input(INPUT_POST, 'token', FILTER_UNSAFE_RAW) ?? '')) {
         $erro = 'A sessão expirou. Tenta outra vez.';
     } else {
-        $erro = Admin::apagarAnuncio((int) ($_POST['id'] ?? 0));
+        $erro = Admin::apagarAnuncio((int) filter_input(INPUT_POST, 'id', FILTER_VALIDATE_INT));
     }
 
     if (!$erro) {

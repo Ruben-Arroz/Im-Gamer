@@ -1,11 +1,14 @@
 <?php
 require_once __DIR__ . '/includes/bootstrap.php';
 
-$aba = ($_GET['aba'] ?? '') === 'breve' ? 'breve' : 'recentes';
-$periodo = isset(Catalogo::PERIODOS[(int) ($_GET['periodo'] ?? 0)]) ? (int) $_GET['periodo'] : 90;
-$ordem = ($_GET['ordem'] ?? '') === 'data' ? 'data' : 'popularidade';
-$plataformasEscolhidas = array_map('intval', (array) ($_GET['plataforma'] ?? []));
-$generosEscolhidos = array_map('intval', (array) ($_GET['genero'] ?? []));
+$aba = (filter_input(INPUT_GET, 'aba', FILTER_UNSAFE_RAW) ?? '') === 'breve' ? 'breve' : 'recentes';
+$periodo = (int) filter_input(INPUT_GET, 'periodo', FILTER_VALIDATE_INT);
+if (!isset(Catalogo::PERIODOS[$periodo])) {
+    $periodo = 90;
+}
+$ordem = (filter_input(INPUT_GET, 'ordem', FILTER_UNSAFE_RAW) ?? '') === 'data' ? 'data' : 'popularidade';
+$plataformasEscolhidas = array_map('intval', (filter_input(INPUT_GET, 'plataforma', FILTER_UNSAFE_RAW, FILTER_REQUIRE_ARRAY) ?: []));
+$generosEscolhidos = array_map('intval', (filter_input(INPUT_GET, 'genero', FILTER_UNSAFE_RAW, FILTER_REQUIRE_ARRAY) ?: []));
 
 $tituloPagina = 'Lançamentos';
 require_once __DIR__ . '/includes/header.php';

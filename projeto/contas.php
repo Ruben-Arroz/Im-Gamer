@@ -10,13 +10,13 @@ $utilizadorId = $_SESSION['utilizador_id'];
 $erro = null;
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $acao = $_POST['acao'] ?? '';
+    $acao = filter_input(INPUT_POST, 'acao', FILTER_UNSAFE_RAW) ?? '';
 
-    if (!Auth::tokenValido($_POST['token'] ?? '')) {
+    if (!Auth::tokenValido(filter_input(INPUT_POST, 'token', FILTER_UNSAFE_RAW) ?? '')) {
         $erro = 'A sessão expirou. Tenta outra vez.';
     } elseif ($acao === 'adicionar') {
-        $servico = $_POST['servico'] ?? '';
-        $identificador = trim($_POST['identificador'] ?? '');
+        $servico = filter_input(INPUT_POST, 'servico', FILTER_UNSAFE_RAW) ?? '';
+        $identificador = trim(filter_input(INPUT_POST, 'identificador', FILTER_UNSAFE_RAW) ?? '');
 
         if (!isset(ContasLigadas::SERVICOS[$servico])) {
             $erro = 'Escolhe uma plataforma.';
@@ -30,18 +30,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
     } elseif ($acao === 'epic') {
         // a epic não tem perfis públicos, liga-se com o código que aparece depois do login
-        $resultado = Epic::ligar($utilizadorId, $_POST['codigo'] ?? '');
+        $resultado = Epic::ligar($utilizadorId, filter_input(INPUT_POST, 'codigo', FILTER_UNSAFE_RAW) ?? '');
         if (!$resultado['sucesso']) {
             $erro = $resultado['erro'];
         }
     } elseif ($acao === 'playstation') {
         // a playstation também não tem perfis públicos, liga-se com o código npsso
-        $resultado = Playstation::ligar($utilizadorId, $_POST['npsso'] ?? '');
+        $resultado = Playstation::ligar($utilizadorId, filter_input(INPUT_POST, 'npsso', FILTER_UNSAFE_RAW) ?? '');
         if (!$resultado['sucesso']) {
             $erro = $resultado['erro'];
         }
     } elseif ($acao === 'remover') {
-        ContasLigadas::remover((int) ($_POST['conta_id'] ?? 0), $utilizadorId);
+        ContasLigadas::remover((int) filter_input(INPUT_POST, 'conta_id', FILTER_VALIDATE_INT), $utilizadorId);
     }
 
     // recarrega a página para o formulário não ser enviado outra vez ao fazer F5

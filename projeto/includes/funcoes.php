@@ -41,3 +41,13 @@ function discordValido(string $nome): bool
 {
     return (bool) preg_match('/^[a-z0-9._]{2,32}$/', $nome);
 }
+
+// valor do url que tem de ser uma das chaves da lista (ordens, abas...), senão fica o valor por defeito
+function escolhaGet(string $nome, array $lista, string $porDefeito): string
+{
+    $valor = filter_input(INPUT_GET, $nome, FILTER_UNSAFE_RAW) ?? '';
+    if (is_string($valor) && isset($lista[$valor])) {
+        return $valor;
+    }
+    return $porDefeito;
+}

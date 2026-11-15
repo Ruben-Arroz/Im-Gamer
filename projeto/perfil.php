@@ -7,8 +7,9 @@ if (!Auth::autenticado()) {
 }
 
 // com ?u=nome mostra o perfil de outra pessoa, sem nada mostra o meu
-if (isset($_GET['u'])) {
-    $utilizador = Utilizador::buscarPorNome($_GET['u']);
+$nomeUrl = filter_input(INPUT_GET, 'u', FILTER_UNSAFE_RAW);
+if ($nomeUrl !== null) {
+    $utilizador = Utilizador::buscarPorNome($nomeUrl);
 } else {
     $utilizador = Utilizador::buscarPorId($_SESSION['utilizador_id']);
 }
