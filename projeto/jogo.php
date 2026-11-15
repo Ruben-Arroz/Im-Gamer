@@ -7,14 +7,15 @@ $jogo = null;
 $procurar = false;
 $erro = null;
 
-if (isset($_GET['id'])) {
-    $jogo = Jogo::buscarPorId((int) $_GET['id']);
+$idJogo = filter_input(INPUT_GET, 'id', FILTER_VALIDATE_INT);
+if ($idJogo !== null) {
+    $jogo = Jogo::buscarPorId((int) $idJogo);
 } else {
     // vem do catálogo (?nome=...&steam=...) ou dos lançamentos (?rawg=slug)
     // se o jogo já estiver na bd abre-se logo, senão o browser vai procurá-lo à rawg (jogo_rawg.js)
-    $slug = $_GET['rawg'] ?? '';
-    $steam = (int) ($_GET['steam'] ?? 0);
-    $nome = trim($_GET['nome'] ?? '');
+    $slug = filter_input(INPUT_GET, 'rawg', FILTER_UNSAFE_RAW) ?? '';
+    $steam = (int) filter_input(INPUT_GET, 'steam', FILTER_VALIDATE_INT);
+    $nome = trim(filter_input(INPUT_GET, 'nome', FILTER_UNSAFE_RAW) ?? '');
 
     $id = Jogo::procurar(0, $slug, $steam, $nome);
 
@@ -27,17 +28,17 @@ if (isset($_GET['id'])) {
 }
 
 if ($jogo && $utilizadorId && $_SERVER['REQUEST_METHOD'] === 'POST') {
-    $acao = $_POST['acao'] ?? '';
+    $acao = filter_input(INPUT_POST, 'acao', FILTER_UNSAFE_RAW) ?? '';
 
-    if (!Auth::tokenValido($_POST['token'] ?? '')) {
+    if (!Auth::tokenValido(filter_input(INPUT_POST, 'token', FILTER_UNSAFE_RAW) ?? '')) {
         $erro = 'A sessão expirou. Tenta outra vez.';
     } elseif ($acao === 'desejo_adicionar') {
         ListaDesejos::adicionar($utilizadorId, $jogo['id']);
     } elseif ($acao === 'desejo_remover') {
         ListaDesejos::remover($utilizadorId, $jogo['id']);
     } elseif ($acao === 'avaliar') {
-        $pontuacao = (int) ($_POST['pontuacao'] ?? 0);
-        $comentario = trim($_POST['comentario'] ?? '');
+        $pontuacao = (int) filter_input(INPUT_POST, 'pontuacao', FILTER_VALIDATE_INT);
+        $comentario = trim(filter_input(INPUT_POST, 'comentario', FILTER_UNSAFE_RAW) ?? '');
 
         if ($pontuacao < 1 || $pontuacao > 5) {
             $erro = 'Escolhe de 1 a 5 estrelas.';

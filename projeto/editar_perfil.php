@@ -11,17 +11,17 @@ $plataformas = Jogo::plataformas();
 $erro = null;
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $nome = trim($_POST['nome_utilizador'] ?? '');
-    $bio = trim($_POST['bio'] ?? '');
-    $plataformaId = (int) ($_POST['plataforma_id'] ?? 0);
+    $nome = trim(filter_input(INPUT_POST, 'nome_utilizador', FILTER_UNSAFE_RAW) ?? '');
+    $bio = trim(filter_input(INPUT_POST, 'bio', FILTER_UNSAFE_RAW) ?? '');
+    $plataformaId = (int) filter_input(INPUT_POST, 'plataforma_id', FILTER_VALIDATE_INT);
     $esconder = isset($_POST['esconder_valores']) ? 1 : 0;
     $esconderReputacao = isset($_POST['esconder_reputacao']) ? 1 : 0;
-    $discord = limparDiscord($_POST['discord'] ?? '');
+    $discord = limparDiscord(filter_input(INPUT_POST, 'discord', FILTER_UNSAFE_RAW) ?? '');
     $mostrarDiscord = isset($_POST['mostrar_discord']) ? 1 : 0;
-    $pesquisaJogo = trim($_POST['jogo_pesquisa'] ?? '');
+    $pesquisaJogo = trim(filter_input(INPUT_POST, 'jogo_pesquisa', FILTER_UNSAFE_RAW) ?? '');
     $jogoId = null;
 
-    if (!Auth::tokenValido($_POST['token'] ?? '')) {
+    if (!Auth::tokenValido(filter_input(INPUT_POST, 'token', FILTER_UNSAFE_RAW) ?? '')) {
         $erro = 'A sessão expirou. Tenta outra vez.';
     } elseif (mb_strlen($nome) < 3 || mb_strlen($nome) > 50) {
         $erro = 'O nome de utilizador deve ter entre 3 e 50 caracteres.';

@@ -9,10 +9,10 @@ if (Auth::autenticado()) {
 $erro = null;
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $email = trim($_POST['email'] ?? '');
-    $password = $_POST['password'] ?? '';
+    $email = trim(filter_input(INPUT_POST, 'email', FILTER_UNSAFE_RAW) ?? '');
+    $password = filter_input(INPUT_POST, 'password', FILTER_UNSAFE_RAW) ?? '';
 
-    if (!Auth::tokenValido($_POST['token'] ?? '')) {
+    if (!Auth::tokenValido(filter_input(INPUT_POST, 'token', FILTER_UNSAFE_RAW) ?? '')) {
         $erro = 'A sessão expirou. Tenta outra vez.';
     } elseif ($email === '' || $password === '') {
         $erro = 'Preenche todos os campos.';

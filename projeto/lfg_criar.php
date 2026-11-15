@@ -11,7 +11,8 @@ $plataformas = Jogo::plataformas();
 $erro = null;
 
 // vindo da página de um jogo (?jogo=id) o jogo já vem escolhido
-$jogoInicial = isset($_GET['jogo']) ? Jogo::buscarPorId((int) $_GET['jogo']) : null;
+$jogoGet = filter_input(INPUT_GET, 'jogo', FILTER_VALIDATE_INT);
+$jogoInicial = $jogoGet !== null ? Jogo::buscarPorId((int) $jogoGet) : null;
 $eu = Utilizador::buscarPorId($utilizadorId);
 
 // o anúncio fica no ar até ao dia escolhido, de hoje até 60 dias à frente (14 por defeito)
@@ -19,16 +20,16 @@ $hoje = date('Y-m-d');
 $dataPorDefeito = date('Y-m-d', strtotime('+' . Lfg::DIAS_NO_AR . ' days'));
 $dataMaxima = date('Y-m-d', strtotime('+' . Lfg::MAX_DIAS . ' days'));
 
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && !Auth::tokenValido($_POST['token'] ?? '')) {
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && !Auth::tokenValido(filter_input(INPUT_POST, 'token', FILTER_UNSAFE_RAW) ?? '')) {
     $erro = 'A sessão expirou. Tenta outra vez.';
 } elseif ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // o jogo só é guardado depois de o token ser válido
     $jogoId = Jogo::doFormulario($_POST);
-    $plataformaId = (int) ($_POST['plataforma_id'] ?? 0);
-    $descricao = trim($_POST['descricao'] ?? '');
-    $discord = limparDiscord($_POST['discord'] ?? '');
-    $vagas = (int) ($_POST['vagas'] ?? 0);
-    $dataFim = $_POST['data_fim'] ?? '';
+    $plataformaId = (int) filter_input(INPUT_POST, 'plataforma_id', FILTER_VALIDATE_INT);
+    $descricao = trim(filter_input(INPUT_POST, 'descricao', FILTER_UNSAFE_RAW) ?? '');
+    $discord = limparDiscord(filter_input(INPUT_POST, 'discord', FILTER_UNSAFE_RAW) ?? '');
+    $vagas = (int) filter_input(INPUT_POST, 'vagas', FILTER_VALIDATE_INT);
+    $dataFim = filter_input(INPUT_POST, 'data_fim', FILTER_UNSAFE_RAW) ?? '';
 
     if (!$jogoId) {
         $erro = 'Escolhe o jogo da lista de sugestões.';

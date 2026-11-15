@@ -4,6 +4,7 @@ require_once __DIR__ . '/../includes/bootstrap.php';
 
 header('Content-Type: application/json');
 
+// vai sempre com o código 200 pq o IIS troca as respostas de erro pelas páginas dele
 function responder(array $resposta): void
 {
     echo json_encode($resposta);
@@ -12,7 +13,6 @@ function responder(array $resposta): void
 
 // não pede sessão porque a página do jogo também abre a quem não entrou
 if ($_SERVER['REQUEST_METHOD'] !== 'POST' || !Auth::tokenValido($_POST['token'] ?? '')) {
-    http_response_code(403);
     responder(['erro' => 'Sem permissão.']);
 }
 
@@ -28,7 +28,6 @@ if (($_POST['fonte'] ?? '') === 'cheapshark') {
     $steam = (int) ($_POST['steam'] ?? 0);
 
     if (!$nome) {
-        http_response_code(400);
         responder(['erro' => 'Dados do jogo inválidos.']);
     }
 
@@ -47,7 +46,6 @@ $nome = texto('nome', 255);
 $slug = texto('slug', 255);
 
 if ($rawgId <= 0 || !$nome || !$slug || !preg_match('/^[a-z0-9-]+$/', $slug)) {
-    http_response_code(400);
     responder(['erro' => 'Dados do jogo inválidos.']);
 }
 
