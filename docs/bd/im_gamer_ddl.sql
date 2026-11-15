@@ -116,7 +116,6 @@ CREATE TABLE `Contas_Ligadas` (
   `servico` varchar(30) NOT NULL,
   `identificador` varchar(255) NOT NULL,
   `id_externo` varchar(100) DEFAULT NULL,
-  `token` text DEFAULT NULL,
   `nome_publico` varchar(100) DEFAULT NULL,
   `avatar` varchar(255) DEFAULT NULL,
   `nivel` int(11) DEFAULT NULL,
