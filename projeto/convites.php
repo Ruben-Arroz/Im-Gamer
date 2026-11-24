@@ -47,11 +47,10 @@ require_once __DIR__ . '/includes/header.php';
 
 <section class="lfg pagina-larga">
     <div class="lfg-topo">
-        <h1>Convites</h1>
-        <a class="botao-principal" href="<?= BASE_URL ?>/projeto/convidar.php">Convidar jogadores</a>
+        <h1>Jogadores</h1>
     </div>
 
-    <?php require __DIR__ . '/includes/abas_lfg.php'; ?>
+    <?php require __DIR__ . '/includes/abas_jogadores.php'; ?>
 
     <?php if ($erro): ?>
         <p class="aviso aviso-erro"><?= htmlspecialchars($erro) ?></p>

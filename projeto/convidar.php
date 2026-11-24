@@ -9,18 +9,18 @@ if (!Auth::autenticado()) {
 $utilizadorId = (int) $_SESSION['utilizador_id'];
 $erro = null;
 
-// sem ?u= mostra a pesquisa, com ?u=nome mostra o convite para essa pessoa
 $nomeDestino = filter_input(INPUT_GET, 'u', FILTER_UNSAFE_RAW);
-$destino = $nomeDestino !== null ? Utilizador::buscarPorNome($nomeDestino) : null;
-$eu = Utilizador::buscarPorId($utilizadorId);
 $jogoGet = filter_input(INPUT_GET, 'jogo', FILTER_VALIDATE_INT);
-$jogoInicial = $jogoGet !== null ? Jogo::buscarPorId((int) $jogoGet) : null;
 
-$pesquisa = mb_substr(trim(filter_input(INPUT_GET, 'q', FILTER_UNSAFE_RAW) ?? ''), 0, 50);
-$encontrados = [];
-if (!$destino && mb_strlen($pesquisa) >= 2) {
-    $encontrados = Utilizador::pesquisar($pesquisa, $utilizadorId, 20);
+// a pesquisa agora é no jogadores.php, aqui fica só o convite
+if ($nomeDestino === null) {
+    header('Location: ' . BASE_URL . '/projeto/jogadores.php' . ($jogoGet ? '?jogo_id=' . (int) $jogoGet : ''));
+    exit;
 }
+
+$destino = Utilizador::buscarPorNome($nomeDestino);
+$eu = Utilizador::buscarPorId($utilizadorId);
+$jogoInicial = $jogoGet ? Jogo::buscarPorId((int) $jogoGet) : null;
 
 if ($destino && $_SERVER['REQUEST_METHOD'] === 'POST') {
     $mensagem = trim(filter_input(INPUT_POST, 'mensagem', FILTER_UNSAFE_RAW) ?? '');
@@ -56,17 +56,17 @@ require_once __DIR__ . '/includes/header.php';
 ?>
 
 <section class="formulario">
-    <?php if ($nomeDestino !== null && !$destino): ?>
+    <?php if (!$destino): ?>
         <h1>Convidar jogadores</h1>
         <p>Este utilizador não existe.</p>
-        <p class="auth-switch"><a href="<?= BASE_URL ?>/projeto/convidar.php">Procurar outro jogador</a></p>
+        <p class="auth-switch"><a href="<?= BASE_URL ?>/projeto/jogadores.php">Procurar outro jogador</a></p>
 
-    <?php elseif ($destino && (int) $destino['id'] === $utilizadorId): ?>
+    <?php elseif ((int) $destino['id'] === $utilizadorId): ?>
         <h1>Convidar jogadores</h1>
         <p>Não te podes convidar a ti próprio.</p>
-        <p class="auth-switch"><a href="<?= BASE_URL ?>/projeto/convidar.php">Procurar outro jogador</a></p>
+        <p class="auth-switch"><a href="<?= BASE_URL ?>/projeto/jogadores.php">Procurar outro jogador</a></p>
 
-    <?php elseif ($destino): ?>
+    <?php else: ?>
         <h1>Convidar <?= htmlspecialchars($destino['nome_utilizador']) ?></h1>
 
         <?php if ($erro): ?>
@@ -102,37 +102,8 @@ require_once __DIR__ . '/includes/header.php';
             <button type="submit">Enviar convite</button>
         </form>
 
-        <p class="auth-switch"><a href="<?= BASE_URL ?>/projeto/convidar.php">Procurar outro jogador</a></p>
+        <p class="auth-switch"><a href="<?= BASE_URL ?>/projeto/jogadores.php">Procurar outro jogador</a></p>
         <script src="<?= BASE_URL ?>/projeto/assets/js/pesquisa_jogo.js?v=3"></script>
-
-    <?php else: ?>
-        <h1>Convidar jogadores</h1>
-
-        <form method="get" novalidate>
-            <?php if ($jogoInicial): ?>
-                <input type="hidden" name="jogo" value="<?= $jogoInicial['id'] ?>">
-            <?php endif; ?>
-            <label for="q">Nome de utilizador</label>
-            <input type="text" id="q" name="q" value="<?= htmlspecialchars($pesquisa) ?>" placeholder="Pelo menos 2 letras">
-            <button type="submit">Procurar</button>
-        </form>
-
-        <?php if (mb_strlen($pesquisa) >= 2): ?>
-            <h2>Resultados</h2>
-            <?php if (!$encontrados): ?>
-                <p class="texto-dim">Nenhum jogador encontrado.</p>
-            <?php endif; ?>
-            <ul class="lista-avaliacoes">
-                <?php foreach ($encontrados as $jogador): ?>
-                    <li>
-                        <a href="<?= BASE_URL ?>/projeto/perfil.php?u=<?= urlencode($jogador['nome_utilizador']) ?>"><?= htmlspecialchars($jogador['nome_utilizador']) ?></a>
-                        <a class="botao-contorno lista-acao" href="<?= BASE_URL ?>/projeto/convidar.php?u=<?= urlencode($jogador['nome_utilizador']) ?><?= $jogoInicial ? '&amp;jogo=' . $jogoInicial['id'] : '' ?>">Convidar</a>
-                    </li>
-                <?php endforeach; ?>
-            </ul>
-        <?php endif; ?>
-
-        <p class="auth-switch"><a href="<?= BASE_URL ?>/projeto/convites.php">Voltar aos convites</a></p>
     <?php endif; ?>
 </section>
 

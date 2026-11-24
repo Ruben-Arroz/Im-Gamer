@@ -4,7 +4,7 @@
 // o sincronizar.php guarda-as na bd e o site mostra a última que ficou guardada
 class Lancamentos
 {
-    // filtros da pesquisa da loja: os lançamentos mais populares e os que saem em breve
+    // filtros da pesquisa da loja, os lançamentos mais populares e os que saem em breve
     const LISTAS = [
         'recentes' => 'popularnew',
         'breve' => 'popularcomingsoon',

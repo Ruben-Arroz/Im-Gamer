@@ -15,7 +15,7 @@ const pagina = Math.max(1, parseInt(parametros.get('pagina') || '1'));
 configurarCartoes(secao);
 
 function intervaloDatas() {
-    // em breve: de amanhã até daqui a X dias, recentes: de há X dias até hoje
+    // em breve vai de amanhã até daqui a X dias e recentes vai de há X dias até hoje
     if (aba === 'breve') {
         return dataDaqui(1) + ',' + dataDaqui(periodo);
     }

@@ -9,7 +9,7 @@ $simbolo = Moeda::SIMBOLOS[$moeda];
 // "até 5" na moeda do user, a cheapshark precisa do valor em dólares
 $cincoEmDolares = ceil(5 / $conversao['fator']);
 
-// cada carrossel: título, de onde vêm os jogos, o que se pede à api, link do "Ver todos" e se tem faixa por cima
+// cada carrossel tem o título, de onde vêm os jogos, o que se pede à api, o link do "Ver todos" e se tem faixa por cima
 // nos da rawg o pedido são os dias "de" e "até" a contar de hoje (negativo é para trás)
 $carrosseis = [
     ['Melhores promoções', 'cheapshark', 'sortBy=Deal%20Rating', 'catalogo.php'],

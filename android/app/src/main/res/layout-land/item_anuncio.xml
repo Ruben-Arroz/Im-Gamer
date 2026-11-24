@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- de lado o cartão fica numa linha: imagem à esquerda e texto à direita -->
+<!-- de lado o cartão fica numa linha com a imagem à esquerda e o texto à direita -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"

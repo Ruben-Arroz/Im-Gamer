@@ -343,7 +343,7 @@ class Jogo
         return $stmt->fetchAll(PDO::FETCH_COLUMN);
     }
 
-    // o jogo de um formulário: ou já vem da bd (jogo_id) ou foi escolhido na pesquisa da rawg (pesquisa_jogo.js)
+    // o jogo de um formulário, ou já vem da bd (jogo_id) ou foi escolhido na pesquisa da rawg (pesquisa_jogo.js)
     public static function doFormulario(array $dados): ?int
     {
         $pesquisa = trim($dados['jogo_pesquisa'] ?? '');

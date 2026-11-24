@@ -130,7 +130,7 @@ class Utilizador
         $stmt->execute(['id' => $id]);
     }
 
-    // trata da foto de perfil ou da capa: remover, manter a atual ou guardar uma nova
+    // trata da foto de perfil ou da capa, remove, mantém a atual ou guarda uma nova
     // $pasta é "perfis" ou "capas", as subpastas de uploads
     public static function trocarImagem(?array $ficheiro, bool $remover, ?string $atual, string $pasta, int $id): array
     {

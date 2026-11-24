@@ -106,7 +106,7 @@ require_once __DIR__ . '/includes/header.php';
 ?>
 
 <?php if (!$jogo && $procurar): ?>
-    <!-- o jogo ainda não está na bd: o browser procura-o na rawg, guarda-o e abre a página dele -->
+    <!-- o jogo ainda não está na bd, ent o browser vai buscá-lo à rawg, guarda-o e abre a página dele -->
     <section class="jogo" id="procurar-jogo"
         data-chave="<?= htmlspecialchars(RAWG_API_KEY) ?>"
         data-slug="<?= htmlspecialchars($slug) ?>"

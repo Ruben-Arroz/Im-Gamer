@@ -44,7 +44,7 @@ class Biblioteca
             $parametros['nome'] = '%' . $filtros['nome'] . '%';
         }
 
-        // para os IN é preciso um parâmetro para cada valor (:servico0, :servico1, ...)
+        // os IN precisam de um parâmetro para cada valor (servico0, servico1 e por aí fora)
         if ($filtros['servicos']) {
             $nomes = [];
             foreach ($filtros['servicos'] as $i => $servico) {

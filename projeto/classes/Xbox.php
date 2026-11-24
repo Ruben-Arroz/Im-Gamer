@@ -242,7 +242,7 @@ class Xbox
         return ['sucesso' => true, 'jogos' => count($jogos)];
     }
 
-    // a xbox dá a data como 2026-10-24T13:44:55.04Z e 0001-01-01 quando o jogo nunca foi jogado
+    // a xbox manda a data com as horas no fim e 0001-01-01 quando o jogo nunca foi jogado
     private static function converterData(string $texto): ?string
     {
         if ($texto === '' || str_starts_with($texto, '0001')) {

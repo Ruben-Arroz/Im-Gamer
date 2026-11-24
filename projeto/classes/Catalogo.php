@@ -2,7 +2,7 @@
 
 class Catalogo
 {
-    // lojas da cheapshark: id => [nome, se é a loja oficial]
+    // lojas da cheapshark, id => [nome, se é a loja oficial]
     // as outras vendem chaves para ativar na steam, epic, ...
     const LOJAS = [
         1 => ['Steam', true],

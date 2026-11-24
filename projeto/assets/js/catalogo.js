@@ -14,7 +14,7 @@ const pagina = Math.max(1, parseInt(parametros.get('pagina') || '1'));
 
 configurarCartoes(catalogo);
 
-// escolhe as lojas: as que foram marcadas, ou então as do tipo escolhido
+// escolhe as lojas, as que foram marcadas ou ent as do tipo escolhido
 function lojasParaPedir() {
     const marcadas = parametros.getAll('loja[]');
 

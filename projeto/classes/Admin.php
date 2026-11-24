@@ -205,7 +205,7 @@ class Admin
         return self::paginar($campos, $resto, 'j.nome ASC, j.id ASC', $parametros, $pagina);
     }
 
-    // cuidado: com o ON DELETE CASCADE vão também os anúncios, desejos e avaliações do jogo
+    // atenção que com o ON DELETE CASCADE vão também os anúncios, desejos e avaliações do jogo
     public static function apagarJogo(int $id): ?string
     {
         if (!Jogo::buscarPorId($id)) {

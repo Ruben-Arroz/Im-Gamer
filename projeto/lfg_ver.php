@@ -113,7 +113,7 @@ require_once __DIR__ . '/includes/header.php';
                                 <button type="submit" name="acao" value="reabrir" class="botao-contorno">Reabrir anúncio</button>
                             <?php endif; ?>
                         </form>
-                        <a class="botao-contorno" href="<?= BASE_URL ?>/projeto/convidar.php?jogo=<?= $anuncio['jogo_id'] ?>">Convidar jogadores</a>
+                        <a class="botao-contorno" href="<?= BASE_URL ?>/projeto/jogadores.php?jogo_id=<?= $anuncio['jogo_id'] ?>">Convidar jogadores</a>
                     <?php endif; ?>
 
                     <?php if ($dono): ?>

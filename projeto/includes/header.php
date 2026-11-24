@@ -6,10 +6,10 @@ if (!isset($tituloPagina)) {
     $tituloPagina = "I'm Gamer";
 }
 
-// convites por responder e avisos por ler, aparecem ao lado do LFG
-$avisosLfg = 0;
+// convites por responder e avisos por ler, é o número ao lado de Jogadores
+$avisosConvites = 0;
 if (Auth::autenticado()) {
-    $avisosLfg = Convites::pendentes($_SESSION['utilizador_id']) + Notificacoes::porLer($_SESSION['utilizador_id']);
+    $avisosConvites = Convites::pendentes($_SESSION['utilizador_id']) + Notificacoes::porLer($_SESSION['utilizador_id']);
 }
 ?>
 <!DOCTYPE html>
@@ -23,7 +23,7 @@ if (Auth::autenticado()) {
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Share+Tech+Mono&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="<?= BASE_URL ?>/common/style.css?v=2">
-<link rel="stylesheet" href="<?= BASE_URL ?>/projeto/assets/css/site.css?v=37">
+<link rel="stylesheet" href="<?= BASE_URL ?>/projeto/assets/css/site.css?v=38">
 </head>
 <body>
 
@@ -32,10 +32,11 @@ if (Auth::autenticado()) {
     <nav>
         <a href="<?= BASE_URL ?>/projeto/catalogo.php">Catálogo</a>
         <a href="<?= BASE_URL ?>/projeto/lancamentos.php">Lançamentos</a>
-        <a href="<?= BASE_URL ?>/projeto/lfg.php">
-            LFG
-            <?php if ($avisosLfg > 0): ?>
-                <span class="contador" title="Convites e avisos por ver"><?= $avisosLfg ?></span>
+        <a href="<?= BASE_URL ?>/projeto/lfg.php">LFG</a>
+        <a href="<?= BASE_URL ?>/projeto/jogadores.php">
+            Jogadores
+            <?php if ($avisosConvites > 0): ?>
+                <span class="contador" title="Convites e avisos por ver"><?= $avisosConvites ?></span>
             <?php endif; ?>
         </a>
         <?php if (Auth::admin()): ?>
