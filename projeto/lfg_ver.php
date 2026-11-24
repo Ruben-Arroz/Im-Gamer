@@ -21,6 +21,24 @@ if ($anuncio && $_SERVER['REQUEST_METHOD'] === 'POST') {
         if (!$resultado['sucesso']) {
             $erro = $resultado['erro'];
         }
+    } elseif ($acao === 'pedir') {
+        $mensagem = trim(filter_input(INPUT_POST, 'mensagem', FILTER_UNSAFE_RAW) ?? '');
+        if (mb_strlen($mensagem) > 255) {
+            $erro = 'A mensagem só pode ter até 255 letras.';
+        } else {
+            $resultado = Lfg::pedir($id, $utilizadorId, $_SESSION['nome_utilizador'], $mensagem === '' ? null : $mensagem);
+            if (!$resultado['sucesso']) {
+                $erro = $resultado['erro'];
+            }
+        }
+    } elseif ($acao === 'cancelar_pedido') {
+        Lfg::cancelarPedido($id, $utilizadorId);
+    } elseif ($acao === 'aceitar') {
+        $erro = Lfg::aceitarPedido($id, $utilizadorId, (int) filter_input(INPUT_POST, 'pedido_id', FILTER_VALIDATE_INT));
+    } elseif ($acao === 'recusar') {
+        Lfg::recusarPedido($id, $utilizadorId, (int) filter_input(INPUT_POST, 'pedido_id', FILTER_VALIDATE_INT));
+    } elseif ($acao === 'com_aprovacao' || $acao === 'sem_aprovacao') {
+        Lfg::mudarAprovacao($id, $utilizadorId, $acao === 'com_aprovacao');
     } elseif ($acao === 'sair') {
         Lfg::sair($id, $utilizadorId, $_SESSION['nome_utilizador']);
     } elseif ($acao === 'fechar') {
@@ -50,7 +68,9 @@ if ($anuncio) {
     $participo = Lfg::participa($id, $utilizadorId);
     $estado = Lfg::estado($anuncio);
     $terminado = Lfg::expirado($anuncio);
-    $podeEntrar = !$dono && !$participo && $anuncio['estado'] === 'aberto' && !$terminado && $anuncio['participantes'] < $anuncio['vagas'];
+    $meuPedido = Lfg::meuPedido($id, $utilizadorId);
+    $pedidos = $dono ? Lfg::pedidos($id) : [];
+    $podeEntrar = !$dono && !$participo && !$meuPedido && $anuncio['estado'] === 'aberto' && !$terminado && $anuncio['participantes'] < $anuncio['vagas'];
 }
 
 $tituloPagina = 'Anúncio de LFG';
@@ -90,10 +110,17 @@ require_once __DIR__ . '/includes/header.php';
                 </div>
 
                 <div class="jogo-acoes">
-                    <?php if ($podeEntrar): ?>
+                    <?php if ($podeEntrar && !$anuncio['aprovar']): ?>
                         <form method="post">
                             <input type="hidden" name="token" value="<?= Auth::token() ?>">
                             <button type="submit" name="acao" value="entrar">Entrar na equipa</button>
+                        </form>
+                    <?php endif; ?>
+
+                    <?php if ($meuPedido === 'pendente'): ?>
+                        <form method="post" onsubmit="return confirm('Cancelar o pedido?');">
+                            <input type="hidden" name="token" value="<?= Auth::token() ?>">
+                            <button type="submit" name="acao" value="cancelar_pedido" class="botao-contorno">Cancelar pedido</button>
                         </form>
                     <?php endif; ?>
 
@@ -114,6 +141,14 @@ require_once __DIR__ . '/includes/header.php';
                             <?php endif; ?>
                         </form>
                         <a class="botao-contorno" href="<?= BASE_URL ?>/projeto/jogadores.php?jogo_id=<?= $anuncio['jogo_id'] ?>">Convidar jogadores</a>
+                        <form method="post">
+                            <input type="hidden" name="token" value="<?= Auth::token() ?>">
+                            <?php if ($anuncio['aprovar']): ?>
+                                <button type="submit" name="acao" value="sem_aprovacao" class="botao-contorno">Deixar entrar sem aprovação</button>
+                            <?php else: ?>
+                                <button type="submit" name="acao" value="com_aprovacao" class="botao-contorno">Aprovar quem entra</button>
+                            <?php endif; ?>
+                        </form>
                     <?php endif; ?>
 
                     <?php if ($dono): ?>
@@ -135,6 +170,45 @@ require_once __DIR__ . '/includes/header.php';
         <?php endif; ?>
 
         <p class="jogo-descricao"><?= nl2br(htmlspecialchars($anuncio['descricao'])) ?></p>
+
+        <?php if ($podeEntrar && $anuncio['aprovar']): ?>
+            <form method="post" class="formulario-avaliacao pedido-lfg">
+                <input type="hidden" name="token" value="<?= Auth::token() ?>">
+                <p class="texto-dim">O dono deste anúncio aprova quem entra na equipa.</p>
+                <label for="mensagem">Mensagem para o dono (opcional)</label>
+                <textarea id="mensagem" name="mensagem" rows="3" maxlength="255" placeholder="Por exemplo: tenho 15k e microfone, jogo à noite"><?= htmlspecialchars($_POST['mensagem'] ?? '') ?></textarea>
+                <button type="submit" name="acao" value="pedir" class="botao-cheio">Pedir para entrar</button>
+            </form>
+        <?php elseif ($meuPedido === 'pendente'): ?>
+            <p class="texto-dim">Pediste para entrar nesta equipa. Estás à espera da resposta do dono.</p>
+        <?php elseif ($meuPedido === 'recusado'): ?>
+            <p class="texto-dim">O dono recusou o teu pedido para esta equipa.</p>
+        <?php endif; ?>
+
+        <?php if ($pedidos): ?>
+            <h2>Pedidos para entrar</h2>
+            <ul class="lista-avaliacoes">
+                <?php foreach ($pedidos as $pedido): ?>
+                    <li>
+                        <a href="<?= BASE_URL ?>/projeto/perfil.php?u=<?= urlencode($pedido['nome_utilizador']) ?>"><?= htmlspecialchars($pedido['nome_utilizador']) ?></a>
+                        <span class="texto-dim">pediu a <?= (new DateTime($pedido['data_criacao']))->format('d/m/Y H:i') ?></span>
+
+                        <?php if (!$terminado): ?>
+                            <form method="post" class="lista-acao">
+                                <input type="hidden" name="token" value="<?= Auth::token() ?>">
+                                <input type="hidden" name="pedido_id" value="<?= $pedido['id'] ?>">
+                                <button type="submit" name="acao" value="aceitar" class="botao-cheio">Aceitar</button>
+                                <button type="submit" name="acao" value="recusar" class="botao-contorno" onclick="return confirm('Recusar este pedido? A pessoa não vai poder pedir outra vez.');">Recusar</button>
+                            </form>
+                        <?php endif; ?>
+
+                        <?php if ($pedido['mensagem']): ?>
+                            <p><?= nl2br(htmlspecialchars($pedido['mensagem'])) ?></p>
+                        <?php endif; ?>
+                    </li>
+                <?php endforeach; ?>
+            </ul>
+        <?php endif; ?>
 
         <!-- o discord só aparece ao dono e a quem já entrou na equipa -->
         <?php if ($anuncio['discord']): ?>

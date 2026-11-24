@@ -20,6 +20,9 @@ $hoje = date('Y-m-d');
 $dataPorDefeito = date('Y-m-d', strtotime('+' . Lfg::DIAS_NO_AR . ' days'));
 $dataMaxima = date('Y-m-d', strtotime('+' . Lfg::MAX_DIAS . ' days'));
 
+// a aprovação vem ligada da primeira vez, depois fica como a pessoa a deixou
+$aprovar = $_SERVER['REQUEST_METHOD'] === 'POST' ? isset($_POST['aprovar']) : true;
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && !Auth::tokenValido(filter_input(INPUT_POST, 'token', FILTER_UNSAFE_RAW) ?? '')) {
     $erro = 'A sessão expirou. Tenta outra vez.';
 } elseif ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -52,7 +55,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !Auth::tokenValido(filter_input(INP
     }
 
     if (!$erro) {
-        $id = Lfg::criar($utilizadorId, $jogoId, $plataformaId ?: null, $descricao, $vagas, $dataFim, $discord === '' ? null : $discord);
+        $id = Lfg::criar($utilizadorId, $jogoId, $plataformaId ?: null, $descricao, $vagas, $dataFim, $discord === '' ? null : $discord, $aprovar);
         header('Location: ' . BASE_URL . '/projeto/lfg_ver.php?id=' . $id);
         exit;
     }
@@ -111,6 +114,12 @@ require_once __DIR__ . '/includes/header.php';
         <label for="discord">O teu Discord (opcional)</label>
         <input type="text" id="discord" name="discord" maxlength="33" placeholder="o_teu_nome" value="<?= htmlspecialchars($_POST['discord'] ?? $eu['discord'] ?? '') ?>">
         <p class="ajuda">Só quem entrar na equipa o vê.</p>
+
+        <label class="opcao">
+            <input type="checkbox" name="aprovar" <?= $aprovar ? 'checked' : '' ?>>
+            Aprovar quem entra na equipa
+        </label>
+        <p class="ajuda">Quem quiser entrar faz um pedido e tu aceitas ou recusas. Sem isto entra logo.</p>
 
         <button type="submit">Publicar anúncio</button>
     </form>

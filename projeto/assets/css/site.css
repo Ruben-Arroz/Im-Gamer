@@ -1364,6 +1364,7 @@ a.barra-nome:hover {
 }
 
 .jogo-acoes button,
+.botao-cheio,
 .botao-contorno {
     background: var(--text);
     color: var(--bg);
@@ -1376,8 +1377,14 @@ a.barra-nome:hover {
     text-decoration: none;
 }
 
-.jogo-acoes button:hover {
+.jogo-acoes button:hover,
+.botao-cheio:hover {
     background: var(--hover);
+}
+
+/* o pedido para entrar numa equipa tem o botão por baixo da mensagem */
+.pedido-lfg .botao-cheio {
+    margin-top: 10px;
 }
 
 .jogo-acoes .botao-contorno,

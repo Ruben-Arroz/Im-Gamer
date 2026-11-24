@@ -203,6 +203,7 @@ CREATE TABLE `LFG_Posts` (
   `descricao` text NOT NULL,
   `discord` varchar(32) DEFAULT NULL,
   `vagas` tinyint(4) NOT NULL DEFAULT 1,
+  `aprovar` tinyint(1) NOT NULL DEFAULT 1,
   `data_fim` date NOT NULL,
   `estado` enum('aberto','fechado') NOT NULL DEFAULT 'aberto',
   `data_criacao` datetime NOT NULL DEFAULT current_timestamp(),
@@ -213,6 +214,20 @@ CREATE TABLE `LFG_Posts` (
   CONSTRAINT `fk_lfgposts_jogo` FOREIGN KEY (`jogo_id`) REFERENCES `Jogos` (`id`) ON DELETE CASCADE,
   CONSTRAINT `fk_lfgposts_plataforma` FOREIGN KEY (`plataforma_id`) REFERENCES `Plataformas` (`id`) ON DELETE SET NULL,
   CONSTRAINT `fk_lfgposts_utilizador` FOREIGN KEY (`utilizador_id`) REFERENCES `Utilizadores` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+CREATE TABLE `LFG_Pedidos` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `post_id` int(11) NOT NULL,
+  `utilizador_id` int(11) NOT NULL,
+  `mensagem` varchar(255) DEFAULT NULL,
+  `estado` enum('pendente','recusado') NOT NULL DEFAULT 'pendente',
+  `data_criacao` datetime NOT NULL DEFAULT current_timestamp(),
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `post_id` (`post_id`,`utilizador_id`),
+  KEY `fk_lfgpedidos_utilizador` (`utilizador_id`),
+  CONSTRAINT `fk_lfgpedidos_post` FOREIGN KEY (`post_id`) REFERENCES `LFG_Posts` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `fk_lfgpedidos_utilizador` FOREIGN KEY (`utilizador_id`) REFERENCES `Utilizadores` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 CREATE TABLE `Lista_Desejos` (

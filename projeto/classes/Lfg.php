@@ -165,11 +165,11 @@ class Lfg
         return (int) $stmt->fetchColumn();
     }
 
-    public static function criar(int $utilizadorId, int $jogoId, ?int $plataformaId, string $descricao, int $vagas, string $dataFim, ?string $discord): int
+    public static function criar(int $utilizadorId, int $jogoId, ?int $plataformaId, string $descricao, int $vagas, string $dataFim, ?string $discord, bool $aprovar): int
     {
         $pdo = Database::ligar();
-        $stmt = $pdo->prepare('INSERT INTO LFG_Posts (utilizador_id, jogo_id, plataforma_id, descricao, discord, vagas, data_fim)
-            VALUES (:utilizador, :jogo, :plataforma, :descricao, :discord, :vagas, :data_fim)');
+        $stmt = $pdo->prepare('INSERT INTO LFG_Posts (utilizador_id, jogo_id, plataforma_id, descricao, discord, vagas, aprovar, data_fim)
+            VALUES (:utilizador, :jogo, :plataforma, :descricao, :discord, :vagas, :aprovar, :data_fim)');
         $stmt->execute([
             'utilizador' => $utilizadorId,
             'jogo' => $jogoId,
@@ -177,6 +177,7 @@ class Lfg
             'descricao' => $descricao,
             'discord' => $discord,
             'vagas' => $vagas,
+            'aprovar' => $aprovar ? 1 : 0,
             'data_fim' => $dataFim,
         ]);
 
@@ -205,7 +206,26 @@ class Lfg
         return $livres == 1 ? 'Falta 1 jogador' : 'Faltam ' . $livres . ' jogadores';
     }
 
+    // entrar logo na equipa, só nos anúncios sem aprovação
     public static function entrar(int $postId, int $utilizadorId, string $nome): array
+    {
+        $anuncio = self::buscar($postId);
+        if ($anuncio && $anuncio['aprovar']) {
+            return ['sucesso' => false, 'erro' => 'Neste anúncio o dono aprova quem entra, faz um pedido.'];
+        }
+
+        $erro = self::juntar($postId, $utilizadorId);
+        if ($erro) {
+            return ['sucesso' => false, 'erro' => $erro];
+        }
+
+        Notificacoes::criar($anuncio['utilizador_id'], 'lfg', $nome . ' entrou na tua equipa de ' . $anuncio['jogo'] . '.');
+
+        return ['sucesso' => true];
+    }
+
+    // mete a pessoa na equipa, devolve o erro ou null se correu bem
+    private static function juntar(int $postId, int $utilizadorId): ?string
     {
         $pdo = Database::ligar();
         $pdo->beginTransaction();
@@ -235,22 +255,151 @@ class Lfg
 
             if ($erro) {
                 $pdo->rollBack();
-                return ['sucesso' => false, 'erro' => $erro];
+                return $erro;
             }
 
             $stmt = $pdo->prepare('INSERT INTO LFG_Participantes (post_id, utilizador_id) VALUES (:post, :utilizador)');
+            $stmt->execute(['post' => $postId, 'utilizador' => $utilizadorId]);
+
+            // se tinha um pedido à espera já não precisa dele
+            $stmt = $pdo->prepare('DELETE FROM LFG_Pedidos WHERE post_id = :post AND utilizador_id = :utilizador');
             $stmt->execute(['post' => $postId, 'utilizador' => $utilizadorId]);
 
             $pdo->commit();
         } catch (PDOException $erro) {
             $pdo->rollBack();
             error_log($erro->getMessage());
-            return ['sucesso' => false, 'erro' => 'Não foi possível entrar na equipa. Tenta outra vez.'];
+            return 'Não foi possível entrar na equipa. Tenta outra vez.';
         }
 
-        Notificacoes::criar($anuncio['utilizador_id'], 'lfg', $nome . ' entrou na tua equipa de ' . $anuncio['jogo'] . '.');
+        return null;
+    }
+
+    // pedido para entrar num anúncio em que o dono aprova quem entra
+    public static function pedir(int $postId, int $utilizadorId, string $nome, ?string $mensagem): array
+    {
+        $anuncio = self::buscar($postId);
+        $meuPedido = self::meuPedido($postId, $utilizadorId);
+
+        $erro = null;
+        if (!$anuncio) {
+            $erro = 'Este anúncio já não existe.';
+        } elseif ((int) $anuncio['utilizador_id'] === $utilizadorId) {
+            $erro = 'Não podes pedir para entrar na tua própria equipa.';
+        } elseif ($anuncio['estado'] !== 'aberto' || self::expirado($anuncio)) {
+            $erro = 'Este anúncio já não aceita jogadores.';
+        } elseif (self::participa($postId, $utilizadorId)) {
+            $erro = 'Já estás nesta equipa.';
+        } elseif ($meuPedido === 'pendente') {
+            $erro = 'Já pediste para entrar, espera pela resposta do dono.';
+        } elseif ($meuPedido === 'recusado') {
+            $erro = 'O dono já recusou o teu pedido para esta equipa.';
+        } elseif ($anuncio['participantes'] >= $anuncio['vagas']) {
+            $erro = 'A equipa já está completa.';
+        }
+
+        if ($erro) {
+            return ['sucesso' => false, 'erro' => $erro];
+        }
+
+        // o IGNORE é pq a bd só deixa um pedido por pessoa em cada anúncio
+        $pdo = Database::ligar();
+        $stmt = $pdo->prepare('INSERT IGNORE INTO LFG_Pedidos (post_id, utilizador_id, mensagem) VALUES (:post, :utilizador, :mensagem)');
+        $stmt->execute(['post' => $postId, 'utilizador' => $utilizadorId, 'mensagem' => $mensagem]);
+
+        if ($stmt->rowCount()) {
+            Notificacoes::criar($anuncio['utilizador_id'], 'lfg', $nome . ' pediu para entrar na tua equipa de ' . $anuncio['jogo'] . '.');
+        }
 
         return ['sucesso' => true];
+    }
+
+    // 'pendente', 'recusado' ou null se a pessoa não fez nenhum pedido
+    public static function meuPedido(int $postId, int $utilizadorId): ?string
+    {
+        $pdo = Database::ligar();
+        $stmt = $pdo->prepare('SELECT estado FROM LFG_Pedidos WHERE post_id = :post AND utilizador_id = :utilizador');
+        $stmt->execute(['post' => $postId, 'utilizador' => $utilizadorId]);
+        $estado = $stmt->fetchColumn();
+
+        return $estado === false ? null : $estado;
+    }
+
+    // os pedidos à espera de resposta, para o dono ver
+    public static function pedidos(int $postId): array
+    {
+        $pdo = Database::ligar();
+        $stmt = $pdo->prepare("SELECT pe.id, pe.mensagem, pe.data_criacao, u.nome_utilizador FROM LFG_Pedidos pe
+            JOIN Utilizadores u ON u.id = pe.utilizador_id
+            WHERE pe.post_id = :post AND pe.estado = 'pendente'
+            ORDER BY pe.data_criacao");
+        $stmt->execute(['post' => $postId]);
+
+        return $stmt->fetchAll();
+    }
+
+    public static function cancelarPedido(int $postId, int $utilizadorId): void
+    {
+        $pdo = Database::ligar();
+        $stmt = $pdo->prepare("DELETE FROM LFG_Pedidos WHERE post_id = :post AND utilizador_id = :utilizador AND estado = 'pendente'");
+        $stmt->execute(['post' => $postId, 'utilizador' => $utilizadorId]);
+    }
+
+    // o dono aceita o pedido, devolve o erro ou null se correu bem
+    public static function aceitarPedido(int $postId, int $donoId, int $pedidoId): ?string
+    {
+        $anuncio = self::buscar($postId);
+        if (!$anuncio || (int) $anuncio['utilizador_id'] !== $donoId) {
+            return null;
+        }
+
+        $pdo = Database::ligar();
+        $stmt = $pdo->prepare("SELECT utilizador_id FROM LFG_Pedidos WHERE id = :id AND post_id = :post AND estado = 'pendente'");
+        $stmt->execute(['id' => $pedidoId, 'post' => $postId]);
+        $candidato = $stmt->fetchColumn();
+        if (!$candidato) {
+            return null;
+        }
+
+        // usa o mesmo código do entrar, assim a última vaga continua protegida
+        $erro = self::juntar($postId, (int) $candidato);
+        if ($erro) {
+            return $erro;
+        }
+
+        Notificacoes::criar((int) $candidato, 'lfg', 'Entraste na equipa de ' . $anuncio['jogo'] . ' de ' . $anuncio['nome_utilizador'] . ', o dono aceitou o teu pedido.');
+
+        return null;
+    }
+
+    public static function recusarPedido(int $postId, int $donoId, int $pedidoId): void
+    {
+        $anuncio = self::buscar($postId);
+        if (!$anuncio || (int) $anuncio['utilizador_id'] !== $donoId) {
+            return;
+        }
+
+        $pdo = Database::ligar();
+        $stmt = $pdo->prepare("SELECT utilizador_id FROM LFG_Pedidos WHERE id = :id AND post_id = :post AND estado = 'pendente'");
+        $stmt->execute(['id' => $pedidoId, 'post' => $postId]);
+        $candidato = $stmt->fetchColumn();
+        if (!$candidato) {
+            return;
+        }
+
+        // fica guardado como recusado para a pessoa não poder pedir outra vez
+        $stmt = $pdo->prepare("UPDATE LFG_Pedidos SET estado = 'recusado' WHERE id = :id");
+        $stmt->execute(['id' => $pedidoId]);
+
+        Notificacoes::criar((int) $candidato, 'lfg', 'O teu pedido para a equipa de ' . $anuncio['jogo'] . ' de ' . $anuncio['nome_utilizador'] . ' foi recusado.');
+    }
+
+    // o dono liga ou desliga a aprovação de quem entra
+    public static function mudarAprovacao(int $postId, int $donoId, bool $aprovar): void
+    {
+        $pdo = Database::ligar();
+        $stmt = $pdo->prepare('UPDATE LFG_Posts SET aprovar = :aprovar WHERE id = :id AND utilizador_id = :dono');
+        $stmt->execute(['aprovar' => $aprovar ? 1 : 0, 'id' => $postId, 'dono' => $donoId]);
     }
 
     public static function sair(int $postId, int $utilizadorId, string $nome): void
