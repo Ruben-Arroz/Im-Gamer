@@ -1,5 +1,5 @@
 <?php
-require_once __DIR__ . '/includes/bootstrap.php';
+require_once __DIR__ . '/../includes/inicio.php';
 
 // os preços da cheapshark vêm em dólares, por isso converte-se para a moeda de quem está a ver
 $conversao = Catalogo::conversaoDolar($_SESSION['moeda'] ?? 'EUR');
@@ -10,7 +10,7 @@ $tipoLoja = filter_input(INPUT_GET, 'tipo', FILTER_UNSAFE_RAW) ?? 'todas';
 $ordem = escolhaGet('ordem', Catalogo::ORDENS, 'Deal Rating');
 
 $tituloPagina = 'Catálogo';
-require_once __DIR__ . '/includes/header.php';
+require_once __DIR__ . '/../includes/header.php';
 ?>
 
 <section class="catalogo pagina-larga" id="catalogo"
@@ -96,7 +96,7 @@ require_once __DIR__ . '/includes/header.php';
                 </div>
 
                 <button type="submit">Aplicar filtros</button>
-                <a class="filtro-limpar" href="<?= BASE_URL ?>/projeto/catalogo.php">Limpar filtros</a>
+                <a class="filtro-limpar" href="<?= BASE_URL ?>/projeto/jogos/catalogo.php">Limpar filtros</a>
             </form>
         </aside>
 
@@ -113,4 +113,4 @@ require_once __DIR__ . '/includes/header.php';
 <script src="<?= BASE_URL ?>/projeto/assets/js/cartoes.js?v=6"></script>
 <script src="<?= BASE_URL ?>/projeto/assets/js/catalogo.js?v=3"></script>
 
-<?php require_once __DIR__ . '/includes/footer.php'; ?>
+<?php require_once __DIR__ . '/../includes/footer.php'; ?>

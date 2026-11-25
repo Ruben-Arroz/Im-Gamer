@@ -1,9 +1,8 @@
 <?php
-require_once __DIR__ . '/includes/bootstrap.php';
+require_once __DIR__ . '/../includes/inicio.php';
 
 if (Auth::autenticado()) {
-    header('Location: ' . BASE_URL . '/projeto/index.php');
-    exit;
+    irPara('index.php');
 }
 
 $erro = null;
@@ -15,7 +14,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $password = filter_input(INPUT_POST, 'password', FILTER_UNSAFE_RAW) ?? '';
     $passwordConfirmar = filter_input(INPUT_POST, 'password_confirmar', FILTER_UNSAFE_RAW) ?? '';
 
-    if (!Auth::tokenValido(filter_input(INPUT_POST, 'token', FILTER_UNSAFE_RAW) ?? '')) {
+    if (!Auth::formularioValido()) {
         $erro = 'A sessão expirou. Tenta outra vez.';
     } elseif ($nomeUtilizador === '' || $email === '' || $password === '') {
         $erro = 'Preenche todos os campos.';
@@ -38,14 +37,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 }
 
 $tituloPagina = 'Registo';
-require_once __DIR__ . '/includes/header.php';
+require_once __DIR__ . '/../includes/header.php';
 ?>
 
 <section class="auth-form">
     <h1>Criar conta</h1>
 
     <?php if ($sucesso): ?>
-        <p class="aviso aviso-sucesso">Conta criada com sucesso. <a href="<?= BASE_URL ?>/projeto/login.php">Entrar</a></p>
+        <p class="aviso aviso-sucesso">Conta criada com sucesso. <a href="<?= BASE_URL ?>/projeto/conta/login.php">Entrar</a></p>
     <?php else: ?>
         <?php if ($erro): ?>
             <p class="aviso aviso-erro"><?= htmlspecialchars($erro) ?></p>
@@ -68,8 +67,8 @@ require_once __DIR__ . '/includes/header.php';
             <button type="submit">Criar conta</button>
         </form>
 
-        <p class="auth-switch">Já tens conta? <a href="<?= BASE_URL ?>/projeto/login.php">Entrar</a></p>
+        <p class="auth-switch">Já tens conta? <a href="<?= BASE_URL ?>/projeto/conta/login.php">Entrar</a></p>
     <?php endif; ?>
 </section>
 
-<?php require_once __DIR__ . '/includes/footer.php'; ?>
+<?php require_once __DIR__ . '/../includes/footer.php'; ?>

@@ -1,4 +1,5 @@
 <?php
+// é chamado no início de todas as páginas, prepara a sessão, o BASE_URL e as funções
 
 // as horas dos anúncios de LFG são as de Portugal, mesmo que o servidor esteja configurado com outra
 date_default_timezone_set('Europe/Lisbon');
@@ -37,29 +38,18 @@ if (!headers_sent()) {
 // pasta das fotos de perfil, fica na raiz do site e não dentro do projeto
 define('PASTA_UPLOADS', __DIR__ . '/../../uploads/');
 
+// passwords da bd e chaves das apis, este ficheiro não vai para o git
+require_once __DIR__ . '/../config/credentials.php';
 require_once __DIR__ . '/funcoes.php';
-require_once __DIR__ . '/../classes/Database.php';
-require_once __DIR__ . '/../classes/Api.php';
-require_once __DIR__ . '/../classes/Auth.php';
-require_once __DIR__ . '/../classes/Utilizador.php';
-require_once __DIR__ . '/../classes/ContasLigadas.php';
-require_once __DIR__ . '/../classes/Biblioteca.php';
-require_once __DIR__ . '/../classes/Jogo.php';
-require_once __DIR__ . '/../classes/Catalogo.php';
-require_once __DIR__ . '/../classes/Moeda.php';
-require_once __DIR__ . '/../classes/Steam.php';
-require_once __DIR__ . '/../classes/Xbox.php';
-require_once __DIR__ . '/../classes/Gog.php';
-require_once __DIR__ . '/../classes/Epic.php';
-require_once __DIR__ . '/../classes/Playstation.php';
-require_once __DIR__ . '/../classes/JogosManuais.php';
-require_once __DIR__ . '/../classes/Estatisticas.php';
-require_once __DIR__ . '/../classes/ListaDesejos.php';
-require_once __DIR__ . '/../classes/Avaliacoes.php';
-require_once __DIR__ . '/../classes/Notificacoes.php';
-require_once __DIR__ . '/../classes/Convites.php';
-require_once __DIR__ . '/../classes/Lfg.php';
-require_once __DIR__ . '/../classes/Jogadores.php';
-require_once __DIR__ . '/../classes/Admin.php';
-require_once __DIR__ . '/../classes/TokensApi.php';
-require_once __DIR__ . '/../classes/Lancamentos.php';
+
+// as classes só são carregadas quando uma página as usa pela primeira vez
+// por exemplo quando uma página usa a classe Lfg o php vai buscar o classes/Lfg.php
+function carregarClasse(string $classe): void
+{
+    $ficheiro = __DIR__ . '/../classes/' . $classe . '.php';
+    if (is_file($ficheiro)) {
+        require_once $ficheiro;
+    }
+}
+
+spl_autoload_register('carregarClasse');

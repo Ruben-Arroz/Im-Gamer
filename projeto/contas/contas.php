@@ -1,10 +1,7 @@
 <?php
-require_once __DIR__ . '/includes/bootstrap.php';
+require_once __DIR__ . '/../includes/inicio.php';
 
-if (!Auth::autenticado()) {
-    header('Location: ' . BASE_URL . '/projeto/login.php');
-    exit;
-}
+Auth::exigirSessao();
 
 $utilizadorId = $_SESSION['utilizador_id'];
 $erro = null;
@@ -12,7 +9,7 @@ $erro = null;
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $acao = filter_input(INPUT_POST, 'acao', FILTER_UNSAFE_RAW) ?? '';
 
-    if (!Auth::tokenValido(filter_input(INPUT_POST, 'token', FILTER_UNSAFE_RAW) ?? '')) {
+    if (!Auth::formularioValido()) {
         $erro = 'A sessão expirou. Tenta outra vez.';
     } elseif ($acao === 'adicionar') {
         $servico = filter_input(INPUT_POST, 'servico', FILTER_UNSAFE_RAW) ?? '';
@@ -46,8 +43,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     // recarrega a página para o formulário não ser enviado outra vez ao fazer F5
     if (!$erro) {
-        header('Location: ' . BASE_URL . '/projeto/contas.php');
-        exit;
+        irPara('contas/contas.php');
     }
 }
 
@@ -66,7 +62,7 @@ foreach ($contas as $conta) {
 }
 
 $tituloPagina = 'Contas ligadas';
-require_once __DIR__ . '/includes/header.php';
+require_once __DIR__ . '/../includes/header.php';
 ?>
 
 <section class="formulario">
@@ -93,7 +89,7 @@ require_once __DIR__ . '/includes/header.php';
                         <span class="texto-dim">
                             <?php if (in_array($conta['servico'], ContasLigadas::MANUAIS)): ?>
                                 <?= $conta['num_jogos'] ?> <?= $conta['num_jogos'] == 1 ? 'jogo' : 'jogos' ?> ·
-                                <a href="<?= BASE_URL ?>/projeto/jogos_manuais.php?conta=<?= $conta['id'] ?>">Gerir jogos</a>
+                                <a href="<?= BASE_URL ?>/projeto/contas/jogos_manuais.php?conta=<?= $conta['id'] ?>">Gerir jogos</a>
                             <?php elseif ($conta['ultima_sincronizacao']): ?>
                                 Atualizada a <?= (new DateTime($conta['ultima_sincronizacao']))->format('d/m/Y H:i') ?>
                             <?php else: ?>
@@ -178,7 +174,7 @@ require_once __DIR__ . '/includes/header.php';
         <button type="submit"><?= $contaPlaystation ? 'Atualizar PlayStation' : 'Ligar PlayStation' ?></button>
     </form>
 
-    <p class="auth-switch"><a href="<?= BASE_URL ?>/projeto/perfil.php">Voltar ao perfil</a></p>
+    <p class="auth-switch"><a href="<?= BASE_URL ?>/projeto/perfil/perfil.php">Voltar ao perfil</a></p>
 </section>
 
-<?php require_once __DIR__ . '/includes/footer.php'; ?>
+<?php require_once __DIR__ . '/../includes/footer.php'; ?>

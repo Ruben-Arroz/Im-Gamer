@@ -1,18 +1,10 @@
 <?php
-require_once __DIR__ . '/includes/bootstrap.php';
+require_once __DIR__ . '/../includes/inicio.php';
 
-if (!Auth::autenticado()) {
-    header('Location: ' . BASE_URL . '/projeto/login.php');
-    exit;
-}
+Auth::exigirSessao();
 
 // tal como no perfil, com ?u=nome mostra a biblioteca de outra pessoa
-$nomeUrl = filter_input(INPUT_GET, 'u', FILTER_UNSAFE_RAW);
-if ($nomeUrl !== null) {
-    $utilizador = Utilizador::buscarPorNome($nomeUrl);
-} else {
-    $utilizador = Utilizador::buscarPorId($_SESSION['utilizador_id']);
-}
+$utilizador = Utilizador::doUrl((int) $_SESSION['utilizador_id']);
 
 const POR_PAGINA = 42;
 
@@ -64,14 +56,8 @@ if ($utilizador) {
     $totalPaginas = max(1, (int) ceil($resultado['total'] / POR_PAGINA));
 }
 
-// url com outra página, sem perder os filtros
-function urlPagina(int $numero): string
-{
-    return '?' . http_build_query(array_merge($_GET, ['pagina' => $numero]));
-}
-
 $tituloPagina = 'Biblioteca';
-require_once __DIR__ . '/includes/header.php';
+require_once __DIR__ . '/../includes/header.php';
 ?>
 
 <section class="biblioteca">
@@ -83,7 +69,7 @@ require_once __DIR__ . '/includes/header.php';
             <div>
                 <h1>Biblioteca</h1>
                 <p class="texto-dim">
-                    De <a href="<?= BASE_URL ?>/projeto/perfil.php?u=<?= urlencode($utilizador['nome_utilizador']) ?>"><?= htmlspecialchars($utilizador['nome_utilizador']) ?></a>
+                    De <a href="<?= BASE_URL ?>/projeto/perfil/perfil.php?u=<?= urlencode($utilizador['nome_utilizador']) ?>"><?= htmlspecialchars($utilizador['nome_utilizador']) ?></a>
                     · <?= $resultado['total'] ?> <?= $resultado['total'] === 1 ? 'jogo' : 'jogos' ?>
                 </p>
             </div>
@@ -197,7 +183,7 @@ require_once __DIR__ . '/includes/header.php';
                     </div>
 
                     <button type="submit">Aplicar filtros</button>
-                    <a class="filtro-limpar" href="<?= BASE_URL ?>/projeto/biblioteca.php?u=<?= urlencode($utilizador['nome_utilizador']) ?>">Limpar filtros</a>
+                    <a class="filtro-limpar" href="<?= BASE_URL ?>/projeto/perfil/biblioteca.php?u=<?= urlencode($utilizador['nome_utilizador']) ?>">Limpar filtros</a>
                 </form>
             </aside>
 
@@ -206,7 +192,7 @@ require_once __DIR__ . '/includes/header.php';
                     <p class="texto-dim">
                         Ainda não há contas ligadas.
                         <?php if ($proprio): ?>
-                            <a href="<?= BASE_URL ?>/projeto/contas.php">Ligar uma conta</a>
+                            <a href="<?= BASE_URL ?>/projeto/contas/contas.php">Ligar uma conta</a>
                         <?php endif; ?>
                     </p>
                 <?php elseif (!$resultado['jogos']): ?>
@@ -217,7 +203,7 @@ require_once __DIR__ . '/includes/header.php';
                     <?php foreach ($resultado['jogos'] as $jogo): ?>
                         <!-- abre a página do jogo, se o jogo não estiver na tabela Jogos abre a loja -->
                         <?php if ($jogo['jogo_id']): ?>
-                            <a class="cartao-jogo" href="<?= BASE_URL ?>/projeto/jogo.php?id=<?= $jogo['jogo_id'] ?>">
+                            <a class="cartao-jogo" href="<?= BASE_URL ?>/projeto/jogos/jogo.php?id=<?= $jogo['jogo_id'] ?>">
                         <?php else: ?>
                             <?php $link = Biblioteca::linkLoja($jogo); ?>
                             <a class="cartao-jogo" <?= $link ? 'href="' . htmlspecialchars($link) . '" target="_blank" rel="noopener"' : '' ?>>
@@ -274,4 +260,4 @@ require_once __DIR__ . '/includes/header.php';
 
 <script src="<?= BASE_URL ?>/projeto/assets/js/biblioteca.js?v=1"></script>
 
-<?php require_once __DIR__ . '/includes/footer.php'; ?>
+<?php require_once __DIR__ . '/../includes/footer.php'; ?>

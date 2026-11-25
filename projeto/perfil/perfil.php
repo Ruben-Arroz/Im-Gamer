@@ -1,18 +1,10 @@
 <?php
-require_once __DIR__ . '/includes/bootstrap.php';
+require_once __DIR__ . '/../includes/inicio.php';
 
-if (!Auth::autenticado()) {
-    header('Location: ' . BASE_URL . '/projeto/login.php');
-    exit;
-}
+Auth::exigirSessao();
 
 // com ?u=nome mostra o perfil de outra pessoa, sem nada mostra o meu
-$nomeUrl = filter_input(INPUT_GET, 'u', FILTER_UNSAFE_RAW);
-if ($nomeUrl !== null) {
-    $utilizador = Utilizador::buscarPorNome($nomeUrl);
-} else {
-    $utilizador = Utilizador::buscarPorId($_SESSION['utilizador_id']);
-}
+$utilizador = Utilizador::doUrl((int) $_SESSION['utilizador_id']);
 
 if ($utilizador) {
     $proprio = (int) $utilizador['id'] === (int) $_SESSION['utilizador_id'];
@@ -38,7 +30,7 @@ if ($utilizador) {
 }
 
 $tituloPagina = 'Perfil';
-require_once __DIR__ . '/includes/header.php';
+require_once __DIR__ . '/../includes/header.php';
 ?>
 
 <section class="perfil">
@@ -78,19 +70,19 @@ require_once __DIR__ . '/includes/header.php';
 
             <?php if ($proprio): ?>
                 <nav class="perfil-acoes">
-                    <a href="<?= BASE_URL ?>/projeto/editar_perfil.php" title="Editar perfil">
+                    <a href="<?= BASE_URL ?>/projeto/conta/editar_perfil.php" title="Editar perfil">
                         <img src="<?= BASE_URL ?>/projeto/assets/img/icones/editar.svg" alt="Editar perfil">
                     </a>
-                    <a href="<?= BASE_URL ?>/projeto/contas.php" title="Contas ligadas">
+                    <a href="<?= BASE_URL ?>/projeto/contas/contas.php" title="Contas ligadas">
                         <img src="<?= BASE_URL ?>/projeto/assets/img/icones/contas.svg" alt="Contas ligadas">
                     </a>
-                    <a href="<?= BASE_URL ?>/projeto/definicoes.php" title="Definições">
+                    <a href="<?= BASE_URL ?>/projeto/conta/definicoes.php" title="Definições">
                         <img src="<?= BASE_URL ?>/projeto/assets/img/icones/definicoes.svg" alt="Definições">
                     </a>
                 </nav>
             <?php else: ?>
                 <div class="perfil-acoes">
-                    <a class="botao-contorno" href="<?= BASE_URL ?>/projeto/convidar.php?u=<?= urlencode($utilizador['nome_utilizador']) ?>">Convidar para jogar</a>
+                    <a class="botao-contorno" href="<?= BASE_URL ?>/projeto/jogadores/convidar.php?u=<?= urlencode($utilizador['nome_utilizador']) ?>">Convidar para jogar</a>
                 </div>
             <?php endif; ?>
         </div>
@@ -102,8 +94,8 @@ require_once __DIR__ . '/includes/header.php';
         <div class="subtitulo-linha">
             <h2>Resumo</h2>
             <span class="links-linha">
-                <a href="<?= BASE_URL ?>/projeto/desejos.php?u=<?= urlencode($utilizador['nome_utilizador']) ?>">Lista de desejos</a>
-                <a href="<?= BASE_URL ?>/projeto/estatisticas.php?u=<?= urlencode($utilizador['nome_utilizador']) ?>">Ver estatísticas</a>
+                <a href="<?= BASE_URL ?>/projeto/perfil/desejos.php?u=<?= urlencode($utilizador['nome_utilizador']) ?>">Lista de desejos</a>
+                <a href="<?= BASE_URL ?>/projeto/perfil/estatisticas.php?u=<?= urlencode($utilizador['nome_utilizador']) ?>">Ver estatísticas</a>
             </span>
         </div>
 
@@ -135,11 +127,11 @@ require_once __DIR__ . '/includes/header.php';
         <?php if ($maisJogados): ?>
             <div class="subtitulo-linha">
                 <p class="subtitulo">Mais jogados</p>
-                <a href="<?= BASE_URL ?>/projeto/biblioteca.php?u=<?= urlencode($utilizador['nome_utilizador']) ?>">Ver todos</a>
+                <a href="<?= BASE_URL ?>/projeto/perfil/biblioteca.php?u=<?= urlencode($utilizador['nome_utilizador']) ?>">Ver todos</a>
             </div>
             <div class="fila-jogos">
                 <?php foreach ($maisJogados as $jogo): ?>
-                    <a class="mini-jogo" <?= $jogo['jogo_id'] ? 'href="' . BASE_URL . '/projeto/jogo.php?id=' . $jogo['jogo_id'] . '"' : '' ?>>
+                    <a class="mini-jogo" <?= $jogo['jogo_id'] ? 'href="' . BASE_URL . '/projeto/jogos/jogo.php?id=' . $jogo['jogo_id'] . '"' : '' ?>>
                         <img src="<?= htmlspecialchars($jogo['imagem']) ?>" alt="" loading="lazy">
                         <p><?= htmlspecialchars($jogo['nome']) ?></p>
                         <span><?= formatarHoras($jogo['minutos_jogados']) ?></span>
@@ -152,13 +144,13 @@ require_once __DIR__ . '/includes/header.php';
             <div class="subtitulo-linha">
                 <p class="subtitulo">Equipas (LFG)</p>
                 <?php if ($proprio): ?>
-                    <a href="<?= BASE_URL ?>/projeto/lfg.php?aba=meus">Ver todos</a>
+                    <a href="<?= BASE_URL ?>/projeto/lfg/anuncios.php?aba=meus">Ver todos</a>
                 <?php endif; ?>
             </div>
             <ul class="lista-avaliacoes lista-lfg">
                 <?php foreach ($anunciosLfg as $anuncio): ?>
                     <li>
-                        <a href="<?= BASE_URL ?>/projeto/lfg_ver.php?id=<?= $anuncio['id'] ?>"><?= htmlspecialchars($anuncio['jogo']) ?></a>
+                        <a href="<?= BASE_URL ?>/projeto/lfg/anuncio.php?id=<?= $anuncio['id'] ?>"><?= htmlspecialchars($anuncio['jogo']) ?></a>
                         <span>de <?= htmlspecialchars($anuncio['nome_utilizador']) ?></span>
                         <span class="texto-dim"><?= Lfg::estado($anuncio) ?></span>
                     </li>
@@ -170,7 +162,7 @@ require_once __DIR__ . '/includes/header.php';
             <p class="texto-dim">
                 Nenhuma conta ligada.
                 <?php if ($proprio): ?>
-                    <a href="<?= BASE_URL ?>/projeto/contas.php">Ligar uma conta</a>
+                    <a href="<?= BASE_URL ?>/projeto/contas/contas.php">Ligar uma conta</a>
                 <?php endif; ?>
             </p>
         <?php endif; ?>
@@ -216,7 +208,7 @@ require_once __DIR__ . '/includes/header.php';
                     <?php endif; ?>
 
                     <?php if ($manual && $proprio): ?>
-                        <a class="conta-link" href="<?= BASE_URL ?>/projeto/jogos_manuais.php?conta=<?= $conta['id'] ?>">Gerir jogos</a>
+                        <a class="conta-link" href="<?= BASE_URL ?>/projeto/contas/jogos_manuais.php?conta=<?= $conta['id'] ?>">Gerir jogos</a>
                     <?php endif; ?>
                 </div>
 
@@ -266,11 +258,11 @@ require_once __DIR__ . '/includes/header.php';
                     <?php if ($jogosConta): ?>
                         <div class="subtitulo-linha">
                             <p class="subtitulo">Mais jogados</p>
-                            <a href="<?= BASE_URL ?>/projeto/biblioteca.php?u=<?= urlencode($utilizador['nome_utilizador']) ?>&amp;servico[]=<?= $conta['servico'] ?>">Ver todos</a>
+                            <a href="<?= BASE_URL ?>/projeto/perfil/biblioteca.php?u=<?= urlencode($utilizador['nome_utilizador']) ?>&amp;servico[]=<?= $conta['servico'] ?>">Ver todos</a>
                         </div>
                         <div class="fila-jogos">
                             <?php foreach ($jogosConta as $jogo): ?>
-                                <a class="mini-jogo" <?= $jogo['jogo_id'] ? 'href="' . BASE_URL . '/projeto/jogo.php?id=' . $jogo['jogo_id'] . '"' : '' ?>>
+                                <a class="mini-jogo" <?= $jogo['jogo_id'] ? 'href="' . BASE_URL . '/projeto/jogos/jogo.php?id=' . $jogo['jogo_id'] . '"' : '' ?>>
                                     <img src="<?= htmlspecialchars($jogo['imagem']) ?>" alt="" loading="lazy">
                                     <p><?= htmlspecialchars($jogo['nome']) ?></p>
                                     <span><?= formatarHoras($jogo['minutos_jogados']) ?></span>
@@ -282,11 +274,11 @@ require_once __DIR__ . '/includes/header.php';
                     <?php if ($jogosPorData): ?>
                         <div class="subtitulo-linha">
                             <p class="subtitulo"><?= $jogosConta ? 'Outros jogos' : 'Jogos' ?></p>
-                            <a href="<?= BASE_URL ?>/projeto/biblioteca.php?u=<?= urlencode($utilizador['nome_utilizador']) ?>&amp;servico[]=<?= $conta['servico'] ?>">Ver todos</a>
+                            <a href="<?= BASE_URL ?>/projeto/perfil/biblioteca.php?u=<?= urlencode($utilizador['nome_utilizador']) ?>&amp;servico[]=<?= $conta['servico'] ?>">Ver todos</a>
                         </div>
                         <div class="fila-jogos">
                             <?php foreach ($jogosPorData as $jogo): ?>
-                                <a class="mini-jogo" <?= $jogo['jogo_id'] ? 'href="' . BASE_URL . '/projeto/jogo.php?id=' . $jogo['jogo_id'] . '"' : '' ?>>
+                                <a class="mini-jogo" <?= $jogo['jogo_id'] ? 'href="' . BASE_URL . '/projeto/jogos/jogo.php?id=' . $jogo['jogo_id'] . '"' : '' ?>>
                                     <?php if ($jogo['imagem']): ?>
                                         <img src="<?= htmlspecialchars($jogo['imagem']) ?>" alt="" loading="lazy">
                                     <?php endif; ?>
@@ -307,7 +299,7 @@ require_once __DIR__ . '/includes/header.php';
                         <p class="subtitulo">Jogados nas últimas 2 semanas</p>
                         <div class="fila-jogos">
                             <?php foreach ($recentes as $jogo): ?>
-                                <a class="mini-jogo" <?= $jogo['jogo_id'] ? 'href="' . BASE_URL . '/projeto/jogo.php?id=' . $jogo['jogo_id'] . '"' : '' ?>>
+                                <a class="mini-jogo" <?= $jogo['jogo_id'] ? 'href="' . BASE_URL . '/projeto/jogos/jogo.php?id=' . $jogo['jogo_id'] . '"' : '' ?>>
                                     <img src="<?= htmlspecialchars($jogo['imagem']) ?>" alt="" loading="lazy">
                                     <p><?= htmlspecialchars($jogo['nome']) ?></p>
                                     <span><?= formatarHoras($jogo['minutos_2_semanas']) ?></span>
@@ -334,4 +326,4 @@ require_once __DIR__ . '/includes/header.php';
     <?php endif; ?>
 </section>
 
-<?php require_once __DIR__ . '/includes/footer.php'; ?>
+<?php require_once __DIR__ . '/../includes/footer.php'; ?>

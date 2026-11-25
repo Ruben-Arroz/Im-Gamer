@@ -26,7 +26,7 @@ async function guardar(formulario) {
     }
 
     // replace para o botão "voltar" do browser não voltar a esta página de procura
-    location.replace(dados.base + '/projeto/jogo.php?id=' + guardado.id);
+    location.replace(dados.base + '/projeto/jogos/jogo.php?id=' + guardado.id);
 }
 
 // a rawg não tem todos os jogos (sobretudo os mais pequenos), aí usa-se o que a cheapshark sabe do jogo

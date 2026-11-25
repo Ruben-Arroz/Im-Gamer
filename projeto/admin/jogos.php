@@ -1,5 +1,5 @@
 <?php
-require_once __DIR__ . '/includes/bootstrap.php';
+require_once __DIR__ . '/../includes/inicio.php';
 
 Admin::verificar();
 
@@ -12,7 +12,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $id = (int) filter_input(INPUT_POST, 'id', FILTER_VALIDATE_INT);
     $aviso = '';
 
-    if (!Auth::tokenValido(filter_input(INPUT_POST, 'token', FILTER_UNSAFE_RAW) ?? '')) {
+    if (!Auth::formularioValido()) {
         $erro = 'A sessão expirou. Tenta outra vez.';
     } elseif ($acao === 'juntar') {
         $ficaId = (int) filter_input(INPUT_POST, 'fica_id', FILTER_VALIDATE_INT);
@@ -27,8 +27,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     if (!$erro) {
         $_SESSION['aviso_admin'] = $aviso;
-        header('Location: ' . BASE_URL . '/projeto/admin_jogos.php?' . http_build_query($_GET));
-        exit;
+        irPara('admin/jogos.php?' . http_build_query($_GET));
     }
 }
 
@@ -38,11 +37,11 @@ $totalPaginas = max(1, (int) ceil($resultado['total'] / Admin::POR_PAGINA));
 $origens = ['rawg_id' => 'RAWG', 'steam_app_id' => 'Steam', 'xbox_id' => 'Xbox', 'gog_id' => 'GOG', 'epic_id' => 'Epic'];
 
 $tituloPagina = 'Administração';
-require_once __DIR__ . '/includes/header.php';
+require_once __DIR__ . '/../includes/header.php';
 ?>
 
 <section class="admin">
-    <?php require __DIR__ . '/includes/abas_admin.php'; ?>
+    <?php require __DIR__ . '/../includes/abas_admin.php'; ?>
 
     <form method="get" class="filtros-lfg">
         <div class="pesquisa-lfg">
@@ -50,7 +49,7 @@ require_once __DIR__ . '/includes/header.php';
             <button type="submit">Procurar</button>
         </div>
         <?php if ($texto !== ''): ?>
-            <a class="link-discreto" href="<?= BASE_URL ?>/projeto/admin_jogos.php">Limpar</a>
+            <a class="link-discreto" href="<?= BASE_URL ?>/projeto/admin/jogos.php">Limpar</a>
         <?php endif; ?>
     </form>
 
@@ -80,7 +79,7 @@ require_once __DIR__ . '/includes/header.php';
 
                 <div class="admin-dados">
                     <span>
-                        <a href="<?= BASE_URL ?>/projeto/jogo.php?id=<?= $jogo['id'] ?>"><?= htmlspecialchars($jogo['nome']) ?></a>
+                        <a href="<?= BASE_URL ?>/projeto/jogos/jogo.php?id=<?= $jogo['id'] ?>"><?= htmlspecialchars($jogo['nome']) ?></a>
                         <span class="texto-dim">id <?= $jogo['id'] ?><?= $jogo['data_lancamento'] ? ' · ' . substr($jogo['data_lancamento'], 0, 4) : '' ?></span>
                     </span>
                     <span class="texto-dim">
@@ -109,7 +108,7 @@ require_once __DIR__ . '/includes/header.php';
         <p class="texto-dim">Nenhum jogo encontrado.</p>
     <?php endif; ?>
 
-    <?php require __DIR__ . '/includes/paginacao.php'; ?>
+    <?php require __DIR__ . '/../includes/paginacao.php'; ?>
 </section>
 
-<?php require_once __DIR__ . '/includes/footer.php'; ?>
+<?php require_once __DIR__ . '/../includes/footer.php'; ?>

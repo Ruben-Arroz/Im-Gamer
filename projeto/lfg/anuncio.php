@@ -1,10 +1,7 @@
 <?php
-require_once __DIR__ . '/includes/bootstrap.php';
+require_once __DIR__ . '/../includes/inicio.php';
 
-if (!Auth::autenticado()) {
-    header('Location: ' . BASE_URL . '/projeto/login.php');
-    exit;
-}
+Auth::exigirSessao();
 
 $utilizadorId = (int) $_SESSION['utilizador_id'];
 $id = (int) filter_input(INPUT_GET, 'id', FILTER_VALIDATE_INT);
@@ -14,7 +11,7 @@ $erro = null;
 if ($anuncio && $_SERVER['REQUEST_METHOD'] === 'POST') {
     $acao = filter_input(INPUT_POST, 'acao', FILTER_UNSAFE_RAW) ?? '';
 
-    if (!Auth::tokenValido(filter_input(INPUT_POST, 'token', FILTER_UNSAFE_RAW) ?? '')) {
+    if (!Auth::formularioValido()) {
         $erro = 'A sessão expirou. Tenta outra vez.';
     } elseif ($acao === 'entrar') {
         $resultado = Lfg::entrar($id, $utilizadorId, $_SESSION['nome_utilizador']);
@@ -51,14 +48,12 @@ if ($anuncio && $_SERVER['REQUEST_METHOD'] === 'POST') {
         Lfg::removerParticipante($id, $utilizadorId, (int) filter_input(INPUT_POST, 'participante_id', FILTER_VALIDATE_INT));
     } elseif ($acao === 'apagar') {
         Lfg::apagar($id, $utilizadorId);
-        header('Location: ' . BASE_URL . '/projeto/lfg.php?aba=meus');
-        exit;
+        irPara('lfg/anuncios.php?aba=meus');
     }
 
     // recarrega a página para o formulário não ser enviado outra vez ao fazer F5
     if (!$erro) {
-        header('Location: ' . BASE_URL . '/projeto/lfg_ver.php?id=' . $id);
-        exit;
+        irPara('lfg/anuncio.php?id=' . $id);
     }
 }
 
@@ -74,18 +69,18 @@ if ($anuncio) {
 }
 
 $tituloPagina = 'Anúncio de LFG';
-require_once __DIR__ . '/includes/header.php';
+require_once __DIR__ . '/../includes/header.php';
 ?>
 
 <section class="jogo">
     <?php if (!$anuncio): ?>
         <h1>Anúncio de LFG</h1>
-        <p>Este anúncio não existe ou já foi apagado. <a href="<?= BASE_URL ?>/projeto/lfg.php">Ver os anúncios</a></p>
+        <p>Este anúncio não existe ou já foi apagado. <a href="<?= BASE_URL ?>/projeto/lfg/anuncios.php">Ver os anúncios</a></p>
     <?php else: ?>
         <div class="jogo-topo">
             <div>
                 <?php if ($anuncio['imagem_capa']): ?>
-                    <a href="<?= BASE_URL ?>/projeto/jogo.php?id=<?= $anuncio['jogo_id'] ?>">
+                    <a href="<?= BASE_URL ?>/projeto/jogos/jogo.php?id=<?= $anuncio['jogo_id'] ?>">
                         <img class="jogo-capa" src="<?= htmlspecialchars($anuncio['imagem_capa']) ?>" alt="">
                     </a>
                 <?php endif; ?>
@@ -95,7 +90,7 @@ require_once __DIR__ . '/includes/header.php';
                 <h1><?= htmlspecialchars($anuncio['jogo']) ?></h1>
                 <p class="perfil-data">
                     <?= htmlspecialchars($anuncio['plataforma'] ?? 'Qualquer plataforma') ?>
-                    · publicado por <a href="<?= BASE_URL ?>/projeto/perfil.php?u=<?= urlencode($anuncio['nome_utilizador']) ?>"><?= htmlspecialchars($anuncio['nome_utilizador']) ?></a>
+                    · publicado por <a href="<?= BASE_URL ?>/projeto/perfil/perfil.php?u=<?= urlencode($anuncio['nome_utilizador']) ?>"><?= htmlspecialchars($anuncio['nome_utilizador']) ?></a>
                 </p>
 
                 <div class="numeros">
@@ -140,7 +135,7 @@ require_once __DIR__ . '/includes/header.php';
                                 <button type="submit" name="acao" value="reabrir" class="botao-contorno">Reabrir anúncio</button>
                             <?php endif; ?>
                         </form>
-                        <a class="botao-contorno" href="<?= BASE_URL ?>/projeto/jogadores.php?jogo_id=<?= $anuncio['jogo_id'] ?>">Convidar jogadores</a>
+                        <a class="botao-contorno" href="<?= BASE_URL ?>/projeto/jogadores/procurar.php?jogo_id=<?= $anuncio['jogo_id'] ?>">Convidar jogadores</a>
                         <form method="post">
                             <input type="hidden" name="token" value="<?= Auth::token() ?>">
                             <?php if ($anuncio['aprovar']): ?>
@@ -190,7 +185,7 @@ require_once __DIR__ . '/includes/header.php';
             <ul class="lista-avaliacoes">
                 <?php foreach ($pedidos as $pedido): ?>
                     <li>
-                        <a href="<?= BASE_URL ?>/projeto/perfil.php?u=<?= urlencode($pedido['nome_utilizador']) ?>"><?= htmlspecialchars($pedido['nome_utilizador']) ?></a>
+                        <a href="<?= BASE_URL ?>/projeto/perfil/perfil.php?u=<?= urlencode($pedido['nome_utilizador']) ?>"><?= htmlspecialchars($pedido['nome_utilizador']) ?></a>
                         <span class="texto-dim">pediu a <?= (new DateTime($pedido['data_criacao']))->format('d/m/Y H:i') ?></span>
 
                         <?php if (!$terminado): ?>
@@ -222,12 +217,12 @@ require_once __DIR__ . '/includes/header.php';
         <h2>Equipa</h2>
         <ul class="lista-avaliacoes">
             <li>
-                <a href="<?= BASE_URL ?>/projeto/perfil.php?u=<?= urlencode($anuncio['nome_utilizador']) ?>"><?= htmlspecialchars($anuncio['nome_utilizador']) ?></a>
+                <a href="<?= BASE_URL ?>/projeto/perfil/perfil.php?u=<?= urlencode($anuncio['nome_utilizador']) ?>"><?= htmlspecialchars($anuncio['nome_utilizador']) ?></a>
                 <span class="texto-dim">criou a equipa</span>
             </li>
             <?php foreach ($participantes as $participante): ?>
                 <li>
-                    <a href="<?= BASE_URL ?>/projeto/perfil.php?u=<?= urlencode($participante['nome_utilizador']) ?>"><?= htmlspecialchars($participante['nome_utilizador']) ?></a>
+                    <a href="<?= BASE_URL ?>/projeto/perfil/perfil.php?u=<?= urlencode($participante['nome_utilizador']) ?>"><?= htmlspecialchars($participante['nome_utilizador']) ?></a>
                     <span class="texto-dim">entrou a <?= (new DateTime($participante['data_entrada']))->format('d/m/Y H:i') ?></span>
 
                     <?php if ($dono && !$terminado): ?>
@@ -245,8 +240,8 @@ require_once __DIR__ . '/includes/header.php';
             <p class="texto-dim">Ainda ninguém entrou.</p>
         <?php endif; ?>
 
-        <p class="auth-switch"><a href="<?= BASE_URL ?>/projeto/lfg.php">Voltar ao LFG</a></p>
+        <p class="auth-switch"><a href="<?= BASE_URL ?>/projeto/lfg/anuncios.php">Voltar ao LFG</a></p>
     <?php endif; ?>
 </section>
 
-<?php require_once __DIR__ . '/includes/footer.php'; ?>
+<?php require_once __DIR__ . '/../includes/footer.php'; ?>

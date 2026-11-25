@@ -15,7 +15,7 @@ class Steam
     // o mercado da steam bloqueia quem faz muitos pedidos, por isso há um limite de itens com preço
     const MAX_ITENS_COM_PRECO = 30;
 
-    // o sincronizar.php liga isto para ir mostrando o que está a fazer
+    // o tarefas/sincronizar.php liga isto para ir mostrando o que está a fazer
     public static bool $mostrarProgresso = false;
 
     private static function progresso(string $texto): void

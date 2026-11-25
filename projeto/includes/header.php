@@ -1,5 +1,5 @@
 <?php
-require_once __DIR__ . '/bootstrap.php';
+require_once __DIR__ . '/inicio.php';
 
 // cada página define o seu título, a página inicial não define e fica só "I'm Gamer"
 if (!isset($tituloPagina)) {
@@ -30,24 +30,24 @@ if (Auth::autenticado()) {
 <header class="site-header">
     <a href="<?= BASE_URL ?>/projeto/index.php" class="logo">I'm Gamer</a>
     <nav>
-        <a href="<?= BASE_URL ?>/projeto/catalogo.php">Catálogo</a>
-        <a href="<?= BASE_URL ?>/projeto/lancamentos.php">Lançamentos</a>
-        <a href="<?= BASE_URL ?>/projeto/lfg.php">LFG</a>
-        <a href="<?= BASE_URL ?>/projeto/jogadores.php">
+        <a href="<?= BASE_URL ?>/projeto/jogos/catalogo.php">Catálogo</a>
+        <a href="<?= BASE_URL ?>/projeto/jogos/lancamentos.php">Lançamentos</a>
+        <a href="<?= BASE_URL ?>/projeto/lfg/anuncios.php">LFG</a>
+        <a href="<?= BASE_URL ?>/projeto/jogadores/procurar.php">
             Jogadores
             <?php if ($avisosConvites > 0): ?>
                 <span class="contador" title="Convites e avisos por ver"><?= $avisosConvites ?></span>
             <?php endif; ?>
         </a>
         <?php if (Auth::admin()): ?>
-            <a href="<?= BASE_URL ?>/projeto/admin.php">Admin</a>
+            <a href="<?= BASE_URL ?>/projeto/admin/resumo.php">Admin</a>
         <?php endif; ?>
         <?php if (Auth::autenticado()): ?>
-            <a href="<?= BASE_URL ?>/projeto/perfil.php">Perfil</a>
-            <a href="<?= BASE_URL ?>/projeto/logout.php">Sair</a>
+            <a href="<?= BASE_URL ?>/projeto/perfil/perfil.php">Perfil</a>
+            <a href="<?= BASE_URL ?>/projeto/conta/logout.php">Sair</a>
         <?php else: ?>
-            <a href="<?= BASE_URL ?>/projeto/login.php">Entrar</a>
-            <a href="<?= BASE_URL ?>/projeto/registo.php">Registar</a>
+            <a href="<?= BASE_URL ?>/projeto/conta/login.php">Entrar</a>
+            <a href="<?= BASE_URL ?>/projeto/conta/registo.php">Registar</a>
         <?php endif; ?>
     </nav>
 </header>

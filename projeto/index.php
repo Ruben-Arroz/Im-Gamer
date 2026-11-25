@@ -1,5 +1,5 @@
 <?php
-require_once __DIR__ . '/includes/bootstrap.php';
+require_once __DIR__ . '/includes/inicio.php';
 
 // os preços da cheapshark vêm em dólares, por isso converte-se para a moeda de quem está a ver
 $conversao = Catalogo::conversaoDolar($_SESSION['moeda'] ?? 'EUR');
@@ -12,13 +12,13 @@ $cincoEmDolares = ceil(5 / $conversao['fator']);
 // cada carrossel tem o título, de onde vêm os jogos, o que se pede à api, o link do "Ver todos" e se tem faixa por cima
 // nos da rawg o pedido são os dias "de" e "até" a contar de hoje (negativo é para trás)
 $carrosseis = [
-    ['Melhores promoções', 'cheapshark', 'sortBy=Deal%20Rating', 'catalogo.php'],
-    ['Maiores descontos em jogos caros', 'cheapshark', 'sortBy=Savings&AAA=1', 'catalogo.php?ordem=Savings&aaa=on'],
-    ['Promoções na Steam', 'cheapshark', 'sortBy=Deal%20Rating&storeID=1', 'catalogo.php?loja[]=1'],
-    ['Até 5 ' . $simbolo, 'cheapshark', 'sortBy=Deal%20Rating&upperPrice=' . $cincoEmDolares, 'catalogo.php?preco_max=5'],
-    ['Mais bem avaliados', 'cheapshark', 'sortBy=Metacritic&metacritic=80', 'catalogo.php?ordem=Metacritic&metacritic=80'],
-    ['Acabados de sair', 'rawg', '-30,0', 'lancamentos.php?aba=recentes&periodo=30', true],
-    ['Em breve', 'rawg', '1,90', 'lancamentos.php?aba=breve&periodo=90'],
+    ['Melhores promoções', 'cheapshark', 'sortBy=Deal%20Rating', 'jogos/catalogo.php'],
+    ['Maiores descontos em jogos caros', 'cheapshark', 'sortBy=Savings&AAA=1', 'jogos/catalogo.php?ordem=Savings&aaa=on'],
+    ['Promoções na Steam', 'cheapshark', 'sortBy=Deal%20Rating&storeID=1', 'jogos/catalogo.php?loja[]=1'],
+    ['Até 5 ' . $simbolo, 'cheapshark', 'sortBy=Deal%20Rating&upperPrice=' . $cincoEmDolares, 'jogos/catalogo.php?preco_max=5'],
+    ['Mais bem avaliados', 'cheapshark', 'sortBy=Metacritic&metacritic=80', 'jogos/catalogo.php?ordem=Metacritic&metacritic=80'],
+    ['Acabados de sair', 'rawg', '-30,0', 'jogos/lancamentos.php?aba=recentes&periodo=30', true],
+    ['Em breve', 'rawg', '1,90', 'jogos/lancamentos.php?aba=breve&periodo=90'],
 ];
 
 // jogos da lista de desejos para o primeiro carrossel (o browser vai buscar os preços à cheapshark)
@@ -48,7 +48,7 @@ require_once __DIR__ . '/includes/header.php';
         <section class="carrossel" data-fonte="desejos" data-desejos='<?= htmlspecialchars(json_encode($desejos), ENT_QUOTES) ?>'>
             <div class="carrossel-topo">
                 <h2>Da tua lista de desejos</h2>
-                <a href="<?= BASE_URL ?>/projeto/desejos.php">Ver todos</a>
+                <a href="<?= BASE_URL ?>/projeto/perfil/desejos.php">Ver todos</a>
                 <div class="carrossel-setas">
                     <button type="button" data-direcao="-1" aria-label="Anteriores">&lsaquo;</button>
                     <button type="button" data-direcao="1" aria-label="Seguintes">&rsaquo;</button>

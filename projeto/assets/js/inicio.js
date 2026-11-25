@@ -77,9 +77,9 @@ function mostrarDestaqueLancamento(jogo) {
     const caixa = document.createElement('a');
     caixa.className = 'destaque-caixa';
     if (jogo.id_site) {
-        caixa.href = base + '/projeto/jogo.php?id=' + jogo.id_site;
+        caixa.href = base + '/projeto/jogos/jogo.php?id=' + jogo.id_site;
     } else {
-        caixa.href = base + '/projeto/jogo.php?rawg=' + encodeURIComponent(jogo.slug);
+        caixa.href = base + '/projeto/jogos/jogo.php?rawg=' + encodeURIComponent(jogo.slug);
     }
 
     const data = document.createElement('p');
@@ -226,7 +226,7 @@ async function carregarDesejos(carrossel) {
 
             // o cartão é o mesmo das promoções, só muda o link para a página do jogo
             const cartao = criarCartaoPromocao(precos[jogo.id]);
-            cartao.href = base + '/projeto/jogo.php?id=' + jogo.id;
+            cartao.href = base + '/projeto/jogos/jogo.php?id=' + jogo.id;
             faixa.appendChild(cartao);
         }
 

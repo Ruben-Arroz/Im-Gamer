@@ -1,10 +1,7 @@
 <?php
-require_once __DIR__ . '/includes/bootstrap.php';
+require_once __DIR__ . '/../includes/inicio.php';
 
-if (!Auth::autenticado()) {
-    header('Location: ' . BASE_URL . '/projeto/login.php');
-    exit;
-}
+Auth::exigirSessao();
 
 $utilizadorId = (int) $_SESSION['utilizador_id'];
 $plataformas = Jogo::plataformas();
@@ -23,7 +20,7 @@ $dataMaxima = date('Y-m-d', strtotime('+' . Lfg::MAX_DIAS . ' days'));
 // a aprovação vem ligada da primeira vez, depois fica como a pessoa a deixou
 $aprovar = $_SERVER['REQUEST_METHOD'] === 'POST' ? isset($_POST['aprovar']) : true;
 
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && !Auth::tokenValido(filter_input(INPUT_POST, 'token', FILTER_UNSAFE_RAW) ?? '')) {
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && !Auth::formularioValido()) {
     $erro = 'A sessão expirou. Tenta outra vez.';
 } elseif ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // o jogo só é guardado depois de o token ser válido
@@ -56,13 +53,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !Auth::tokenValido(filter_input(INP
 
     if (!$erro) {
         $id = Lfg::criar($utilizadorId, $jogoId, $plataformaId ?: null, $descricao, $vagas, $dataFim, $discord === '' ? null : $discord, $aprovar);
-        header('Location: ' . BASE_URL . '/projeto/lfg_ver.php?id=' . $id);
-        exit;
+        irPara('lfg/anuncio.php?id=' . $id);
     }
 }
 
 $tituloPagina = 'Criar anúncio';
-require_once __DIR__ . '/includes/header.php';
+require_once __DIR__ . '/../includes/header.php';
 ?>
 
 <section class="formulario">
@@ -76,20 +72,11 @@ require_once __DIR__ . '/includes/header.php';
         <input type="hidden" name="token" value="<?= Auth::token() ?>">
 
         <label for="jogo_pesquisa">Jogo</label>
-        <div class="pesquisa-jogo">
-            <input type="text" id="jogo_pesquisa" name="jogo_pesquisa" autocomplete="off" placeholder="Escreve o nome do jogo"
-                data-chave="<?= htmlspecialchars(RAWG_API_KEY) ?>"
-                data-base="<?= BASE_URL ?>"
-                value="<?= htmlspecialchars($_POST['jogo_pesquisa'] ?? $jogoInicial['nome'] ?? '') ?>">
-            <ul id="jogo_sugestoes" class="sugestoes"></ul>
-        </div>
-        <input type="hidden" name="jogo_id" value="<?= (int) ($_POST['jogo_id'] ?? $jogoInicial['id'] ?? 0) ?>">
-        <input type="hidden" id="jogo_rawg_id" name="jogo_rawg_id" value="<?= htmlspecialchars($_POST['jogo_rawg_id'] ?? '') ?>">
-        <input type="hidden" id="jogo_nome" name="jogo_nome" value="<?= htmlspecialchars($_POST['jogo_nome'] ?? '') ?>">
-        <input type="hidden" id="jogo_slug" name="jogo_slug" value="<?= htmlspecialchars($_POST['jogo_slug'] ?? '') ?>">
-        <input type="hidden" id="jogo_imagem" name="jogo_imagem" value="<?= htmlspecialchars($_POST['jogo_imagem'] ?? '') ?>">
-        <input type="hidden" id="jogo_lancamento" name="jogo_lancamento" value="<?= htmlspecialchars($_POST['jogo_lancamento'] ?? '') ?>">
-        <p class="ajuda">Pesquisa feita na <a href="https://rawg.io" target="_blank" rel="noopener">RAWG</a>.</p>
+        <?php
+        $jogoTexto = $jogoInicial['nome'] ?? '';
+        $jogoIdInicial = $jogoInicial['id'] ?? 0;
+        require __DIR__ . '/../includes/campo_jogo.php';
+        ?>
 
         <label for="plataforma_id">Plataforma</label>
         <select id="plataforma_id" name="plataforma_id">
@@ -124,9 +111,9 @@ require_once __DIR__ . '/includes/header.php';
         <button type="submit">Publicar anúncio</button>
     </form>
 
-    <p class="auth-switch"><a href="<?= BASE_URL ?>/projeto/lfg.php">Voltar ao LFG</a></p>
+    <p class="auth-switch"><a href="<?= BASE_URL ?>/projeto/lfg/anuncios.php">Voltar ao LFG</a></p>
 </section>
 
 <script src="<?= BASE_URL ?>/projeto/assets/js/pesquisa_jogo.js?v=3"></script>
 
-<?php require_once __DIR__ . '/includes/footer.php'; ?>
+<?php require_once __DIR__ . '/../includes/footer.php'; ?>

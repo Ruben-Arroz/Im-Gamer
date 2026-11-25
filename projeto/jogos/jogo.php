@@ -1,5 +1,5 @@
 <?php
-require_once __DIR__ . '/includes/bootstrap.php';
+require_once __DIR__ . '/../includes/inicio.php';
 
 // esta página também abre a quem não tem sessão, só vê. 0 quer dizer que não entrou
 $utilizadorId = Auth::autenticado() ? (int) $_SESSION['utilizador_id'] : 0;
@@ -20,8 +20,7 @@ if ($idJogo !== null) {
     $id = Jogo::procurar(0, $slug, $steam, $nome);
 
     if ($id) {
-        header('Location: ' . BASE_URL . '/projeto/jogo.php?id=' . $id);
-        exit;
+        irPara('jogos/jogo.php?id=' . $id);
     }
 
     $procurar = $slug !== '' || $nome !== '';
@@ -30,7 +29,7 @@ if ($idJogo !== null) {
 if ($jogo && $utilizadorId && $_SERVER['REQUEST_METHOD'] === 'POST') {
     $acao = filter_input(INPUT_POST, 'acao', FILTER_UNSAFE_RAW) ?? '';
 
-    if (!Auth::tokenValido(filter_input(INPUT_POST, 'token', FILTER_UNSAFE_RAW) ?? '')) {
+    if (!Auth::formularioValido()) {
         $erro = 'A sessão expirou. Tenta outra vez.';
     } elseif ($acao === 'desejo_adicionar') {
         ListaDesejos::adicionar($utilizadorId, $jogo['id']);
@@ -54,8 +53,7 @@ if ($jogo && $utilizadorId && $_SERVER['REQUEST_METHOD'] === 'POST') {
     // recarrega a página para o formulário não ser enviado outra vez ao fazer F5
     if (!$erro) {
         $ancora = str_contains($acao, 'avalia') ? '#avaliacoes' : '';
-        header('Location: ' . BASE_URL . '/projeto/jogo.php?id=' . $jogo['id'] . $ancora);
-        exit;
+        irPara('jogos/jogo.php?id=' . $jogo['id'] . $ancora);
     }
 }
 
@@ -102,7 +100,7 @@ if (!$jogo && !$procurar) {
 }
 
 $tituloPagina = $jogo ? $jogo['nome'] : 'Jogo';
-require_once __DIR__ . '/includes/header.php';
+require_once __DIR__ . '/../includes/header.php';
 ?>
 
 <?php if (!$jogo && $procurar): ?>
@@ -198,10 +196,10 @@ require_once __DIR__ . '/includes/header.php';
                             <?php endif; ?>
                         </form>
                     <?php else: ?>
-                        <a class="botao-contorno" href="<?= BASE_URL ?>/projeto/login.php">Entrar para guardar na lista de desejos</a>
+                        <a class="botao-contorno" href="<?= BASE_URL ?>/projeto/conta/login.php">Entrar para guardar na lista de desejos</a>
                     <?php endif; ?>
 
-                    <a class="botao-contorno" href="<?= BASE_URL ?>/projeto/lfg_criar.php?jogo=<?= $jogo['id'] ?>">Criar anúncio de LFG</a>
+                    <a class="botao-contorno" href="<?= BASE_URL ?>/projeto/lfg/criar.php?jogo=<?= $jogo['id'] ?>">Criar anúncio de LFG</a>
 
                     <?php foreach ($lojas as $loja => $link): ?>
                         <a class="botao-contorno" href="<?= htmlspecialchars($link) ?>" target="_blank" rel="noopener">Ver na <?= $loja ?></a>
@@ -276,7 +274,7 @@ require_once __DIR__ . '/includes/header.php';
             <ul class="lista-avaliacoes lista-lfg">
                 <?php foreach ($anunciosLfg as $anuncio): ?>
                     <li>
-                        <a href="<?= BASE_URL ?>/projeto/lfg_ver.php?id=<?= $anuncio['id'] ?>">Equipa de <?= htmlspecialchars($anuncio['nome_utilizador']) ?></a>
+                        <a href="<?= BASE_URL ?>/projeto/lfg/anuncio.php?id=<?= $anuncio['id'] ?>">Equipa de <?= htmlspecialchars($anuncio['nome_utilizador']) ?></a>
                         <span><?= htmlspecialchars($anuncio['plataforma'] ?? 'Qualquer plataforma') ?></span>
                         <span class="texto-dim"><?= Lfg::estado($anuncio) ?></span>
                     </li>
@@ -309,7 +307,7 @@ require_once __DIR__ . '/includes/header.php';
                 </div>
             </form>
         <?php else: ?>
-            <p class="texto-dim"><a href="<?= BASE_URL ?>/projeto/login.php">Entra</a> para avaliar este jogo.</p>
+            <p class="texto-dim"><a href="<?= BASE_URL ?>/projeto/conta/login.php">Entra</a> para avaliar este jogo.</p>
         <?php endif; ?>
 
         <?php if (!$avaliacoes): ?>
@@ -320,7 +318,7 @@ require_once __DIR__ . '/includes/header.php';
             <?php foreach ($avaliacoes as $avaliacao): ?>
                 <li>
                     <?php if ($utilizadorId): ?>
-                        <a href="<?= BASE_URL ?>/projeto/perfil.php?u=<?= urlencode($avaliacao['nome_utilizador']) ?>"><?= htmlspecialchars($avaliacao['nome_utilizador']) ?></a>
+                        <a href="<?= BASE_URL ?>/projeto/perfil/perfil.php?u=<?= urlencode($avaliacao['nome_utilizador']) ?>"><?= htmlspecialchars($avaliacao['nome_utilizador']) ?></a>
                     <?php else: ?>
                         <?= htmlspecialchars($avaliacao['nome_utilizador']) ?>
                     <?php endif; ?>
@@ -338,13 +336,13 @@ require_once __DIR__ . '/includes/header.php';
             <ul class="lista-simples lista-quem-tem">
                 <?php foreach ($quemTem as $pessoa): ?>
                     <li>
-                        <a href="<?= BASE_URL ?>/projeto/perfil.php?u=<?= urlencode($pessoa['nome_utilizador']) ?>"><?= htmlspecialchars($pessoa['nome_utilizador']) ?></a>
+                        <a href="<?= BASE_URL ?>/projeto/perfil/perfil.php?u=<?= urlencode($pessoa['nome_utilizador']) ?>"><?= htmlspecialchars($pessoa['nome_utilizador']) ?></a>
                         <span class="texto-dim">
                             <?= ContasLigadas::SERVICOS[$pessoa['servico']] ?>
                             <?= $pessoa['minutos_jogados'] !== null ? '· ' . formatarHoras($pessoa['minutos_jogados']) : '' ?>
                         </span>
                         <?php if ((int) $pessoa['utilizador_id'] !== $utilizadorId): ?>
-                            <a class="link-discreto" href="<?= BASE_URL ?>/projeto/convidar.php?u=<?= urlencode($pessoa['nome_utilizador']) ?>&amp;jogo=<?= $jogo['id'] ?>">Convidar</a>
+                            <a class="link-discreto" href="<?= BASE_URL ?>/projeto/jogadores/convidar.php?u=<?= urlencode($pessoa['nome_utilizador']) ?>&amp;jogo=<?= $jogo['id'] ?>">Convidar</a>
                         <?php endif; ?>
                     </li>
                 <?php endforeach; ?>
@@ -365,4 +363,4 @@ require_once __DIR__ . '/includes/header.php';
     <script src="<?= BASE_URL ?>/projeto/assets/js/galeria.js?v=3"></script>
 <?php endif; ?>
 
-<?php require_once __DIR__ . '/includes/footer.php'; ?>
+<?php require_once __DIR__ . '/../includes/footer.php'; ?>

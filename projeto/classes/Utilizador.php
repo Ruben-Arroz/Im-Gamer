@@ -35,6 +35,16 @@ class Utilizador
         return $stmt->fetch();
     }
 
+    // com ?u=nome é essa pessoa, sem nada é quem está a ver (perfil, biblioteca, desejos e estatísticas)
+    public static function doUrl(int $meuId): array|false
+    {
+        $nome = filter_input(INPUT_GET, 'u', FILTER_UNSAFE_RAW);
+        if ($nome !== null) {
+            return self::buscarPorNome((string) $nome);
+        }
+        return self::buscarPorId($meuId);
+    }
+
     // pesquisa de jogadores pelo nome, para os convites (sem o próprio utilizador)
     public static function pesquisar(string $texto, int $excetoId, int $limite): array
     {

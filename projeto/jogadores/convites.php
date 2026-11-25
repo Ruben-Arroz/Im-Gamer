@@ -1,10 +1,7 @@
 <?php
-require_once __DIR__ . '/includes/bootstrap.php';
+require_once __DIR__ . '/../includes/inicio.php';
 
-if (!Auth::autenticado()) {
-    header('Location: ' . BASE_URL . '/projeto/login.php');
-    exit;
-}
+Auth::exigirSessao();
 
 $utilizadorId = (int) $_SESSION['utilizador_id'];
 $erro = null;
@@ -13,7 +10,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $acao = filter_input(INPUT_POST, 'acao', FILTER_UNSAFE_RAW) ?? '';
     $conviteId = (int) filter_input(INPUT_POST, 'convite_id', FILTER_VALIDATE_INT);
 
-    if (!Auth::tokenValido(filter_input(INPUT_POST, 'token', FILTER_UNSAFE_RAW) ?? '')) {
+    if (!Auth::formularioValido()) {
         $erro = 'A sessão expirou. Tenta outra vez.';
     } elseif ($acao === 'aceitar' || $acao === 'recusar') {
         Convites::responder($conviteId, $utilizadorId, $_SESSION['nome_utilizador'], $acao === 'aceitar');
@@ -22,8 +19,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 
     if (!$erro) {
-        header('Location: ' . BASE_URL . '/projeto/convites.php');
-        exit;
+        irPara('jogadores/convites.php');
     }
 }
 
@@ -42,7 +38,7 @@ const ESTADOS_CONVITE = [
 
 $abaAtual = 'convites';
 $tituloPagina = 'Convites';
-require_once __DIR__ . '/includes/header.php';
+require_once __DIR__ . '/../includes/header.php';
 ?>
 
 <section class="lfg pagina-larga">
@@ -50,7 +46,7 @@ require_once __DIR__ . '/includes/header.php';
         <h1>Jogadores</h1>
     </div>
 
-    <?php require __DIR__ . '/includes/abas_jogadores.php'; ?>
+    <?php require __DIR__ . '/../includes/abas_jogadores.php'; ?>
 
     <?php if ($erro): ?>
         <p class="aviso aviso-erro"><?= htmlspecialchars($erro) ?></p>
@@ -65,10 +61,10 @@ require_once __DIR__ . '/includes/header.php';
             <ul class="lista-avaliacoes">
                 <?php foreach ($recebidos as $convite): ?>
                     <li>
-                        <a href="<?= BASE_URL ?>/projeto/perfil.php?u=<?= urlencode($convite['remetente']) ?>"><?= htmlspecialchars($convite['remetente']) ?></a>
+                        <a href="<?= BASE_URL ?>/projeto/perfil/perfil.php?u=<?= urlencode($convite['remetente']) ?>"><?= htmlspecialchars($convite['remetente']) ?></a>
                         <span>convidou-te para jogar</span>
                         <?php if ($convite['jogo']): ?>
-                            <a href="<?= BASE_URL ?>/projeto/jogo.php?id=<?= $convite['jogo_id'] ?>"><?= htmlspecialchars($convite['jogo']) ?></a>
+                            <a href="<?= BASE_URL ?>/projeto/jogos/jogo.php?id=<?= $convite['jogo_id'] ?>"><?= htmlspecialchars($convite['jogo']) ?></a>
                         <?php endif; ?>
                         <span class="texto-dim"><?= (new DateTime($convite['data_criacao']))->format('d/m/Y H:i') ?></span>
 
@@ -119,7 +115,7 @@ require_once __DIR__ . '/includes/header.php';
                 <?php foreach ($enviados as $convite): ?>
                     <li>
                         <span>Para</span>
-                        <a href="<?= BASE_URL ?>/projeto/perfil.php?u=<?= urlencode($convite['destinatario']) ?>"><?= htmlspecialchars($convite['destinatario']) ?></a>
+                        <a href="<?= BASE_URL ?>/projeto/perfil/perfil.php?u=<?= urlencode($convite['destinatario']) ?>"><?= htmlspecialchars($convite['destinatario']) ?></a>
                         <?php if ($convite['jogo']): ?>
                             <span>· <?= htmlspecialchars($convite['jogo']) ?></span>
                         <?php endif; ?>
@@ -140,4 +136,4 @@ require_once __DIR__ . '/includes/header.php';
     </div>
 </section>
 
-<?php require_once __DIR__ . '/includes/footer.php'; ?>
+<?php require_once __DIR__ . '/../includes/footer.php'; ?>

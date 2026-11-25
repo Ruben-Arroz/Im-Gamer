@@ -47,7 +47,7 @@ function configurarCartoes(elemento) {
 }
 
 function linkJogoPromocao(promo) {
-    return base + '/projeto/jogo.php?nome=' + encodeURIComponent(promo.title) + (promo.steamAppID ? '&steam=' + promo.steamAppID : '');
+    return base + '/projeto/jogos/jogo.php?nome=' + encodeURIComponent(promo.title) + (promo.steamAppID ? '&steam=' + promo.steamAppID : '');
 }
 
 // nomes das lojas da cheapshark, se falhar os cartões aparecem na mesma sem o nome
@@ -148,9 +148,9 @@ function criarCartaoLancamento(jogo) {
     cartao.className = 'cartao-jogo';
     // os lançamentos guardados da steam já estão na bd, abrem pelo id
     if (jogo.id_site) {
-        cartao.href = base + '/projeto/jogo.php?id=' + jogo.id_site;
+        cartao.href = base + '/projeto/jogos/jogo.php?id=' + jogo.id_site;
     } else {
-        cartao.href = base + '/projeto/jogo.php?rawg=' + encodeURIComponent(jogo.slug);
+        cartao.href = base + '/projeto/jogos/jogo.php?rawg=' + encodeURIComponent(jogo.slug);
     }
 
     if (jogo.background_image) {

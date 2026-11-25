@@ -1,7 +1,5 @@
 <?php
 
-require_once __DIR__ . '/../config/credentials.php';
-
 class Database
 {
     private static ?PDO $instancia = null;

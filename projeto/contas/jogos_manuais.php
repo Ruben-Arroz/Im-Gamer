@@ -1,10 +1,7 @@
 <?php
-require_once __DIR__ . '/includes/bootstrap.php';
+require_once __DIR__ . '/../includes/inicio.php';
 
-if (!Auth::autenticado()) {
-    header('Location: ' . BASE_URL . '/projeto/login.php');
-    exit;
-}
+Auth::exigirSessao();
 
 $utilizadorId = (int) $_SESSION['utilizador_id'];
 $contaId = (int) filter_input(INPUT_GET, 'conta', FILTER_VALIDATE_INT);
@@ -12,8 +9,7 @@ $contaId = (int) filter_input(INPUT_GET, 'conta', FILTER_VALIDATE_INT);
 // só o dono da conta pode mexer, e só nas contas sem api (nintendo e battle.net)
 $conta = JogosManuais::conta($contaId, $utilizadorId);
 if (!$conta) {
-    header('Location: ' . BASE_URL . '/projeto/contas.php');
-    exit;
+    irPara('contas/contas.php');
 }
 
 $erro = null;
@@ -21,7 +17,7 @@ $erro = null;
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $acao = filter_input(INPUT_POST, 'acao', FILTER_UNSAFE_RAW) ?? '';
 
-    if (!Auth::tokenValido(filter_input(INPUT_POST, 'token', FILTER_UNSAFE_RAW) ?? '')) {
+    if (!Auth::formularioValido()) {
         $erro = 'A sessão expirou. Tenta outra vez.';
     } elseif ($acao === 'adicionar') {
         $horas = trim(filter_input(INPUT_POST, 'horas', FILTER_UNSAFE_RAW) ?? '');
@@ -43,8 +39,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 
     if (!$erro) {
-        header('Location: ' . BASE_URL . '/projeto/jogos_manuais.php?conta=' . $contaId);
-        exit;
+        irPara('contas/jogos_manuais.php?conta=' . $contaId);
     }
 }
 
@@ -52,7 +47,7 @@ $jogos = JogosManuais::listar($contaId);
 $nomeServico = ContasLigadas::SERVICOS[$conta['servico']];
 
 $tituloPagina = 'Jogos ' . $nomeServico;
-require_once __DIR__ . '/includes/header.php';
+require_once __DIR__ . '/../includes/header.php';
 ?>
 
 <section class="formulario">
@@ -68,20 +63,11 @@ require_once __DIR__ . '/includes/header.php';
         <input type="hidden" name="acao" value="adicionar">
 
         <label for="jogo_pesquisa">Jogo</label>
-        <div class="pesquisa-jogo">
-            <input type="text" id="jogo_pesquisa" name="jogo_pesquisa" autocomplete="off" placeholder="Escreve o nome do jogo"
-                data-chave="<?= htmlspecialchars(RAWG_API_KEY) ?>"
-                data-base="<?= BASE_URL ?>"
-                value="<?= htmlspecialchars($_POST['jogo_pesquisa'] ?? '') ?>">
-            <ul id="jogo_sugestoes" class="sugestoes"></ul>
-        </div>
-        <input type="hidden" name="jogo_id" value="0">
-        <input type="hidden" id="jogo_rawg_id" name="jogo_rawg_id" value="<?= htmlspecialchars($_POST['jogo_rawg_id'] ?? '') ?>">
-        <input type="hidden" id="jogo_nome" name="jogo_nome" value="<?= htmlspecialchars($_POST['jogo_nome'] ?? '') ?>">
-        <input type="hidden" id="jogo_slug" name="jogo_slug" value="<?= htmlspecialchars($_POST['jogo_slug'] ?? '') ?>">
-        <input type="hidden" id="jogo_imagem" name="jogo_imagem" value="<?= htmlspecialchars($_POST['jogo_imagem'] ?? '') ?>">
-        <input type="hidden" id="jogo_lancamento" name="jogo_lancamento" value="<?= htmlspecialchars($_POST['jogo_lancamento'] ?? '') ?>">
-        <p class="ajuda">Pesquisa feita na <a href="https://rawg.io" target="_blank" rel="noopener">RAWG</a>.</p>
+        <?php
+        $jogoTexto = '';
+        $jogoIdInicial = 0;
+        require __DIR__ . '/../includes/campo_jogo.php';
+        ?>
 
         <label for="horas">Horas jogadas (opcional)</label>
         <input type="number" id="horas" name="horas" min="0" max="<?= JogosManuais::MAX_HORAS ?>" value="<?= htmlspecialchars($_POST['horas'] ?? '') ?>">
@@ -100,7 +86,7 @@ require_once __DIR__ . '/includes/header.php';
                     <?php endif; ?>
 
                     <div class="conta-dados">
-                        <a href="<?= BASE_URL ?>/projeto/jogo.php?id=<?= (int) $jogo['jogo_id'] ?>"><?= htmlspecialchars($jogo['nome']) ?></a>
+                        <a href="<?= BASE_URL ?>/projeto/jogos/jogo.php?id=<?= (int) $jogo['jogo_id'] ?>"><?= htmlspecialchars($jogo['nome']) ?></a>
                         <span class="texto-dim">
                             <?= $jogo['minutos_jogados'] !== null ? formatarHoras($jogo['minutos_jogados']) : 'Sem horas' ?>
                         </span>
@@ -119,9 +105,9 @@ require_once __DIR__ . '/includes/header.php';
         <p class="texto-dim">Ainda não adicionaste nenhum jogo.</p>
     <?php endif; ?>
 
-    <p class="auth-switch"><a href="<?= BASE_URL ?>/projeto/contas.php">Voltar às contas</a></p>
+    <p class="auth-switch"><a href="<?= BASE_URL ?>/projeto/contas/contas.php">Voltar às contas</a></p>
 </section>
 
 <script src="<?= BASE_URL ?>/projeto/assets/js/pesquisa_jogo.js?v=3"></script>
 
-<?php require_once __DIR__ . '/includes/footer.php'; ?>
+<?php require_once __DIR__ . '/../includes/footer.php'; ?>

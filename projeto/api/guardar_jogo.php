@@ -1,6 +1,6 @@
 <?php
 // guarda um jogo que o browser foi buscar à rawg (o servidor da UA não tem internet) e devolve o id
-require_once __DIR__ . '/../includes/bootstrap.php';
+require_once __DIR__ . '/../includes/inicio.php';
 
 header('Content-Type: application/json');
 

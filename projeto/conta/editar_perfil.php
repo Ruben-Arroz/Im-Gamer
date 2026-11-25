@@ -1,10 +1,7 @@
 <?php
-require_once __DIR__ . '/includes/bootstrap.php';
+require_once __DIR__ . '/../includes/inicio.php';
 
-if (!Auth::autenticado()) {
-    header('Location: ' . BASE_URL . '/projeto/login.php');
-    exit;
-}
+Auth::exigirSessao();
 
 $utilizador = Utilizador::buscarPorId($_SESSION['utilizador_id']);
 $plataformas = Jogo::plataformas();
@@ -21,7 +18,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $pesquisaJogo = trim(filter_input(INPUT_POST, 'jogo_pesquisa', FILTER_UNSAFE_RAW) ?? '');
     $jogoId = null;
 
-    if (!Auth::tokenValido(filter_input(INPUT_POST, 'token', FILTER_UNSAFE_RAW) ?? '')) {
+    if (!Auth::formularioValido()) {
         $erro = 'A sessão expirou. Tenta outra vez.';
     } elseif (mb_strlen($nome) < 3 || mb_strlen($nome) > 50) {
         $erro = 'O nome de utilizador deve ter entre 3 e 50 caracteres.';
@@ -74,13 +71,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         // o nome também está guardado na sessão
         $_SESSION['nome_utilizador'] = $nome;
 
-        header('Location: ' . BASE_URL . '/projeto/perfil.php');
-        exit;
+        irPara('perfil/perfil.php');
     }
 }
 
 $tituloPagina = 'Editar perfil';
-require_once __DIR__ . '/includes/header.php';
+require_once __DIR__ . '/../includes/header.php';
 ?>
 
 <section class="formulario">
@@ -117,20 +113,11 @@ require_once __DIR__ . '/includes/header.php';
         <textarea id="bio" name="bio" rows="5" maxlength="1000"><?= htmlspecialchars($_POST['bio'] ?? $utilizador['bio'] ?? '') ?></textarea>
 
         <label for="jogo_pesquisa">Jogo favorito</label>
-        <div class="pesquisa-jogo">
-            <input type="text" id="jogo_pesquisa" name="jogo_pesquisa" autocomplete="off" placeholder="Escreve o nome do jogo"
-                data-chave="<?= htmlspecialchars(RAWG_API_KEY) ?>"
-                data-base="<?= BASE_URL ?>"
-                value="<?= htmlspecialchars($_POST['jogo_pesquisa'] ?? $utilizador['jogo_favorito'] ?? '') ?>">
-            <ul id="jogo_sugestoes" class="sugestoes"></ul>
-        </div>
-        <input type="hidden" name="jogo_id" value="<?= (int) ($_POST['jogo_id'] ?? $utilizador['jogo_favorito_id'] ?? 0) ?>">
-        <input type="hidden" id="jogo_rawg_id" name="jogo_rawg_id" value="<?= htmlspecialchars($_POST['jogo_rawg_id'] ?? '') ?>">
-        <input type="hidden" id="jogo_nome" name="jogo_nome" value="<?= htmlspecialchars($_POST['jogo_nome'] ?? '') ?>">
-        <input type="hidden" id="jogo_slug" name="jogo_slug" value="<?= htmlspecialchars($_POST['jogo_slug'] ?? '') ?>">
-        <input type="hidden" id="jogo_imagem" name="jogo_imagem" value="<?= htmlspecialchars($_POST['jogo_imagem'] ?? '') ?>">
-        <input type="hidden" id="jogo_lancamento" name="jogo_lancamento" value="<?= htmlspecialchars($_POST['jogo_lancamento'] ?? '') ?>">
-        <p class="ajuda">Pesquisa feita na <a href="https://rawg.io" target="_blank" rel="noopener">RAWG</a>.</p>
+        <?php
+        $jogoTexto = $utilizador['jogo_favorito'] ?? '';
+        $jogoIdInicial = $utilizador['jogo_favorito_id'] ?? 0;
+        require __DIR__ . '/../includes/campo_jogo.php';
+        ?>
 
         <label for="plataforma_id">Dispositivo preferido</label>
         <select id="plataforma_id" name="plataforma_id">
@@ -161,10 +148,10 @@ require_once __DIR__ . '/includes/header.php';
         <button type="submit">Guardar</button>
     </form>
 
-    <p class="auth-switch"><a href="<?= BASE_URL ?>/projeto/perfil.php">Voltar ao perfil</a></p>
+    <p class="auth-switch"><a href="<?= BASE_URL ?>/projeto/perfil/perfil.php">Voltar ao perfil</a></p>
 </section>
 
 <script src="<?= BASE_URL ?>/projeto/assets/js/pesquisa_jogo.js?v=3"></script>
 <script src="<?= BASE_URL ?>/projeto/assets/js/previsao_imagem.js?v=1"></script>
 
-<?php require_once __DIR__ . '/includes/footer.php'; ?>
+<?php require_once __DIR__ . '/../includes/footer.php'; ?>

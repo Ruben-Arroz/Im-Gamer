@@ -1,5 +1,5 @@
 <?php
-require_once __DIR__ . '/includes/bootstrap.php';
+require_once __DIR__ . '/../includes/inicio.php';
 
 Admin::verificar();
 
@@ -9,11 +9,11 @@ $plataformas = Admin::contasPorPlataforma();
 $ultimos = Admin::ultimosRegistos(5);
 
 $tituloPagina = 'Administração';
-require_once __DIR__ . '/includes/header.php';
+require_once __DIR__ . '/../includes/header.php';
 ?>
 
 <section class="admin">
-    <?php require __DIR__ . '/includes/abas_admin.php'; ?>
+    <?php require __DIR__ . '/../includes/abas_admin.php'; ?>
 
     <div class="numeros">
         <div class="numero">
@@ -59,14 +59,14 @@ require_once __DIR__ . '/includes/header.php';
         <?php foreach ($ultimos as $utilizador): ?>
             <li>
                 <div class="admin-dados">
-                    <a href="<?= BASE_URL ?>/projeto/perfil.php?u=<?= urlencode($utilizador['nome_utilizador']) ?>"><?= htmlspecialchars($utilizador['nome_utilizador']) ?></a>
+                    <a href="<?= BASE_URL ?>/projeto/perfil/perfil.php?u=<?= urlencode($utilizador['nome_utilizador']) ?>"><?= htmlspecialchars($utilizador['nome_utilizador']) ?></a>
                     <span class="texto-dim"><?= htmlspecialchars($utilizador['email']) ?></span>
                 </div>
                 <span class="texto-dim"><?= (new DateTime($utilizador['data_criacao']))->format('d/m/Y') ?></span>
             </li>
         <?php endforeach; ?>
     </ul>
-    <p class="auth-switch"><a href="<?= BASE_URL ?>/projeto/admin_utilizadores.php">Ver todos os utilizadores</a></p>
+    <p class="auth-switch"><a href="<?= BASE_URL ?>/projeto/admin/utilizadores.php">Ver todos os utilizadores</a></p>
 </section>
 
-<?php require_once __DIR__ . '/includes/footer.php'; ?>
+<?php require_once __DIR__ . '/../includes/footer.php'; ?>

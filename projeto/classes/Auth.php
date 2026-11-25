@@ -66,6 +66,14 @@ class Auth
         return isset($_SESSION['utilizador_id']);
     }
 
+    // nas páginas que só abrem com sessão, quem não entrou vai para o login
+    public static function exigirSessao(): void
+    {
+        if (!self::autenticado()) {
+            irPara('conta/login.php');
+        }
+    }
+
     // lido sempre da bd, assim quem perde o admin deixa logo de entrar no painel
     public static function admin(): bool
     {
@@ -93,5 +101,11 @@ class Auth
     public static function tokenValido(string $token): bool
     {
         return isset($_SESSION['token']) && hash_equals($_SESSION['token'], $token);
+    }
+
+    // vê o token que veio no POST do formulário
+    public static function formularioValido(): bool
+    {
+        return self::tokenValido(filter_input(INPUT_POST, 'token', FILTER_UNSAFE_RAW) ?? '');
     }
 }

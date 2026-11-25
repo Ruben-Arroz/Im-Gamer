@@ -8,7 +8,7 @@ unset($_SESSION['aviso_admin']);
 
 <nav class="abas">
     <?php foreach (Admin::ABAS as $ficheiro => $nome): ?>
-        <a href="<?= BASE_URL ?>/projeto/<?= $ficheiro ?>" class="<?= $paginaAtual === $ficheiro ? 'ativo' : '' ?>"><?= $nome ?></a>
+        <a href="<?= BASE_URL ?>/projeto/admin/<?= $ficheiro ?>" class="<?= $paginaAtual === $ficheiro ? 'ativo' : '' ?>"><?= $nome ?></a>
     <?php endforeach; ?>
 </nav>
 

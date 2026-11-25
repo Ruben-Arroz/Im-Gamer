@@ -1,10 +1,7 @@
 <?php
-require_once __DIR__ . '/includes/bootstrap.php';
+require_once __DIR__ . '/../includes/inicio.php';
 
-if (!Auth::autenticado()) {
-    header('Location: ' . BASE_URL . '/projeto/login.php');
-    exit;
-}
+Auth::exigirSessao();
 
 $id = $_SESSION['utilizador_id'];
 $utilizador = Utilizador::buscarPorId($id);
@@ -16,7 +13,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $acao = filter_input(INPUT_POST, 'acao', FILTER_UNSAFE_RAW) ?? '';
     $passwordAtual = filter_input(INPUT_POST, 'password_atual', FILTER_UNSAFE_RAW) ?? '';
 
-    if (!Auth::tokenValido(filter_input(INPUT_POST, 'token', FILTER_UNSAFE_RAW) ?? '')) {
+    if (!Auth::formularioValido()) {
         $erro = 'A sessão expirou. Tenta outra vez.';
     } elseif ($acao === 'moeda') {
         $moeda = filter_input(INPUT_POST, 'moeda', FILTER_UNSAFE_RAW) ?? '';
@@ -67,8 +64,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             Utilizador::apagarFoto($utilizador['foto_capa']);
             Utilizador::apagar($id);
             Auth::logout();
-            header('Location: ' . BASE_URL . '/projeto/index.php');
-            exit;
+            irPara('index.php');
         }
     }
 
@@ -77,7 +73,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 }
 
 $tituloPagina = 'Definições';
-require_once __DIR__ . '/includes/header.php';
+require_once __DIR__ . '/../includes/header.php';
 ?>
 
 <section class="formulario">
@@ -152,4 +148,4 @@ require_once __DIR__ . '/includes/header.php';
     </form>
 </section>
 
-<?php require_once __DIR__ . '/includes/footer.php'; ?>
+<?php require_once __DIR__ . '/../includes/footer.php'; ?>

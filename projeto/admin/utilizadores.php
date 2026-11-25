@@ -1,5 +1,5 @@
 <?php
-require_once __DIR__ . '/includes/bootstrap.php';
+require_once __DIR__ . '/../includes/inicio.php';
 
 Admin::verificar();
 
@@ -9,7 +9,7 @@ $texto = mb_substr(trim(filter_input(INPUT_GET, 'q', FILTER_UNSAFE_RAW) ?? ''), 
 $pagina = max(1, (int) (filter_input(INPUT_GET, 'pagina', FILTER_VALIDATE_INT) ?? 1));
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    if (!Auth::tokenValido(filter_input(INPUT_POST, 'token', FILTER_UNSAFE_RAW) ?? '')) {
+    if (!Auth::formularioValido()) {
         $erro = 'A sessão expirou. Tenta outra vez.';
     } else {
         $erro = Admin::apagarUtilizador((int) filter_input(INPUT_POST, 'id', FILTER_VALIDATE_INT), $utilizadorId);
@@ -18,8 +18,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // para o F5 não apagar outra vez
     if (!$erro) {
         $_SESSION['aviso_admin'] = 'Utilizador apagado.';
-        header('Location: ' . BASE_URL . '/projeto/admin_utilizadores.php?' . http_build_query($_GET));
-        exit;
+        irPara('admin/utilizadores.php?' . http_build_query($_GET));
     }
 }
 
@@ -27,11 +26,11 @@ $resultado = Admin::utilizadores($texto, $pagina);
 $totalPaginas = max(1, (int) ceil($resultado['total'] / Admin::POR_PAGINA));
 
 $tituloPagina = 'Administração';
-require_once __DIR__ . '/includes/header.php';
+require_once __DIR__ . '/../includes/header.php';
 ?>
 
 <section class="admin">
-    <?php require __DIR__ . '/includes/abas_admin.php'; ?>
+    <?php require __DIR__ . '/../includes/abas_admin.php'; ?>
 
     <!-- mesmo estilo da pesquisa do LFG -->
     <form method="get" class="filtros-lfg">
@@ -40,7 +39,7 @@ require_once __DIR__ . '/includes/header.php';
             <button type="submit">Procurar</button>
         </div>
         <?php if ($texto !== ''): ?>
-            <a class="link-discreto" href="<?= BASE_URL ?>/projeto/admin_utilizadores.php">Limpar</a>
+            <a class="link-discreto" href="<?= BASE_URL ?>/projeto/admin/utilizadores.php">Limpar</a>
         <?php endif; ?>
     </form>
 
@@ -51,7 +50,7 @@ require_once __DIR__ . '/includes/header.php';
             <li>
                 <div class="admin-dados">
                     <span>
-                        <a href="<?= BASE_URL ?>/projeto/perfil.php?u=<?= urlencode($utilizador['nome_utilizador']) ?>"><?= htmlspecialchars($utilizador['nome_utilizador']) ?></a>
+                        <a href="<?= BASE_URL ?>/projeto/perfil/perfil.php?u=<?= urlencode($utilizador['nome_utilizador']) ?>"><?= htmlspecialchars($utilizador['nome_utilizador']) ?></a>
                         <?php if ($utilizador['is_admin']): ?>
                             <span class="etiqueta-chave">admin</span>
                         <?php endif; ?>
@@ -89,7 +88,7 @@ require_once __DIR__ . '/includes/header.php';
         <p class="texto-dim">Nenhum utilizador encontrado.</p>
     <?php endif; ?>
 
-    <?php require __DIR__ . '/includes/paginacao.php'; ?>
+    <?php require __DIR__ . '/../includes/paginacao.php'; ?>
 </section>
 
-<?php require_once __DIR__ . '/includes/footer.php'; ?>
+<?php require_once __DIR__ . '/../includes/footer.php'; ?>

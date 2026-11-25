@@ -5,11 +5,11 @@ class Admin
     const POR_PAGINA = 30;
 
     const ABAS = [
-        'admin.php' => 'Resumo',
-        'admin_utilizadores.php' => 'Utilizadores',
-        'admin_lfg.php' => 'Anúncios LFG',
-        'admin_avaliacoes.php' => 'Avaliações',
-        'admin_jogos.php' => 'Jogos',
+        'resumo.php' => 'Resumo',
+        'utilizadores.php' => 'Utilizadores',
+        'lfg.php' => 'Anúncios LFG',
+        'avaliacoes.php' => 'Avaliações',
+        'jogos.php' => 'Jogos',
     ];
 
     // ids que passam para o jogo que fica ao juntar dois jogos
@@ -18,8 +18,7 @@ class Admin
     public static function verificar(): void
     {
         if (!Auth::admin()) {
-            header('Location: ' . BASE_URL . '/projeto/index.php');
-            exit;
+            irPara('index.php');
         }
     }
 
@@ -135,7 +134,7 @@ class Admin
             return 'Esse anúncio já não existe.';
         }
 
-        // o Lfg::apagar só deixa o dono apagar, por isso vai o id dele
+        // o apagar da classe Lfg só deixa o dono apagar, por isso vai o id dele
         Lfg::apagar($id, (int) $anuncio['utilizador_id']);
         Notificacoes::criar($anuncio['utilizador_id'], 'admin', 'O teu anúncio de ' . $anuncio['jogo'] . ' foi apagado por um administrador.');
 

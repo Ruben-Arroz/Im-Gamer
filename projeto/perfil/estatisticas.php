@@ -1,18 +1,10 @@
 <?php
-require_once __DIR__ . '/includes/bootstrap.php';
+require_once __DIR__ . '/../includes/inicio.php';
 
-if (!Auth::autenticado()) {
-    header('Location: ' . BASE_URL . '/projeto/login.php');
-    exit;
-}
+Auth::exigirSessao();
 
 // como no perfil, com ?u=nome mostra as estatísticas de outra pessoa
-$nomeUrl = filter_input(INPUT_GET, 'u', FILTER_UNSAFE_RAW);
-if ($nomeUrl !== null) {
-    $utilizador = Utilizador::buscarPorNome($nomeUrl);
-} else {
-    $utilizador = Utilizador::buscarPorId($_SESSION['utilizador_id']);
-}
+$utilizador = Utilizador::doUrl((int) $_SESSION['utilizador_id']);
 
 if ($utilizador) {
     $id = (int) $utilizador['id'];
@@ -65,7 +57,7 @@ if ($utilizador) {
 }
 
 $tituloPagina = 'Estatísticas';
-require_once __DIR__ . '/includes/header.php';
+require_once __DIR__ . '/../includes/header.php';
 ?>
 
 <section class="perfil estatisticas">
@@ -75,8 +67,8 @@ require_once __DIR__ . '/includes/header.php';
     <?php else: ?>
         <h1>Estatísticas</h1>
         <p class="perfil-data">
-            De <a href="<?= BASE_URL ?>/projeto/perfil.php?u=<?= urlencode($utilizador['nome_utilizador']) ?>"><?= htmlspecialchars($utilizador['nome_utilizador']) ?></a>
-            · <a href="<?= BASE_URL ?>/projeto/biblioteca.php?u=<?= urlencode($utilizador['nome_utilizador']) ?>">Ver biblioteca</a>
+            De <a href="<?= BASE_URL ?>/projeto/perfil/perfil.php?u=<?= urlencode($utilizador['nome_utilizador']) ?>"><?= htmlspecialchars($utilizador['nome_utilizador']) ?></a>
+            · <a href="<?= BASE_URL ?>/projeto/perfil/biblioteca.php?u=<?= urlencode($utilizador['nome_utilizador']) ?>">Ver biblioteca</a>
         </p>
 
         <?php if ($resumo['jogos'] == 0): ?>
@@ -128,7 +120,7 @@ require_once __DIR__ . '/includes/header.php';
                     <?php foreach ($maisJogados as $jogo): ?>
                         <div class="barra-linha">
                             <?php if ($jogo['jogo_id']): ?>
-                                <a class="barra-nome" href="<?= BASE_URL ?>/projeto/jogo.php?id=<?= $jogo['jogo_id'] ?>"><?= htmlspecialchars($jogo['nome']) ?></a>
+                                <a class="barra-nome" href="<?= BASE_URL ?>/projeto/jogos/jogo.php?id=<?= $jogo['jogo_id'] ?>"><?= htmlspecialchars($jogo['nome']) ?></a>
                             <?php else: ?>
                                 <span class="barra-nome"><?= htmlspecialchars($jogo['nome']) ?></span>
                             <?php endif; ?>
@@ -295,4 +287,4 @@ require_once __DIR__ . '/includes/header.php';
     <?php endif; ?>
 </section>
 
-<?php require_once __DIR__ . '/includes/footer.php'; ?>
+<?php require_once __DIR__ . '/../includes/footer.php'; ?>

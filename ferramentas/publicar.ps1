@@ -1,37 +1,30 @@
 ﻿# janela para publicar o site no servidor da UA e sincronizar as contas (precisa da VPN ligada)
-# abre-se com o publicar.bat que está na raiz do projeto
+# abre-se com o publicar.bat que está na raiz do projeto ou com o atalho "I'm Gamer publicar" do menu Iniciar
 
 Add-Type -AssemblyName System.Windows.Forms
 Add-Type -AssemblyName System.Drawing
 
-# funções do windows para usar as fontes do site e pôr a barra de título e o scroll escuros
+# funções do windows para usar as fontes do site, pôr a barra de título escura e mexer no scroll do registo
 Add-Type -TypeDefinition @'
 using System;
 using System.Runtime.InteropServices;
 public class Windows {
     [DllImport("gdi32.dll")]
     public static extern IntPtr AddFontMemResourceEx(IntPtr dados, uint tamanho, IntPtr reservado, ref uint quantas);
-    [DllImport("uxtheme.dll", CharSet = CharSet.Unicode)]
-    public static extern int SetWindowTheme(IntPtr janela, string tema, string lista);
     [DllImport("dwmapi.dll")]
     public static extern int DwmSetWindowAttribute(IntPtr janela, int atributo, ref int valor, int tamanho);
-    [DllImport("uxtheme.dll", EntryPoint = "#135")]
-    public static extern int SetPreferredAppMode(int modo);
+    [DllImport("user32.dll")]
+    public static extern IntPtr SendMessage(IntPtr janela, int mensagem, IntPtr a, IntPtr b);
 }
 '@
-
-# sem isto o windows ignora o tema escuro no scroll (2 = forçar escuro)
-[void][Windows]::SetPreferredAppMode(2)
 
 $pastaProjeto = Split-Path $PSScriptRoot -Parent
 $servidor = '\\arca.ua.pt\Hosting\esan-tesp-ds-paw.web.ua.pt\tesp-ds-g17'
 $site = 'https://esan-tesp-ds-paw.web.ua.pt/tesp-ds-g17/projeto/'
+$credenciais = "$pastaProjeto\projeto\config\credentials.php"
 
-# usa o comando php se existir, senão vai à pasta onde o winget o instalou
-$php = (Get-Command php -ErrorAction SilentlyContinue).Source
-if (-not $php) {
-    $php = "$env:LOCALAPPDATA\Microsoft\WinGet\Packages\PHP.PHP.8.3_Microsoft.Winget.Source_8wekyb3d8bbwe\php.exe"
-}
+# extensões do php que o site usa (bd, pedidos às apis, textos com acentos e ficheiros)
+$extensoes = @('curl', 'fileinfo', 'mbstring', 'openssl', 'pdo_mysql')
 
 # cores iguais às do site (common/style.css)
 $corFundo = [System.Drawing.Color]::FromArgb(14, 15, 18)
@@ -39,6 +32,8 @@ $corCaixa = [System.Drawing.Color]::FromArgb(22, 23, 27)
 $corBorda = [System.Drawing.Color]::FromArgb(36, 38, 43)
 $corTexto = [System.Drawing.Color]::FromArgb(242, 242, 240)
 $corDim = [System.Drawing.Color]::FromArgb(143, 145, 152)
+# cor do puxador da barra de scroll, um pouco mais clara que a borda para se ver
+$corPuxador = [System.Drawing.Color]::FromArgb(62, 65, 72)
 
 # ---------- fontes ----------
 
@@ -76,89 +71,253 @@ try {
 
 $letraPequena = New-Object System.Drawing.Font($letraTexto.FontFamily, 9.5)
 
+# ---------- php ----------
+
+# usa o comando php se existir, senão vai à pasta onde o winget o instala
+function Encontrar-Php {
+    $comando = Get-Command php -ErrorAction SilentlyContinue
+    if ($comando) {
+        return $comando.Source
+    }
+
+    $instalado = Get-ChildItem "$env:LOCALAPPDATA\Microsoft\WinGet\Packages\PHP.PHP.8.3_*\php.exe" -ErrorAction SilentlyContinue | Select-Object -First 1
+    if ($instalado) {
+        return $instalado.FullName
+    }
+    return $null
+}
+
+# o php do winget vem sem php.ini, e sem ele não liga à bd nem faz pedidos às apis
+function Php-Configurado($php) {
+    if (-not (Test-Path (Join-Path (Split-Path $php) 'php.ini'))) {
+        return $false
+    }
+
+    $modulos = & $php -m 2>$null
+    if ($LASTEXITCODE -ne 0) {
+        return $false
+    }
+    foreach ($extensao in $extensoes) {
+        if ($modulos -notcontains $extensao) {
+            return $false
+        }
+    }
+    return $true
+}
+
 # ---------- janela ----------
 
 $janela = New-Object System.Windows.Forms.Form
 $janela.Text = "I'm Gamer"
+$janela.Size = New-Object System.Drawing.Size(1180, 780)
+$janela.StartPosition = 'CenterScreen'
 $janela.WindowState = 'Maximized'
-$janela.MinimumSize = New-Object System.Drawing.Size(720, 480)
+$janela.MinimumSize = New-Object System.Drawing.Size(1000, 720)
 $janela.BackColor = $corFundo
 $janela.ForeColor = $corTexto
 $janela.Font = $letraTexto
 
-$logo = "$pastaProjeto\projeto\assets\img\logos\versao3\logo_branco_fundo_preto.png"
-if (Test-Path $logo) {
-    $imagem = New-Object System.Drawing.Bitmap($logo)
-    $janela.Icon = [System.Drawing.Icon]::FromHandle($imagem.GetHicon())
+if (Test-Path "$PSScriptRoot\imgamer.ico") {
+    $janela.Icon = New-Object System.Drawing.Icon("$PSScriptRoot\imgamer.ico")
 }
 
-# cabeçalho com o nome e os botões
+# cabeçalho com o nome
 $cabecalho = New-Object System.Windows.Forms.Panel
 $cabecalho.Dock = 'Top'
-$cabecalho.Height = 128
-$cabecalho.Padding = New-Object System.Windows.Forms.Padding(24, 20, 24, 0)
+$cabecalho.Height = 76
 
 $titulo = New-Object System.Windows.Forms.Label
 $titulo.Text = "I'm Gamer"
 $titulo.Font = $letraTitulo
 $titulo.AutoSize = $true
 $titulo.UseCompatibleTextRendering = $true
-$titulo.Location = New-Object System.Drawing.Point(24, 22)
+$titulo.Location = New-Object System.Drawing.Point(24, 26)
 
 $subtitulo = New-Object System.Windows.Forms.Label
 $subtitulo.Text = 'publicar e sincronizar'
 $subtitulo.ForeColor = $corDim
 $subtitulo.Font = $letraPequena
 $subtitulo.AutoSize = $true
-$subtitulo.Location = New-Object System.Drawing.Point(210, 26)
+$subtitulo.Location = New-Object System.Drawing.Point(210, 30)
 
-# os botões ficam numa "fila" que passa para a linha de baixo se a janela for estreita
-$botoes = New-Object System.Windows.Forms.FlowLayoutPanel
-$botoes.Location = New-Object System.Drawing.Point(20, 64)
-$botoes.Size = New-Object System.Drawing.Size(1200, 50)
-$botoes.Anchor = 'Top, Left, Right'
-$botoes.WrapContents = $true
+# linha fina por baixo do cabeçalho
+$linhaCabecalho = New-Object System.Windows.Forms.Panel
+$linhaCabecalho.Dock = 'Bottom'
+$linhaCabecalho.Height = 1
+$linhaCabecalho.BackColor = $corBorda
+
+$cabecalho.Controls.Add($titulo)
+$cabecalho.Controls.Add($subtitulo)
+$cabecalho.Controls.Add($linhaCabecalho)
+
+# ---------- coluna da esquerda com os botões e o estado ----------
+
+$lateral = New-Object System.Windows.Forms.Panel
+$lateral.Dock = 'Left'
+$lateral.Width = 340
+$lateral.Padding = New-Object System.Windows.Forms.Padding(24, 16, 8, 12)
+
+$menu = New-Object System.Windows.Forms.FlowLayoutPanel
+$menu.Dock = 'Fill'
+$menu.FlowDirection = 'TopDown'
+$menu.WrapContents = $false
+$lateral.Controls.Add($menu)
+
+$largura = 290
+
+function Nova-Secao($texto) {
+    $secao = New-Object System.Windows.Forms.Label
+    $secao.Text = $texto.ToUpper()
+    $secao.ForeColor = $corDim
+    $secao.Font = $letraPequena
+    $secao.AutoSize = $true
+    $secao.Margin = New-Object System.Windows.Forms.Padding(0, 14, 0, 8)
+    $menu.Controls.Add($secao)
+}
+
+function Pintar-Botao($botao, $ativo) {
+    if (-not $ativo) {
+        $botao.BackColor = $corFundo
+        $botao.ForeColor = $corDim
+        $botao.Cursor = 'Default'
+    } elseif ($botao.Tag -eq 'principal') {
+        $botao.BackColor = $corTexto
+        $botao.ForeColor = $corFundo
+        $botao.Cursor = 'Hand'
+    } else {
+        $botao.BackColor = $corFundo
+        $botao.ForeColor = $corTexto
+        $botao.Cursor = 'Hand'
+    }
+}
 
 function Novo-Botao($texto, $principal) {
     $botao = New-Object System.Windows.Forms.Button
     $botao.Text = $texto
-    $botao.AutoSize = $true
-    $botao.AutoSizeMode = 'GrowAndShrink'
-    $botao.Padding = New-Object System.Windows.Forms.Padding(14, 6, 14, 6)
-    $botao.Margin = New-Object System.Windows.Forms.Padding(4, 0, 8, 8)
+    $botao.Size = New-Object System.Drawing.Size($largura, 40)
+    $botao.TextAlign = 'MiddleLeft'
+    $botao.Padding = New-Object System.Windows.Forms.Padding(10, 0, 0, 0)
+    $botao.Margin = New-Object System.Windows.Forms.Padding(0, 0, 0, 10)
     $botao.FlatStyle = 'Flat'
-    $botao.Cursor = 'Hand'
     $botao.UseCompatibleTextRendering = $true
+    $botao.FlatAppearance.BorderColor = $corBorda
+    $botao.FlatAppearance.MouseOverBackColor = $corBorda
 
     if ($principal) {
-        $botao.BackColor = $corTexto
-        $botao.ForeColor = $corFundo
+        $botao.Tag = 'principal'
         $botao.FlatAppearance.BorderSize = 0
-    } else {
-        $botao.BackColor = $corFundo
-        $botao.ForeColor = $corTexto
-        $botao.FlatAppearance.BorderColor = $corBorda
+        # o botão principal é claro, por isso o rato por cima fica branco e não cinzento
+        $botao.FlatAppearance.MouseOverBackColor = [System.Drawing.Color]::White
     }
-
-    $botao.FlatAppearance.MouseOverBackColor = $corBorda
-    $botoes.Controls.Add($botao)
+    Pintar-Botao $botao $true
+    $menu.Controls.Add($botao)
     return $botao
 }
 
+function Novo-Botao-Pequeno($texto) {
+    $botao = New-Object System.Windows.Forms.Button
+    $botao.Text = $texto
+    $botao.AutoSize = $true
+    $botao.AutoSizeMode = 'GrowAndShrink'
+    $botao.Font = $letraPequena
+    $botao.FlatStyle = 'Flat'
+    $botao.UseCompatibleTextRendering = $true
+    $botao.FlatAppearance.BorderColor = $corBorda
+    $botao.FlatAppearance.MouseOverBackColor = $corBorda
+    $botao.Padding = New-Object System.Windows.Forms.Padding(6, 0, 6, 0)
+    Pintar-Botao $botao $true
+    return $botao
+}
+
+Nova-Secao 'Servidor da UA'
 $botaoPublicar = Novo-Botao 'Publicar site' $true
-$botaoSincronizar = Novo-Botao 'Sincronizar contas' $false
 $botaoCredenciais = Novo-Botao 'Enviar credenciais' $false
 $botaoSite = Novo-Botao 'Abrir site' $false
+
+Nova-Secao 'Neste PC'
+$botaoSincronizar = Novo-Botao 'Sincronizar contas' $false
 $botaoLocal = Novo-Botao 'Site local' $false
-$botaoLimpar = Novo-Botao 'Limpar' $false
 
-# o botão principal fica com texto escuro quando o rato passa por cima
-$botaoPublicar.FlatAppearance.MouseOverBackColor = [System.Drawing.Color]::White
+# ---------- à direita, o estado em cima e o registo por baixo ----------
 
-# caixa com o registo do que vai acontecendo
 $area = New-Object System.Windows.Forms.Panel
 $area.Dock = 'Fill'
-$area.Padding = New-Object System.Windows.Forms.Padding(24, 4, 24, 0)
+$area.Padding = New-Object System.Windows.Forms.Padding(16, 20, 24, 0)
+
+function Novo-Titulo($texto) {
+    $rotulo = New-Object System.Windows.Forms.Label
+    $rotulo.Text = $texto
+    $rotulo.ForeColor = $corDim
+    $rotulo.Font = $letraPequena
+    $rotulo.AutoSize = $true
+    $rotulo.Location = New-Object System.Drawing.Point(0, 8)
+    return $rotulo
+}
+
+# faixa do estado com a VPN, o PHP e as credenciais lado a lado
+$topoEstado = New-Object System.Windows.Forms.Panel
+$topoEstado.Dock = 'Top'
+$topoEstado.Height = 34
+$topoEstado.Controls.Add((Novo-Titulo 'ESTADO'))
+
+$faixaEstado = New-Object System.Windows.Forms.FlowLayoutPanel
+$faixaEstado.Dock = 'Top'
+$faixaEstado.Height = 44
+$faixaEstado.WrapContents = $true
+
+# cada parte do estado tem o nome, o que se passa e um botão para resolver (só aparece quando falta alguma coisa)
+function Novo-Estado($nome) {
+    $rotulo = New-Object System.Windows.Forms.Label
+    $rotulo.Text = $nome
+    $rotulo.ForeColor = $corDim
+    $rotulo.AutoSize = $true
+    $rotulo.Margin = New-Object System.Windows.Forms.Padding(0, 6, 8, 0)
+
+    $valor = New-Object System.Windows.Forms.Label
+    $valor.Text = '...'
+    $valor.ForeColor = $corDim
+    $valor.AutoSize = $true
+    $valor.Margin = New-Object System.Windows.Forms.Padding(0, 6, 8, 0)
+
+    $botao = Novo-Botao-Pequeno ''
+    $botao.Visible = $false
+    $botao.Margin = New-Object System.Windows.Forms.Padding(0, 2, 0, 0)
+
+    # espaço entre as partes do estado
+    $espaco = New-Object System.Windows.Forms.Label
+    $espaco.Width = 28
+    $espaco.Margin = New-Object System.Windows.Forms.Padding(0)
+
+    $faixaEstado.Controls.Add($rotulo)
+    $faixaEstado.Controls.Add($valor)
+    $faixaEstado.Controls.Add($botao)
+    $faixaEstado.Controls.Add($espaco)
+
+    return @{ Valor = $valor; Botao = $botao }
+}
+
+$estadoVpn = Novo-Estado 'VPN'
+$estadoPhp = Novo-Estado 'PHP'
+$estadoCredenciais = Novo-Estado 'Credenciais'
+
+$botaoVerificar = Novo-Botao-Pequeno 'Verificar outra vez'
+$topoEstado.Controls.Add($botaoVerificar)
+
+$topoRegisto = New-Object System.Windows.Forms.Panel
+$topoRegisto.Dock = 'Top'
+$topoRegisto.Height = 34
+$topoRegisto.Controls.Add((Novo-Titulo 'REGISTO'))
+
+$botaoLimpar = Novo-Botao-Pequeno 'Limpar'
+$topoRegisto.Controls.Add($botaoLimpar)
+
+# o Limpar e o Verificar ficam sempre encostados à direita, mesmo quando a janela muda de tamanho
+$topoRegisto.Add_Resize({
+    $botaoLimpar.Location = New-Object System.Drawing.Point(($topoRegisto.Width - $botaoLimpar.Width), 2)
+})
+$topoEstado.Add_Resize({
+    $botaoVerificar.Location = New-Object System.Drawing.Point(($topoEstado.Width - $botaoVerificar.Width), 2)
+})
 
 $moldura = New-Object System.Windows.Forms.Panel
 $moldura.Dock = 'Fill'
@@ -168,7 +327,7 @@ $moldura.Padding = New-Object System.Windows.Forms.Padding(1)
 $fundoRegisto = New-Object System.Windows.Forms.Panel
 $fundoRegisto.Dock = 'Fill'
 $fundoRegisto.BackColor = $corCaixa
-$fundoRegisto.Padding = New-Object System.Windows.Forms.Padding(16, 12, 4, 12)
+$fundoRegisto.Padding = New-Object System.Windows.Forms.Padding(16, 12, 6, 12)
 
 $registo = New-Object System.Windows.Forms.RichTextBox
 $registo.Dock = 'Fill'
@@ -179,12 +338,30 @@ $registo.ForeColor = $corTexto
 $registo.Font = $letraTexto
 $registo.WordWrap = $true
 $registo.DetectUrls = $false
+# a barra de scroll do windows fica sempre branca, por isso esconde-se e usa-se a de baixo
+$registo.ScrollBars = 'None'
+
+# barra de scroll feita à mão, uma calha escura com um puxador que se arrasta
+$barra = New-Object System.Windows.Forms.Panel
+$barra.Dock = 'Right'
+$barra.Width = 10
+$barra.BackColor = $corCaixa
+
+$puxador = New-Object System.Windows.Forms.Panel
+$puxador.BackColor = $corPuxador
+$puxador.Visible = $false
+$barra.Controls.Add($puxador)
 
 $fundoRegisto.Controls.Add($registo)
+$fundoRegisto.Controls.Add($barra)
 $moldura.Controls.Add($fundoRegisto)
+# a ordem conta, o que é adicionado primeiro com Dock=Fill fica no meio e o último fica em cima de tudo
 $area.Controls.Add($moldura)
+$area.Controls.Add($topoRegisto)
+$area.Controls.Add($faixaEstado)
+$area.Controls.Add($topoEstado)
 
-# barra de baixo com o estado
+# barra de baixo com o estado da tarefa
 $rodape = New-Object System.Windows.Forms.Panel
 $rodape.Dock = 'Bottom'
 $rodape.Height = 44
@@ -194,18 +371,17 @@ $estado = New-Object System.Windows.Forms.Label
 $estado.Dock = 'Fill'
 $estado.ForeColor = $corDim
 $estado.Font = $letraPequena
-$estado.Text = 'Liga a VPN e escolhe o que queres fazer.'
+$estado.Text = 'Escolhe o que queres fazer.'
 $estado.UseCompatibleTextRendering = $true
 $rodape.Controls.Add($estado)
 
-$cabecalho.Controls.Add($titulo)
-$cabecalho.Controls.Add($subtitulo)
-$cabecalho.Controls.Add($botoes)
-
-# a ordem conta: o que é adicionado primeiro com Dock=Fill fica no meio
 $janela.Controls.Add($area)
+$janela.Controls.Add($lateral)
 $janela.Controls.Add($rodape)
 $janela.Controls.Add($cabecalho)
+
+# os botões que ficam parados enquanto uma tarefa corre
+$botoesTarefa = @($botaoPublicar, $botaoCredenciais, $botaoSincronizar, $botaoLimpar, $botaoVerificar, $estadoPhp.Botao, $estadoCredenciais.Botao)
 
 # ---------- escrever no registo ----------
 
@@ -222,6 +398,7 @@ function Escrever($texto, $cor, $negrito) {
 
     $registo.AppendText($texto + "`n")
     $registo.ScrollToCaret()
+    Atualizar-Barra
 }
 
 # as linhas do robocopy são traduzidas para português e com o caminho mais curto
@@ -238,6 +415,11 @@ $tipos = @{
 
 function Escrever-Linha($linha) {
     if ($linha.Trim() -eq '') {
+        return
+    }
+
+    # o winget desenha barras de progresso com estes carateres, não interessam no registo
+    if ($linha -match '[█▒]' -or $linha -match '^\s*[-\\|/]\s*$') {
         return
     }
 
@@ -272,6 +454,8 @@ $script:resto = ''
 $script:inicio = $null
 $script:tarefa = ''
 $script:houveErro = $false
+# o que se faz quando a tarefa acaba bem (por exemplo configurar o php depois de o instalar)
+$script:depois = $null
 
 # com Enabled = $false o windows pinta o texto dos botões de preto e não se lê no fundo escuro,
 # por isso os botões ficam ativos mas ignoram os cliques e são pintados a cinzento à mão
@@ -279,21 +463,8 @@ $script:ocupado = $false
 
 function Bloquear-Botoes($bloquear) {
     $script:ocupado = $bloquear
-
-    foreach ($botao in @($botaoPublicar, $botaoSincronizar, $botaoCredenciais, $botaoLimpar)) {
-        if ($bloquear) {
-            $botao.BackColor = $corFundo
-            $botao.ForeColor = $corDim
-            $botao.Cursor = 'Default'
-        } elseif ($botao -eq $botaoPublicar) {
-            $botao.BackColor = $corTexto
-            $botao.ForeColor = $corFundo
-            $botao.Cursor = 'Hand'
-        } else {
-            $botao.BackColor = $corFundo
-            $botao.ForeColor = $corTexto
-            $botao.Cursor = 'Hand'
-        }
+    foreach ($botao in $botoesTarefa) {
+        Pintar-Botao $botao (-not $bloquear)
     }
 }
 
@@ -359,15 +530,15 @@ function Ler-Saida {
         return
     }
 
-    # o php escreve em utf-8, o robocopy na codificação antiga da consola
-    if ($script:atual.Tipo -eq 'php') {
-        $texto = [System.Text.Encoding]::UTF8.GetString($bytes, 0, $lidos)
-    } else {
+    # o php e o winget escrevem em utf-8, o robocopy na codificação antiga da consola
+    if ($script:atual.Tipo -eq 'robocopy') {
         $texto = [System.Text.Encoding]::GetEncoding(850).GetString($bytes, 0, $lidos)
+    } else {
+        $texto = [System.Text.Encoding]::UTF8.GetString($bytes, 0, $lidos)
     }
 
     # a última linha pode ainda não estar completa, fica guardada para a próxima leitura
-    $linhas = ($script:resto + $texto) -split "`r?`n"
+    $linhas = ($script:resto + $texto) -split "`r`n|`n|`r"
     $script:resto = $linhas[-1]
 
     for ($i = 0; $i -lt $linhas.Length - 1; $i++) {
@@ -385,7 +556,14 @@ function Fim-Do-Comando {
     $codigo = $script:processo.ExitCode
 
     # no robocopy os códigos de 0 a 7 são sucesso, no php só o 0
-    $falhou = ($script:atual.Tipo -eq 'robocopy' -and $codigo -ge 8) -or ($script:atual.Tipo -eq 'php' -and $codigo -ne 0)
+    # no winget o -1978335189 quer dizer que o programa já estava instalado
+    if ($script:atual.Tipo -eq 'robocopy') {
+        $falhou = $codigo -ge 8
+    } elseif ($script:atual.Tipo -eq 'winget') {
+        $falhou = $codigo -ne 0 -and $codigo -ne -1978335189
+    } else {
+        $falhou = $codigo -ne 0
+    }
 
     if ($falhou) {
         $script:houveErro = $true
@@ -422,6 +600,13 @@ function Terminar {
     }
 
     Bloquear-Botoes $false
+
+    $depois = $script:depois
+    $script:depois = $null
+    if ($depois -and -not $script:houveErro) {
+        & $depois
+    }
+    Atualizar-Estado
 }
 
 $temporizador = New-Object System.Windows.Forms.Timer
@@ -441,18 +626,325 @@ $temporizador.Add_Tick({
     }
 })
 
-# ---------- botões ----------
+# ---------- vpn, php e credenciais ----------
+
+# tenta ligar ao servidor da UA durante 1,5 s, sem a VPN não responde
+# (o Test-Path sozinho pode ficar parado uns 20 s quando a VPN está desligada)
+function Tem-Vpn {
+    try {
+        $cliente = New-Object System.Net.Sockets.TcpClient
+        $tentativa = $cliente.BeginConnect('arca.ua.pt', 445, $null, $null)
+        $ligou = $tentativa.AsyncWaitHandle.WaitOne(1500) -and $cliente.Connected
+        $cliente.Close()
+        return $ligou
+    } catch {
+        return $false
+    }
+}
 
 function Ha-Vpn {
-    if (Test-Path $servidor) {
+    if ((Tem-Vpn) -and (Test-Path $servidor)) {
         return $true
     }
 
     Escrever '' $corTexto $false
     Escrever 'Não consegui chegar ao servidor da UA. Liga a VPN e tenta outra vez.' $corTexto $true
     $estado.Text = 'Sem ligação ao servidor (VPN desligada?).'
+    Atualizar-Estado
     return $false
 }
+
+function Mostrar-Estado($linha, $texto, $ok, $textoBotao) {
+    # o que está bem fica a branco, o que falta fica a cinzento e com o botão para resolver
+    $linha.Valor.Text = $texto
+    if ($ok) {
+        $linha.Valor.ForeColor = $corTexto
+        $linha.Botao.Visible = $false
+    } else {
+        $linha.Valor.ForeColor = $corDim
+        $linha.Botao.Text = $textoBotao
+        $linha.Botao.Visible = [bool]$textoBotao
+    }
+}
+
+function Atualizar-Estado {
+    $janela.Cursor = 'WaitCursor'
+
+    if (Tem-Vpn) {
+        Mostrar-Estado $estadoVpn 'ligada' $true $null
+    } else {
+        Mostrar-Estado $estadoVpn 'desligada' $false $null
+    }
+
+    $php = Encontrar-Php
+    if (-not $php) {
+        Mostrar-Estado $estadoPhp 'não instalado' $false 'Instalar'
+    } elseif (-not (Php-Configurado $php)) {
+        Mostrar-Estado $estadoPhp 'falta configurar' $false 'Configurar'
+    } else {
+        $versao = & $php -r 'echo PHP_VERSION;'
+        Mostrar-Estado $estadoPhp $versao $true $null
+    }
+
+    if (Test-Path $credenciais) {
+        Mostrar-Estado $estadoCredenciais 'neste PC' $true $null
+    } else {
+        Mostrar-Estado $estadoCredenciais 'em falta' $false 'Trazer'
+    }
+
+    $janela.Cursor = 'Default'
+}
+
+# cria o php.ini a partir do exemplo que vem com o php, com as extensões e os certificados para o https
+function Configurar-Php($perguntar) {
+    $php = Encontrar-Php
+    if (-not $php) {
+        Escrever 'Não encontrei o PHP neste computador.' $corTexto $true
+        return
+    }
+
+    if (Php-Configurado $php) {
+        Escrever 'O PHP já está configurado.' $corDim $false
+        return
+    }
+
+    if ($perguntar) {
+        $resposta = [System.Windows.Forms.MessageBox]::Show(
+            "Criar o php.ini com as extensões que o site usa ($($extensoes -join ', ')) e descarregar os certificados do curl?",
+            'Configurar o PHP', 'YesNo', 'Question')
+        if ($resposta -ne 'Yes') {
+            return
+        }
+    }
+
+    $pasta = Split-Path $php
+    $ini = Join-Path $pasta 'php.ini'
+    Escrever '' $corTexto $false
+    Escrever '== Configurar o PHP ==' $corTexto $true
+
+    try {
+        # se já havia um php.ini fica guardado com outro nome
+        if (Test-Path $ini) {
+            Copy-Item $ini "$ini.antigo" -Force
+            Escrever '  o php.ini antigo ficou guardado como php.ini.antigo' $corDim $false
+        }
+
+        $texto = [System.IO.File]::ReadAllText((Join-Path $pasta 'php.ini-development'))
+        $texto = $texto.Replace(';extension_dir = "ext"', 'extension_dir = "ext"')
+        foreach ($extensao in $extensoes) {
+            $texto = [regex]::Replace($texto, "(?m)^;extension=$extensao(?=\r?$)", "extension=$extensao")
+        }
+        $texto = [regex]::Replace($texto, '(?m)^;date\.timezone =[^\r\n]*', 'date.timezone = Europe/Lisbon')
+
+        # sem estes certificados o php não consegue falar com as apis por https
+        try {
+            [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
+            $ProgressPreference = 'SilentlyContinue'
+            Invoke-WebRequest 'https://curl.se/ca/cacert.pem' -OutFile (Join-Path $pasta 'cacert.pem') -UseBasicParsing
+            $certificados = (Join-Path $pasta 'cacert.pem').Replace('\', '/')
+            $texto = [regex]::Replace($texto, '(?m)^;curl\.cainfo =[^\r\n]*', "curl.cainfo = `"$certificados`"")
+            $texto = [regex]::Replace($texto, '(?m)^;openssl\.cafile=[^\r\n]*', "openssl.cafile=`"$certificados`"")
+            Escrever '  certificados descarregados do curl.se' $corTexto $false
+        } catch {
+            Escrever '  não consegui descarregar os certificados, os pedidos às apis por https podem falhar' $corTexto $true
+        }
+
+        [System.IO.File]::WriteAllText($ini, $texto)
+        Escrever "  php.ini criado em $pasta" $corTexto $false
+    } catch {
+        Escrever "  não consegui criar o php.ini ($($_.Exception.Message))" $corTexto $true
+        return
+    }
+
+    if (Php-Configurado $php) {
+        Escrever '  PHP pronto' $corTexto $true
+    } else {
+        Escrever '  o php.ini foi criado mas o PHP ainda não está pronto, vê o que diz o php -m' $corTexto $true
+        Escrever '  se o php nem arranca, falta instalar o Microsoft Visual C++ Redistributable (x64)' $corTexto $false
+    }
+}
+
+# instala o php 8.3 com o winget (fica na pasta do utilizador, não precisa de administrador)
+function Resolver-Php {
+    if (Encontrar-Php) {
+        Configurar-Php $true
+        Atualizar-Estado
+        return
+    }
+
+    if (-not (Get-Command winget -ErrorAction SilentlyContinue)) {
+        Escrever '' $corTexto $false
+        Escrever 'Este PC não tem o winget, por isso o PHP tem de ser instalado à mão.' $corTexto $true
+        Escrever '  descarrega o PHP 8.3 (VS16 x64 Thread Safe) em https://windows.php.net/download e põe a pasta no PATH' $corTexto $false
+        return
+    }
+
+    $resposta = [System.Windows.Forms.MessageBox]::Show(
+        'O PHP não está instalado neste PC. Instalar o PHP 8.3 com o winget? Não precisa de administrador.',
+        'Instalar o PHP', 'YesNo', 'Question')
+    if ($resposta -ne 'Yes') {
+        return
+    }
+
+    # depois de instalar configura logo, sem perguntar outra vez
+    $script:depois = { Configurar-Php $false }
+    Comecar 'Instalar o PHP' @(
+        (Novo-Comando 'winget' 'winget' 'install --id PHP.PHP.8.3 -e --accept-source-agreements --accept-package-agreements --disable-interactivity')
+    )
+}
+
+# o credentials.php não vai para o git, num PC novo copia-se o do servidor
+function Trazer-Credenciais {
+    if (Test-Path $credenciais) {
+        Escrever 'O credentials.php já existe neste PC.' $corDim $false
+        return
+    }
+
+    if (-not (Ha-Vpn)) {
+        return
+    }
+
+    $resposta = [System.Windows.Forms.MessageBox]::Show(
+        'Copiar o credentials.php do servidor da UA para este PC?',
+        'Trazer credenciais', 'YesNo', 'Question')
+    if ($resposta -ne 'Yes') {
+        return
+    }
+
+    try {
+        Copy-Item "$servidor\projeto\config\credentials.php" $credenciais -ErrorAction Stop
+        Escrever '' $corTexto $false
+        Escrever 'credentials.php copiado do servidor.' $corTexto $true
+    } catch {
+        Escrever 'Não foi possível copiar o credentials.php do servidor.' $corTexto $true
+    }
+    Atualizar-Estado
+}
+
+# antes de usar o php vê se está tudo pronto e diz o que falta
+function Php-Pronto {
+    $php = Encontrar-Php
+    if (-not $php -or -not (Php-Configurado $php)) {
+        Escrever '' $corTexto $false
+        Escrever 'O PHP ainda não está pronto neste PC. Usa o botão ao lado de PHP, em Estado.' $corTexto $true
+        Atualizar-Estado
+        return $null
+    }
+
+    if (-not (Test-Path $credenciais)) {
+        Escrever '' $corTexto $false
+        Escrever 'Falta o credentials.php neste PC. Usa o botão ao lado de Credenciais, em Estado.' $corTexto $true
+        Atualizar-Estado
+        return $null
+    }
+    return $php
+}
+
+# ---------- atalho no menu Iniciar ----------
+
+# com o atalho basta carregar na tecla do windows e escrever "gamer"
+# se a pasta do projeto mudar de sítio o atalho é corrigido da próxima vez que a janela abre
+function Criar-Atalho {
+    try {
+        $caminho = Join-Path ([Environment]::GetFolderPath('Programs')) "I'm Gamer publicar.lnk"
+        $argumentos = "--headless powershell -NoProfile -ExecutionPolicy Bypass -File `"$PSCommandPath`""
+
+        $shell = New-Object -ComObject WScript.Shell
+        $atalho = $shell.CreateShortcut($caminho)
+        if ((Test-Path $caminho) -and $atalho.Arguments -eq $argumentos) {
+            return
+        }
+
+        $atalho.TargetPath = "$env:SystemRoot\System32\conhost.exe"
+        $atalho.Arguments = $argumentos
+        $atalho.WorkingDirectory = $pastaProjeto
+        $atalho.IconLocation = "$PSScriptRoot\imgamer.ico"
+        $atalho.Description = 'Publicar o site e sincronizar as contas'
+        $atalho.Save()
+
+        Escrever "Criei um atalho no menu Iniciar. Para abrir esta janela carrega na tecla do Windows e escreve gamer." $corDim $false
+    } catch {
+        # sem atalho continua a dar para abrir pelo publicar.bat
+    }
+}
+
+# ---------- barra de scroll do registo ----------
+
+# o registo diz quantas linhas tem e qual é a primeira à vista (EM_GETLINECOUNT e EM_GETFIRSTVISIBLELINE)
+function Linhas-Registo {
+    $total = [int][Windows]::SendMessage($registo.Handle, 0xBA, [IntPtr]::Zero, [IntPtr]::Zero)
+    $primeira = [int][Windows]::SendMessage($registo.Handle, 0xCE, [IntPtr]::Zero, [IntPtr]::Zero)
+    $visiveis = [Math]::Max(1, [int]($registo.ClientSize.Height / $registo.Font.Height))
+    return @($total, $primeira, $visiveis)
+}
+
+# anda N linhas para cima (negativo) ou para baixo (EM_LINESCROLL)
+function Andar-Registo($linhas) {
+    [void][Windows]::SendMessage($registo.Handle, 0xB6, [IntPtr]::Zero, [IntPtr][int]$linhas)
+    Atualizar-Barra
+}
+
+# o tamanho do puxador mostra quanto do registo está à vista e a posição mostra onde se está
+function Atualizar-Barra {
+    $total, $primeira, $visiveis = Linhas-Registo
+    if ($total -le $visiveis) {
+        $puxador.Visible = $false
+        return
+    }
+
+    $tamanho = [Math]::Max(30, [int]($barra.Height * $visiveis / $total))
+    $topo = [int](($barra.Height - $tamanho) * $primeira / ($total - $visiveis))
+    $topo = [Math]::Min($topo, $barra.Height - $tamanho)
+    $puxador.SetBounds(2, $topo, 6, $tamanho)
+    $puxador.Visible = $true
+}
+
+# sem a barra do windows a roda do rato deixa de mexer no registo, por isso faz-se aqui (3 linhas por volta)
+$registo.Add_MouseWheel({
+    param($origem, $evento)
+    Andar-Registo (-[int]($evento.Delta / 120) * 3)
+})
+$registo.Add_VScroll({ Atualizar-Barra })
+$registo.Add_Resize({ Atualizar-Barra })
+
+# arrastar o puxador
+$puxador.Add_MouseDown({
+    param($origem, $evento)
+    $script:pegouEm = $evento.Y
+})
+$puxador.Add_MouseMove({
+    param($origem, $evento)
+    if ($evento.Button -ne 'Left') {
+        return
+    }
+
+    $total, $primeira, $visiveis = Linhas-Registo
+    $livre = $barra.Height - $puxador.Height
+    if ($livre -le 0) {
+        return
+    }
+
+    $novoTopo = [Math]::Max(0, [Math]::Min($livre, $puxador.Top + $evento.Y - $script:pegouEm))
+    $alvo = [int](($total - $visiveis) * $novoTopo / $livre)
+    Andar-Registo ($alvo - $primeira)
+})
+
+# clicar na calha por cima ou por baixo do puxador anda uma página
+$barra.Add_MouseDown({
+    param($origem, $evento)
+    $total, $primeira, $visiveis = Linhas-Registo
+    if ($evento.Y -lt $puxador.Top) {
+        Andar-Registo (-$visiveis)
+    } else {
+        Andar-Registo $visiveis
+    }
+})
+
+# o puxador fica mais claro com o rato por cima
+$puxador.Add_MouseEnter({ $puxador.BackColor = $corDim })
+$puxador.Add_MouseLeave({ $puxador.BackColor = $corPuxador })
+
+# ---------- botões ----------
 
 $botaoPublicar.Add_Click({
     # enquanto uma tarefa está a correr os botões não fazem nada
@@ -474,7 +966,6 @@ $botaoPublicar.Add_Click({
 })
 
 $botaoSincronizar.Add_Click({
-    # enquanto uma tarefa está a correr os botões não fazem nada
     if ($script:ocupado) {
         return
     }
@@ -483,13 +974,13 @@ $botaoSincronizar.Add_Click({
         return
     }
 
-    if (-not (Test-Path $php)) {
-        Escrever 'Não encontrei o PHP neste computador.' $corTexto $true
+    $php = Php-Pronto
+    if (-not $php) {
         return
     }
 
     Comecar 'Sincronizar contas' @(
-        (Novo-Comando 'php' $php "`"$pastaProjeto\projeto\sincronizar.php`"")
+        (Novo-Comando 'php' $php "`"$pastaProjeto\projeto\tarefas\sincronizar.php`"")
     )
 })
 
@@ -497,6 +988,11 @@ $botaoSincronizar.Add_Click({
 # este botão é só para quando se muda uma chave e pede confirmação antes
 $botaoCredenciais.Add_Click({
     if ($script:ocupado) {
+        return
+    }
+
+    if (-not (Test-Path $credenciais)) {
+        Escrever 'Não há credentials.php neste PC para enviar.' $corTexto $true
         return
     }
 
@@ -513,7 +1009,7 @@ $botaoCredenciais.Add_Click({
     }
 
     try {
-        Copy-Item "$pastaProjeto\projeto\config\credentials.php" "$servidor\projeto\config\credentials.php" -ErrorAction Stop
+        Copy-Item $credenciais "$servidor\projeto\config\credentials.php" -ErrorAction Stop
         Escrever '' $corTexto $false
         Escrever 'credentials.php enviado para o servidor.' $corTexto $true
         $estado.Text = 'Credenciais enviadas às ' + (Get-Date -Format 'HH:mm') + '.'
@@ -533,8 +1029,8 @@ $botaoLocal.Add_Click({
         return
     }
 
-    if (-not (Test-Path $php)) {
-        Escrever 'Não encontrei o PHP neste computador.' $corTexto $true
+    $php = Php-Pronto
+    if (-not $php) {
         return
     }
 
@@ -553,29 +1049,54 @@ $botaoLocal.Add_Click({
         Start-Sleep -Milliseconds 800
     }
 
-    Start-Process 'http://localhost:8124/projeto/contas.php'
+    Start-Process 'http://localhost:8124/projeto/contas/contas.php'
     Escrever '' $corTexto $false
     Escrever 'Site local aberto em http://localhost:8124 (fecha quando fechares esta janela).' $corTexto $true
     $estado.Text = 'Site local a correr.'
 })
 
 $botaoLimpar.Add_Click({
-    # enquanto uma tarefa está a correr os botões não fazem nada
     if ($script:ocupado) {
         return
     }
 
     $registo.Clear()
-    $estado.Text = 'Liga a VPN e escolhe o que queres fazer.'
+    $estado.Text = 'Escolhe o que queres fazer.'
 })
 
-# barra de título e scroll escuros (windows 10 e 11)
+$botaoVerificar.Add_Click({
+    if ($script:ocupado) {
+        return
+    }
+    Atualizar-Estado
+})
+
+$estadoPhp.Botao.Add_Click({
+    if ($script:ocupado) {
+        return
+    }
+    Resolver-Php
+})
+
+$estadoCredenciais.Botao.Add_Click({
+    if ($script:ocupado) {
+        return
+    }
+    Trazer-Credenciais
+})
+
+# barra de título escura (windows 10 e 11)
 $janela.Add_HandleCreated({
     $escuro = 1
     [void][Windows]::DwmSetWindowAttribute($janela.Handle, 20, [ref]$escuro, 4)
 })
-$registo.Add_HandleCreated({
-    [void][Windows]::SetWindowTheme($registo.Handle, 'DarkMode_Explorer', $null)
+
+# o estado só é visto depois de a janela aparecer, para ela não demorar a abrir
+$janela.Add_Shown({
+    Escrever 'A ver o que está pronto neste PC...' $corDim $false
+    Atualizar-Estado
+    Criar-Atalho
+    $janela.Activate()
 })
 
 # ao fechar a janela desliga o site local, se foi esta janela que o ligou

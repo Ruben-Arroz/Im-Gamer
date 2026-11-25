@@ -1,10 +1,7 @@
 <?php
-require_once __DIR__ . '/includes/bootstrap.php';
+require_once __DIR__ . '/../includes/inicio.php';
 
-if (!Auth::autenticado()) {
-    header('Location: ' . BASE_URL . '/projeto/login.php');
-    exit;
-}
+Auth::exigirSessao();
 
 const POR_PAGINA = 24;
 
@@ -39,7 +36,7 @@ $totalPaginas = max(1, (int) ceil($resultado['total'] / POR_PAGINA));
 
 $abaAtual = 'procurar';
 $tituloPagina = 'Jogadores';
-require_once __DIR__ . '/includes/header.php';
+require_once __DIR__ . '/../includes/header.php';
 ?>
 
 <section class="lfg pagina-larga">
@@ -47,7 +44,7 @@ require_once __DIR__ . '/includes/header.php';
         <h1>Jogadores</h1>
     </div>
 
-    <?php require __DIR__ . '/includes/abas_jogadores.php'; ?>
+    <?php require __DIR__ . '/../includes/abas_jogadores.php'; ?>
 
     <form method="get" class="filtros-lfg">
         <?php if ($jogoConvite): ?>
@@ -93,7 +90,7 @@ require_once __DIR__ . '/includes/header.php';
         </select>
 
         <?php if ($comFiltros): ?>
-            <a class="link-discreto" href="<?= BASE_URL ?>/projeto/jogadores.php">Limpar filtros</a>
+            <a class="link-discreto" href="<?= BASE_URL ?>/projeto/jogadores/procurar.php">Limpar filtros</a>
         <?php endif; ?>
     </form>
 
@@ -105,7 +102,7 @@ require_once __DIR__ . '/includes/header.php';
 
     <ul class="lista-jogadores">
         <?php foreach ($resultado['jogadores'] as $jogador): ?>
-            <?php $perfil = BASE_URL . '/projeto/perfil.php?u=' . urlencode($jogador['nome_utilizador']); ?>
+            <?php $perfil = BASE_URL . '/projeto/perfil/perfil.php?u=' . urlencode($jogador['nome_utilizador']); ?>
             <li>
                 <a href="<?= $perfil ?>" class="jogador-foto">
                     <?php if ($jogador['foto_perfil']): ?>
@@ -135,12 +132,12 @@ require_once __DIR__ . '/includes/header.php';
                     </p>
                 </div>
 
-                <a class="botao-contorno lista-acao" href="<?= BASE_URL ?>/projeto/convidar.php?u=<?= urlencode($jogador['nome_utilizador']) ?><?= $jogoConvite ? '&amp;jogo=' . $jogoConvite['id'] : '' ?>">Convidar</a>
+                <a class="botao-contorno lista-acao" href="<?= BASE_URL ?>/projeto/jogadores/convidar.php?u=<?= urlencode($jogador['nome_utilizador']) ?><?= $jogoConvite ? '&amp;jogo=' . $jogoConvite['id'] : '' ?>">Convidar</a>
             </li>
         <?php endforeach; ?>
     </ul>
 
-    <?php require __DIR__ . '/includes/paginacao.php'; ?>
+    <?php require __DIR__ . '/../includes/paginacao.php'; ?>
 </section>
 
-<?php require_once __DIR__ . '/includes/footer.php'; ?>
+<?php require_once __DIR__ . '/../includes/footer.php'; ?>

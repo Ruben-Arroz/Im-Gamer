@@ -1,27 +1,18 @@
 <?php
-require_once __DIR__ . '/includes/bootstrap.php';
+require_once __DIR__ . '/../includes/inicio.php';
 
-if (!Auth::autenticado()) {
-    header('Location: ' . BASE_URL . '/projeto/login.php');
-    exit;
-}
+Auth::exigirSessao();
 
 // como no perfil, com ?u=nome mostra a lista de outra pessoa
-$nomeUrl = filter_input(INPUT_GET, 'u', FILTER_UNSAFE_RAW);
-if ($nomeUrl !== null) {
-    $utilizador = Utilizador::buscarPorNome($nomeUrl);
-} else {
-    $utilizador = Utilizador::buscarPorId($_SESSION['utilizador_id']);
-}
+$utilizador = Utilizador::doUrl((int) $_SESSION['utilizador_id']);
 
 if ($utilizador) {
     $proprio = (int) $utilizador['id'] === (int) $_SESSION['utilizador_id'];
 
     // só o dono pode tirar jogos da lista
-    if ($proprio && $_SERVER['REQUEST_METHOD'] === 'POST' && Auth::tokenValido(filter_input(INPUT_POST, 'token', FILTER_UNSAFE_RAW) ?? '')) {
+    if ($proprio && $_SERVER['REQUEST_METHOD'] === 'POST' && Auth::formularioValido()) {
         ListaDesejos::remover($utilizador['id'], (int) filter_input(INPUT_POST, 'jogo_id', FILTER_VALIDATE_INT));
-        header('Location: ' . BASE_URL . '/projeto/desejos.php?u=' . urlencode($utilizador['nome_utilizador']));
-        exit;
+        irPara('perfil/desejos.php?u=' . urlencode($utilizador['nome_utilizador']));
     }
 
     $ordem = escolhaGet('ordem', ListaDesejos::ORDENS, 'data');
@@ -30,7 +21,7 @@ if ($utilizador) {
 }
 
 $tituloPagina = 'Lista de desejos';
-require_once __DIR__ . '/includes/header.php';
+require_once __DIR__ . '/../includes/header.php';
 ?>
 
 <section class="biblioteca desejos">
@@ -42,7 +33,7 @@ require_once __DIR__ . '/includes/header.php';
             <div>
                 <h1>Lista de desejos</h1>
                 <p class="texto-dim">
-                    De <a href="<?= BASE_URL ?>/projeto/perfil.php?u=<?= urlencode($utilizador['nome_utilizador']) ?>"><?= htmlspecialchars($utilizador['nome_utilizador']) ?></a>
+                    De <a href="<?= BASE_URL ?>/projeto/perfil/perfil.php?u=<?= urlencode($utilizador['nome_utilizador']) ?>"><?= htmlspecialchars($utilizador['nome_utilizador']) ?></a>
                     · <?= contarJogos(count($desejos)) ?>
                 </p>
             </div>
@@ -77,7 +68,7 @@ require_once __DIR__ . '/includes/header.php';
                 data-todas="<?= implode(',', array_keys(Catalogo::LOJAS)) ?>">
                 <?php foreach ($desejos as $jogo): ?>
                     <div class="cartao-jogo" data-id="<?= $jogo['id'] ?>" data-nome="<?= htmlspecialchars($jogo['nome']) ?>" data-steam="<?= $jogo['steam_app_id'] ?: '' ?>">
-                        <a href="<?= BASE_URL ?>/projeto/jogo.php?id=<?= $jogo['id'] ?>">
+                        <a href="<?= BASE_URL ?>/projeto/jogos/jogo.php?id=<?= $jogo['id'] ?>">
                             <?php if ($jogo['imagem_capa']): ?>
                                 <img src="<?= htmlspecialchars($jogo['imagem_capa']) ?>" alt="" loading="lazy">
                             <?php else: ?>
@@ -111,4 +102,4 @@ require_once __DIR__ . '/includes/header.php';
     <script src="<?= BASE_URL ?>/projeto/assets/js/desejos.js?v=1"></script>
 <?php endif; ?>
 
-<?php require_once __DIR__ . '/includes/footer.php'; ?>
+<?php require_once __DIR__ . '/../includes/footer.php'; ?>

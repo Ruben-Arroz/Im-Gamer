@@ -1,10 +1,7 @@
 <?php
-require_once __DIR__ . '/includes/bootstrap.php';
+require_once __DIR__ . '/../includes/inicio.php';
 
-if (!Auth::autenticado()) {
-    header('Location: ' . BASE_URL . '/projeto/login.php');
-    exit;
-}
+Auth::exigirSessao();
 
 const POR_PAGINA = 24;
 
@@ -29,25 +26,17 @@ $pagina = max(1, (int) (filter_input(INPUT_GET, 'pagina', FILTER_VALIDATE_INT) ?
 $resultado = Lfg::pesquisar($abaAtual, $filtros, $utilizadorId, $pagina, POR_PAGINA);
 $totalPaginas = max(1, (int) ceil($resultado['total'] / POR_PAGINA));
 
-// url com outra página, sem perder os filtros
-function urlPagina(int $numero): string
-{
-    $parametros = $_GET;
-    $parametros['pagina'] = $numero;
-    return '?' . http_build_query($parametros);
-}
-
 $tituloPagina = 'LFG';
-require_once __DIR__ . '/includes/header.php';
+require_once __DIR__ . '/../includes/header.php';
 ?>
 
 <section class="lfg pagina-larga">
     <div class="lfg-topo">
         <h1>LFG</h1>
-        <a class="botao-principal" href="<?= BASE_URL ?>/projeto/lfg_criar.php">Criar anúncio</a>
+        <a class="botao-principal" href="<?= BASE_URL ?>/projeto/lfg/criar.php">Criar anúncio</a>
     </div>
 
-    <?php require __DIR__ . '/includes/abas_lfg.php'; ?>
+    <?php require __DIR__ . '/../includes/abas_lfg.php'; ?>
 
     <form method="get" class="filtros-lfg">
         <input type="hidden" name="aba" value="<?= $abaAtual ?>">
@@ -81,7 +70,7 @@ require_once __DIR__ . '/includes/header.php';
         <label class="opcao"><input type="checkbox" name="vagas" onchange="this.form.submit()" <?= $filtros['vagas'] ? 'checked' : '' ?>> Só com vagas</label>
 
         <?php if ($comFiltros): ?>
-            <a class="link-discreto" href="<?= BASE_URL ?>/projeto/lfg.php?aba=<?= $abaAtual ?>">Limpar filtros</a>
+            <a class="link-discreto" href="<?= BASE_URL ?>/projeto/lfg/anuncios.php?aba=<?= $abaAtual ?>">Limpar filtros</a>
         <?php endif; ?>
     </form>
 
@@ -96,7 +85,7 @@ require_once __DIR__ . '/includes/header.php';
             <?php elseif ($abaAtual === 'meus'): ?>
                 Ainda não criaste nem entraste em nenhum anúncio.
             <?php else: ?>
-                Não há anúncios para já. <a href="<?= BASE_URL ?>/projeto/lfg_criar.php">Cria o primeiro</a>.
+                Não há anúncios para já. <a href="<?= BASE_URL ?>/projeto/lfg/criar.php">Cria o primeiro</a>.
             <?php endif; ?>
         </p>
     <?php endif; ?>
@@ -104,7 +93,7 @@ require_once __DIR__ . '/includes/header.php';
     <div class="grelha-jogos">
         <?php foreach ($resultado['anuncios'] as $anuncio): ?>
             <?php $estado = Lfg::estado($anuncio); ?>
-            <a class="cartao-jogo <?= Lfg::expirado($anuncio) ? 'cartao-passado' : '' ?>" href="<?= BASE_URL ?>/projeto/lfg_ver.php?id=<?= $anuncio['id'] ?>">
+            <a class="cartao-jogo <?= Lfg::expirado($anuncio) ? 'cartao-passado' : '' ?>" href="<?= BASE_URL ?>/projeto/lfg/anuncio.php?id=<?= $anuncio['id'] ?>">
                 <?php if ($anuncio['imagem_capa']): ?>
                     <img src="<?= htmlspecialchars($anuncio['imagem_capa']) ?>" alt="" loading="lazy">
                 <?php else: ?>
@@ -121,17 +110,7 @@ require_once __DIR__ . '/includes/header.php';
         <?php endforeach; ?>
     </div>
 
-    <?php if ($totalPaginas > 1): ?>
-        <nav class="paginacao">
-            <?php if ($pagina > 1): ?>
-                <a href="<?= htmlspecialchars(urlPagina($pagina - 1)) ?>">Anterior</a>
-            <?php endif; ?>
-            <span class="pagina-atual"><?= $pagina ?> de <?= $totalPaginas ?></span>
-            <?php if ($pagina < $totalPaginas): ?>
-                <a href="<?= htmlspecialchars(urlPagina($pagina + 1)) ?>">Seguinte</a>
-            <?php endif; ?>
-        </nav>
-    <?php endif; ?>
+    <?php require __DIR__ . '/../includes/paginacao.php'; ?>
 </section>
 
-<?php require_once __DIR__ . '/includes/footer.php'; ?>
+<?php require_once __DIR__ . '/../includes/footer.php'; ?>

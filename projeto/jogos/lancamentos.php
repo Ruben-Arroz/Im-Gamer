@@ -1,5 +1,5 @@
 <?php
-require_once __DIR__ . '/includes/bootstrap.php';
+require_once __DIR__ . '/../includes/inicio.php';
 
 $aba = (filter_input(INPUT_GET, 'aba', FILTER_UNSAFE_RAW) ?? '') === 'breve' ? 'breve' : 'recentes';
 $periodo = (int) filter_input(INPUT_GET, 'periodo', FILTER_VALIDATE_INT);
@@ -11,7 +11,7 @@ $plataformasEscolhidas = array_map('intval', (filter_input(INPUT_GET, 'plataform
 $generosEscolhidos = array_map('intval', (filter_input(INPUT_GET, 'genero', FILTER_UNSAFE_RAW, FILTER_REQUIRE_ARRAY) ?: []));
 
 $tituloPagina = 'Lançamentos';
-require_once __DIR__ . '/includes/header.php';
+require_once __DIR__ . '/../includes/header.php';
 ?>
 
 <!-- a chave da rawg tem de ir para o browser porque é ele que faz os pedidos -->
@@ -82,7 +82,7 @@ require_once __DIR__ . '/includes/header.php';
                 </div>
 
                 <button type="submit">Aplicar filtros</button>
-                <a class="filtro-limpar" href="<?= BASE_URL ?>/projeto/lancamentos.php?aba=<?= $aba ?>">Limpar filtros</a>
+                <a class="filtro-limpar" href="<?= BASE_URL ?>/projeto/jogos/lancamentos.php?aba=<?= $aba ?>">Limpar filtros</a>
             </form>
         </aside>
 
@@ -99,4 +99,4 @@ require_once __DIR__ . '/includes/header.php';
 <script src="<?= BASE_URL ?>/projeto/assets/js/cartoes.js?v=6"></script>
 <script src="<?= BASE_URL ?>/projeto/assets/js/lancamentos.js?v=5"></script>
 
-<?php require_once __DIR__ . '/includes/footer.php'; ?>
+<?php require_once __DIR__ . '/../includes/footer.php'; ?>

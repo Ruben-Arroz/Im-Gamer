@@ -51,3 +51,16 @@ function escolhaGet(string $nome, array $lista, string $porDefeito): string
     }
     return $porDefeito;
 }
+
+// manda o browser para outra página do projeto e para o resto do script
+function irPara(string $pagina): void
+{
+    header('Location: ' . BASE_URL . '/projeto/' . $pagina);
+    exit;
+}
+
+// link para outra página da lista, sem perder os filtros que estão no url
+function urlPagina(int $numero): string
+{
+    return '?' . http_build_query(array_merge($_GET, ['pagina' => $numero]));
+}

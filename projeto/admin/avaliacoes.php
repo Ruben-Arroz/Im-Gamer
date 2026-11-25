@@ -1,5 +1,5 @@
 <?php
-require_once __DIR__ . '/includes/bootstrap.php';
+require_once __DIR__ . '/../includes/inicio.php';
 
 Admin::verificar();
 
@@ -9,7 +9,7 @@ $soComentario = isset($_GET['comentario']);
 $pagina = max(1, (int) (filter_input(INPUT_GET, 'pagina', FILTER_VALIDATE_INT) ?? 1));
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    if (!Auth::tokenValido(filter_input(INPUT_POST, 'token', FILTER_UNSAFE_RAW) ?? '')) {
+    if (!Auth::formularioValido()) {
         $erro = 'A sessão expirou. Tenta outra vez.';
     } else {
         $erro = Admin::apagarAvaliacao((int) filter_input(INPUT_POST, 'id', FILTER_VALIDATE_INT));
@@ -17,8 +17,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     if (!$erro) {
         $_SESSION['aviso_admin'] = 'Avaliação apagada. O autor foi avisado.';
-        header('Location: ' . BASE_URL . '/projeto/admin_avaliacoes.php?' . http_build_query($_GET));
-        exit;
+        irPara('admin/avaliacoes.php?' . http_build_query($_GET));
     }
 }
 
@@ -26,11 +25,11 @@ $resultado = Admin::avaliacoes($texto, $soComentario, $pagina);
 $totalPaginas = max(1, (int) ceil($resultado['total'] / Admin::POR_PAGINA));
 
 $tituloPagina = 'Administração';
-require_once __DIR__ . '/includes/header.php';
+require_once __DIR__ . '/../includes/header.php';
 ?>
 
 <section class="admin">
-    <?php require __DIR__ . '/includes/abas_admin.php'; ?>
+    <?php require __DIR__ . '/../includes/abas_admin.php'; ?>
 
     <form method="get" class="filtros-lfg">
         <div class="pesquisa-lfg">
@@ -39,7 +38,7 @@ require_once __DIR__ . '/includes/header.php';
         </div>
         <label class="opcao"><input type="checkbox" name="comentario" onchange="this.form.submit()" <?= $soComentario ? 'checked' : '' ?>> Só com comentário</label>
         <?php if ($texto !== '' || $soComentario): ?>
-            <a class="link-discreto" href="<?= BASE_URL ?>/projeto/admin_avaliacoes.php">Limpar</a>
+            <a class="link-discreto" href="<?= BASE_URL ?>/projeto/admin/avaliacoes.php">Limpar</a>
         <?php endif; ?>
     </form>
 
@@ -50,7 +49,7 @@ require_once __DIR__ . '/includes/header.php';
             <li>
                 <div class="admin-dados">
                     <span>
-                        <a href="<?= BASE_URL ?>/projeto/jogo.php?id=<?= $avaliacao['jogo_id'] ?>"><?= htmlspecialchars($avaliacao['jogo']) ?></a>
+                        <a href="<?= BASE_URL ?>/projeto/jogos/jogo.php?id=<?= $avaliacao['jogo_id'] ?>"><?= htmlspecialchars($avaliacao['jogo']) ?></a>
                         · <?= $avaliacao['pontuacao'] ?> de 5
                     </span>
                     <span class="texto-dim">
@@ -75,7 +74,7 @@ require_once __DIR__ . '/includes/header.php';
         <p class="texto-dim">Nenhuma avaliação encontrada.</p>
     <?php endif; ?>
 
-    <?php require __DIR__ . '/includes/paginacao.php'; ?>
+    <?php require __DIR__ . '/../includes/paginacao.php'; ?>
 </section>
 
-<?php require_once __DIR__ . '/includes/footer.php'; ?>
+<?php require_once __DIR__ . '/../includes/footer.php'; ?>

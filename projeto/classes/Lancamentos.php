@@ -1,7 +1,7 @@
 <?php
 
 // plano B para quando a rawg não responde: listas de lançamentos da loja da steam (não precisam de chave)
-// o sincronizar.php guarda-as na bd e o site mostra a última que ficou guardada
+// o tarefas/sincronizar.php guarda-as na bd e o site mostra a última que ficou guardada
 class Lancamentos
 {
     // filtros da pesquisa da loja, os lançamentos mais populares e os que saem em breve

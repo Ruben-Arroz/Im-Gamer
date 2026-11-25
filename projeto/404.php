@@ -1,5 +1,5 @@
 <?php
-require_once __DIR__ . '/includes/bootstrap.php';
+require_once __DIR__ . '/includes/inicio.php';
 
 // o IIS mostra esta página quando um endereço do projeto não existe (projeto/web.config)
 http_response_code(404);
