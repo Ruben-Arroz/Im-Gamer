@@ -127,7 +127,7 @@ require_once __DIR__ . '/../includes/header.php';
                     <p class="texto-dim">
                         <?= $jogador['plataforma'] ? 'Prefere ' . htmlspecialchars($jogador['plataforma']) : 'Sem plataforma preferida' ?>
                         <?php if ($jogador['servicos']): ?>
-                            · <?= htmlspecialchars(Jogadores::nomesContas($jogador['servicos'])) ?>
+                            · <?= htmlspecialchars(ContasLigadas::nomes($jogador['servicos'])) ?>
                         <?php endif; ?>
                     </p>
                 </div>

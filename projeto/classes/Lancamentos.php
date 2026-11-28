@@ -1,9 +1,19 @@
 <?php
 
-// plano B para quando a rawg não responde: listas de lançamentos da loja da steam (não precisam de chave)
-// o tarefas/sincronizar.php guarda-as na bd e o site mostra a última que ficou guardada
+// plano B para quando a rawg não responde, listas de lançamentos da loja da steam (não precisam de chave)
+// o tarefas/sincronizar.php e o api/tarefa.php guardam-nas na bd e o site mostra a última que ficou guardada
 class Lancamentos
 {
+    // se as listas têm mais de um dia marca-as já com a data de agora e devolve true (como no Moeda)
+    public static function reservarAtualizacao(): bool
+    {
+        $pdo = Database::ligar();
+        $stmt = $pdo->prepare('UPDATE Lancamentos SET data_sincronizacao = NOW() WHERE data_sincronizacao < NOW() - INTERVAL 1 DAY');
+        $stmt->execute();
+
+        return $stmt->rowCount() > 0;
+    }
+
     // filtros da pesquisa da loja, os lançamentos mais populares e os que saem em breve
     const LISTAS = [
         'recentes' => 'popularnew',

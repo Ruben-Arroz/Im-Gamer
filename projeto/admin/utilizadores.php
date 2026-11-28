@@ -58,14 +58,7 @@ require_once __DIR__ . '/../includes/header.php';
                     <span class="texto-dim"><?= htmlspecialchars($utilizador['email']) ?> · desde <?= (new DateTime($utilizador['data_criacao']))->format('d/m/Y') ?></span>
                     <span class="texto-dim">
                         <?php if ($utilizador['contas']): ?>
-                            <?php
-                            // vem tipo "steam,xbox", aqui passa para os nomes
-                            $nomes = [];
-                            foreach (explode(',', $utilizador['contas']) as $servico) {
-                                $nomes[] = ContasLigadas::SERVICOS[$servico] ?? $servico;
-                            }
-                            ?>
-                            <?= htmlspecialchars(implode(', ', $nomes)) ?>
+                            <?= htmlspecialchars(ContasLigadas::nomes($utilizador['contas'])) ?>
                         <?php else: ?>
                             Sem contas ligadas
                         <?php endif; ?>

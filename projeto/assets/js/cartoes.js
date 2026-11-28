@@ -197,7 +197,7 @@ function generosRawg(jogo) {
     return nomes.join(', ');
 }
 
-// plano B quando a rawg não responde: a última lista de lançamentos da steam guardada no site
+// plano B quando a rawg não responde, a última lista de lançamentos da steam guardada no site
 // tipo é "recentes" ou "breve"
 async function lancamentosGuardados(tipo) {
     const resposta = await fetch(base + '/projeto/api/lancamentos.php?tipo=' + tipo);

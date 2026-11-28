@@ -91,6 +91,12 @@ require_once __DIR__ . '/../includes/header.php';
             <p class="perfil-bio"><?= nl2br(htmlspecialchars($utilizador['bio'])) ?></p>
         <?php endif; ?>
 
+        <!-- as contas com mais de 6 horas sem atualizar e os preços do inventário são atualizados pelo atualizar_contas.js -->
+        <?php if (ContasLigadas::faltam((int) $utilizador['id']) > 0): ?>
+            <p id="atualizar-contas" class="aviso aviso-sucesso" data-base="<?= BASE_URL ?>" data-token="<?= Auth::token() ?>" data-utilizador="<?= $utilizador['id'] ?>">A atualizar as contas...</p>
+            <script src="<?= BASE_URL ?>/projeto/assets/js/atualizar_contas.js?v=2" defer></script>
+        <?php endif; ?>
+
         <div class="subtitulo-linha">
             <h2>Resumo</h2>
             <span class="links-linha">

@@ -27,6 +27,17 @@ class Moeda
         return true;
     }
 
+    // se as taxas têm mais de um dia marca-as já com a data de agora e devolve true
+    // assim, com várias pessoas no site, só uma é que as vai atualizar
+    public static function reservarAtualizacao(): bool
+    {
+        $pdo = Database::ligar();
+        $stmt = $pdo->prepare('UPDATE Taxas_Cambio SET data_atualizacao = NOW() WHERE data_atualizacao < NOW() - INTERVAL 1 DAY');
+        $stmt->execute();
+
+        return $stmt->rowCount() > 0;
+    }
+
     public static function taxa(string $moeda): ?float
     {
         if ($moeda === 'EUR') {

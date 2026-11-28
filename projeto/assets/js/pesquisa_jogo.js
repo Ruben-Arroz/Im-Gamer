@@ -90,7 +90,7 @@ function escolher(jogo) {
     listaSugestoes.innerHTML = '';
 }
 
-// jogo que já está na bd: vai o id dele e não o da rawg
+// jogo que já está na bd, vai o id dele e não o da rawg
 function escolherGuardado(jogo) {
     campoPesquisa.value = jogo.nome;
     document.querySelector('#jogo_rawg_id').value = '';

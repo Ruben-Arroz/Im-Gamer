@@ -1,6 +1,6 @@
 <?php
 
-// LFG (looking for group): anúncios para completar equipas
+// LFG (looking for group), anúncios para completar equipas
 class Lfg
 {
     // limites para ninguém encher a lista

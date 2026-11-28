@@ -154,8 +154,10 @@ CREATE TABLE `Convites` (
 CREATE TABLE `Inventario_Itens` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `conta_id` int(11) NOT NULL,
+  `appid` int(11) DEFAULT NULL,
   `jogo` varchar(100) NOT NULL,
   `nome` varchar(255) NOT NULL,
+  `nome_mercado` varchar(255) DEFAULT NULL,
   `imagem` varchar(1000) DEFAULT NULL,
   `quantidade` int(11) NOT NULL DEFAULT 1,
   `preco` decimal(10,2) DEFAULT NULL,

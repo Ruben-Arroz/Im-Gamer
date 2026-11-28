@@ -11,7 +11,7 @@ class Playstation
     // o npsso é uma chave da conta, por isso só se mostram os passos e nunca o valor
     const LINK_NPSSO = 'https://ca.account.sony.com/api/v1/ssocookie';
 
-    // o utilizador pode colar só o código (64 letras e números) ou o texto todo {"npsso":"..."}
+    // o utilizador pode colar só o código (64 letras e números) ou o texto todo que aparece na página do npsso
     public static function extrairNpsso(string $texto): ?string
     {
         if (preg_match('/[A-Za-z0-9]{64}/', $texto, $partes)) {

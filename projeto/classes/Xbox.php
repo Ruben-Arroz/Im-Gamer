@@ -46,7 +46,7 @@ class Xbox
             return $identificador;
         }
 
-        // nos links do site da xbox o gamertag vem no fim: xbox.com/pt-PT/play/user/Nome
+        // nos links do site da xbox o gamertag vem no fim, por exemplo xbox.com/pt-PT/play/user/Nome
         if (preg_match('/\/user\/([^\/?#]+)/', $identificador, $partes)) {
             $identificador = urldecode($partes[1]);
         }

@@ -95,16 +95,6 @@ class Jogadores
         return ['jogadores' => $stmt->fetchAll(), 'total' => $total];
     }
 
-    // "steam,xbox" fica "Steam, Xbox"
-    public static function nomesContas(string $servicos): string
-    {
-        $nomes = [];
-        foreach (explode(',', $servicos) as $servico) {
-            $nomes[] = ContasLigadas::SERVICOS[$servico] ?? $servico;
-        }
-        return implode(', ', $nomes);
-    }
-
     // os jogos que mais gente tem, para as sugestões do campo do jogo
     public static function jogosNasBibliotecas(): array
     {

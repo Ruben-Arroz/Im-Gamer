@@ -1,4 +1,4 @@
-// o jogo ainda não está na bd: procura-o na rawg, manda-o ao servidor para guardar e abre a página dele
+// o jogo ainda não está na bd, ent procura-o na rawg, manda-o ao servidor para guardar e abre a página dele
 
 const caixa = document.querySelector('#procurar-jogo');
 const dados = caixa.dataset;

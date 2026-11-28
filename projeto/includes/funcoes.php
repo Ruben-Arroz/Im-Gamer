@@ -36,7 +36,7 @@ function limparDiscord(string $texto): string
     return strtolower(ltrim(trim($texto), '@'));
 }
 
-// nome de utilizador do discord: 2 a 32 letras minúsculas, números, pontos ou _ (links não)
+// nome de utilizador do discord, 2 a 32 letras minúsculas, números, pontos ou _ (links não)
 function discordValido(string $nome): bool
 {
     return (bool) preg_match('/^[a-z0-9._]{2,32}$/', $nome);

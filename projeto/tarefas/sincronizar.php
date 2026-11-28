@@ -1,7 +1,8 @@
 <?php
-// a epic atualiza-se no site, com o login da epic (contas/contas.php)
-// vai buscar os dados das contas steam, xbox e gog e as taxas de câmbio e guarda tudo na bd
-// corre no pc porque o servidor da UA não tem internet: php projeto/sincronizar.php
+// atualiza tudo de uma vez, as contas steam, xbox e gog (com o inventário da steam), as taxas de câmbio e os lançamentos
+// corre no pc com o botão "Sincronizar contas" da janela de publicar, ou com php projeto/tarefas/sincronizar.php
+// normalmente não é preciso, o site atualiza-se sozinho com as visitas (api/tarefa.php e api/atualizar_contas.php)
+// a epic e a playstation atualizam-se no site, com o login de cada um (contas/contas.php)
 
 if (php_sapi_name() !== 'cli') {
     exit('Este script só corre na linha de comandos.');
@@ -35,12 +36,13 @@ foreach ($contas as $conta) {
         // a conta anterior pode ter demorado e a bd fecha as ligações paradas, por isso cada conta começa com uma nova
         Database::religar();
 
-        if ($conta['servico'] === 'steam') {
-            $resultado = Steam::sincronizar($conta);
-        } elseif ($conta['servico'] === 'gog') {
-            $resultado = Gog::sincronizar($conta);
-        } else {
-            $resultado = Xbox::sincronizar($conta);
+        $resultado = ContasLigadas::sincronizar($conta);
+
+        // na steam vem tbm o inventário, com os preços 5 de cada vez como no site
+        if ($resultado['sucesso'] && $conta['servico'] === 'steam' && Steam::atualizarItens($conta['id'])) {
+            while (Steam::avaliarItens($conta['id'], 5) > 0) {
+                sleep(3);
+            }
         }
     } catch (Exception $erro) {
         $resultado = ['sucesso' => false, 'erro' => 'Falhou (' . $erro->getMessage() . '). Vê se a VPN está ligada e tenta outra vez.'];
